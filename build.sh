@@ -25,6 +25,6 @@ static="OFF"
 
 
 export CFLAGS="$general $protect $codegen $params $sched $optim $loops $ftree $align $arch $lto $testing"
-cmake3 . -DCMAKE_LINK_STATIC="$static" -DHWLOC_ENABLE=OFF -DMICROHTTPD_ENABLE=OFF -DCMAKE_C_FLAGS="$CFLAGS" -DCMAKE_CXX_FLAGS="$CFLAGS" -DCMAKE_EXE_LINKER_FLAGS="$CFLAGS"
+cmake . -DCMAKE_LINK_STATIC="$static" -DHWLOC_ENABLE=OFF -DMICROHTTPD_ENABLE=OFF -DCMAKE_C_FLAGS="$CFLAGS" -DCMAKE_CXX_FLAGS="$CFLAGS" -DCMAKE_EXE_LINKER_FLAGS="$CFLAGS"
 
 make -j2
