@@ -119,18 +119,13 @@ endif()
 file(GLOB SRCFILES_CPP "*.cpp" "crypto/*.cpp")
 file(GLOB SRCFILES_C "crypto/*.c")
 
-add_library(xmr-stak-c
-    STATIC
-    ${SRCFILES_C}
-)
-set_property(TARGET xmr-stak-c PROPERTY C_STANDARD 99)
-
 add_executable(xmr-stak-cpu
+    ${SRCFILES_C}
     ${SRCFILES_CPP}
 )
 
 set(EXECUTABLE_OUTPUT_PATH "bin")
-target_link_libraries(xmr-stak-cpu ${LIBS} xmr-stak-c)
+target_link_libraries(xmr-stak-cpu ${LIBS})
 
 ################################################################################
 # Install
