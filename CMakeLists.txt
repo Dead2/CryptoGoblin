@@ -7,6 +7,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD 11)
 
+include(CheckCSourceCompiles)
+
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}" CACHE PATH "install prefix" FORCE)
 endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
@@ -36,6 +38,19 @@ set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "${BUILD_TYPE}")
 
 # option to add static libgcc and libstdc++
 option(CMAKE_LINK_STATIC "link as much as possible libraries static" OFF)
+
+################################################################################
+# Compiler tests
+################################################################################
+
+check_c_source_compiles(
+    "int __attribute__((always_inline)) foo() {
+      return 0;
+    }"
+    COMPILER_ALWAYS_INLINE FAIL_REGEX "not supported")
+if(COMPILER_ALWAYS_INLINE)
+    add_definitions(-DHAVE_ALWAYS_INLINE)
+endif()
 
 ################################################################################
 # Find PThreads
