@@ -46,6 +46,10 @@ option(CMAKE_LINK_STATIC "link as much as possible libraries static" OFF)
 check_c_source_compiles(
     "int __attribute__((always_inline)) foo() {
       return 0;
+    }
+    int main()
+    {
+      return foo();
     }"
     COMPILER_ALWAYS_INLINE FAIL_REGEX "not supported")
 if(COMPILER_ALWAYS_INLINE)
