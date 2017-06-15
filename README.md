@@ -32,6 +32,9 @@ to test it yourself.
 PS: I have yet to find a cpu that needs a no-prefetch=true config using my fork of the miner,
 so make sure you try with false even if you normally would use true.
 
+## Compile for Windows
+- see [WINCOMPILE.md](WINCOMPILE.md)
+
 ## Linux compilation
 ### GNU Compiler
 ```
