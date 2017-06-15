@@ -24,7 +24,7 @@ list(APPEND CMAKE_PREFIX_PATH "$ENV{CMAKE_PREFIX_PATH}")
 # https://github.com/fireice-uk/xmr-stak-nvidia/pull/10#issuecomment-290821792
 # If you remove this guard to compile with older gcc versions the miner will produce
 # a high rate of wrong shares.
-if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
     if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.1)
         message(FATAL_ERROR "GCC version must be at least 5.1!")
     endif()
@@ -96,7 +96,14 @@ set(LIBS ${LIBS} ${CMAKE_THREAD_LIBS_INIT})
 
 option(MICROHTTPD_ENABLE "Enable or disable the requirement of microhttp (http deamon)" ON)
 if(MICROHTTPD_ENABLE)
-    find_library(MHTD NAMES microhttpd)
+    find_library(MHTD
+        NAMES
+            microhttpd
+            libmicrohttpd.lib
+        PATHS
+            ENV "MICROHTTPD_ROOT"
+        PATH_SUFFIXES
+            lib)
     if("${MHTD}" STREQUAL "MHTD-NOTFOUND")
         message(FATAL_ERROR "microhttpd NOT found: use `-DMICROHTTPD_ENABLE=OFF` to build without http deamon support")
     else()
@@ -129,13 +136,27 @@ endif()
 
 option(HWLOC_ENABLE "Enable or disable the requirement of hwloc" ON)
 if(HWLOC_ENABLE)
-    find_path(HWLOC_INCLUDE_DIR hwloc.h
-        $ENV{HWLOC_ROOT}/inlcude
-        /opt/local/include
-        /usr/local/include
-        /usr/include
-    )
-    find_library(HWLOC NAMES hwloc)
+    find_path(HWLOC_INCLUDE_DIR
+        NAMES
+            hwloc.h
+        PATHS
+            /opt/local
+            /usr/local
+            /usr
+            ENV "PROGRAMFILES(X86)"
+            ENV "HWLOC_ROOT"
+        PATH_SUFFIXES
+            include)
+
+    find_library(HWLOC
+        NAMES
+            libhwloc.lib
+            hwloc
+        PATHS
+            ENV "HWLOC_ROOT"
+        PATH_SUFFIXES
+            lib)
+
     if("${HWLOC}" STREQUAL "MHTD-NOTFOUND" OR ${HWLOC_INCLUDE_DIR} STREQUAL "HWLOC_INCLUDE_DIR-NOTFOUND")
         message(FATAL_ERROR "hwloc NOT found: use `-DHWLOC_ENABLE=OFF` to build without hwloc support")
     else()
@@ -144,6 +165,14 @@ if(HWLOC_ENABLE)
     endif()
 else()
     add_definitions("-DCONF_NO_HWLOC")
+endif()
+
+################################################################################
+# Windows Sockets
+################################################################################
+
+if(WIN32)
+    set(LIBS ${LIBS} wsock32 ws2_32)
 endif()
 
 ################################################################################
