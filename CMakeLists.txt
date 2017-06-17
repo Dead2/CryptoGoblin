@@ -56,6 +56,19 @@ if(COMPILER_ALWAYS_INLINE)
     add_definitions(-DHAVE_ALWAYS_INLINE)
 endif()
 
+check_c_source_compiles(
+    "int __attribute__((flatten)) foo() {
+      return 0;
+    }
+    int main()
+    {
+      return foo();
+    }"
+    COMPILER_FLATTEN FAIL_REGEX "not supported")
+if(COMPILER_FLATTEN)
+    add_definitions(-DHAVE_FLATTEN)
+endif()
+
 ################################################################################
 # Find PThreads
 ################################################################################
