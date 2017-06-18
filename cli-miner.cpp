@@ -148,6 +148,7 @@ int main(int argc, char *argv[])
 	printer::inst()->print_str("'h' - hashrate\n");
 	printer::inst()->print_str("'r' - results\n");
 	printer::inst()->print_str("'c' - connection\n");
+	printer::inst()->print_str("'q' - quit\n");
 	printer::inst()->print_str("-------------------------------------------------------------------\n");
 
 	if(strlen(jconf::inst()->GetOutputFile()) != 0)
@@ -173,6 +174,9 @@ int main(int argc, char *argv[])
 			break;
 		case 'c':
 			executor::inst()->push_event(ex_event(EV_USR_CONNSTAT));
+			break;
+		case 'q':
+			exit(0);
 			break;
 		default:
 			break;
