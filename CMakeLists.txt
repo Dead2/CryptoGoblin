@@ -69,6 +69,20 @@ if(COMPILER_FLATTEN)
     add_definitions(-DHAVE_FLATTEN)
 endif()
 
+check_c_source_compiles(
+    "
+    typedef struct{
+        int foo;
+    } __attribute__ ((aligned (16))) bar;
+    int main()
+    {
+      return 0;
+    }"
+    COMPILER_ALIGN FAIL_REGEX "not supported")
+if(COMPILER_ALIGN)
+    add_definitions(-DHAVE_ALIGNED)
+endif()
+
 ################################################################################
 # Find PThreads
 ################################################################################

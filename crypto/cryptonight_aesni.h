@@ -16,20 +16,9 @@
 #pragma once
 
 #include "cryptonight.h"
+#include "../common.h"
 #include <memory.h>
 #include <stdio.h>
-
-#ifdef HAVE_ALWAYS_INLINE
-#  define ALWAYS_INLINE __attribute__((always_inline))
-#else
-#  define ALWAYS_INLINE
-#endif
-
-#ifdef HAVE_FLATTEN
-#  define FLATTEN __attribute__((flatten))
-#else
-#  define FLATTEN
-#endif
 
 #ifdef __GNUC__
 #include <x86intrin.h>
