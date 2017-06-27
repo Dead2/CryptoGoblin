@@ -28,6 +28,7 @@ extern "C"
 #include "c_jh.h"
 #include "c_skein.h"
 }
+#include "../common.h"
 #include "cryptonight.h"
 #include "cryptonight_aesni.h"
 #include <stdio.h>
@@ -64,7 +65,7 @@ void do_jh_hash(const void* input, size_t len, char* output) {
 }
 
 void do_skein_hash(const void* input, size_t len, char* output) {
-	skein_hash(8 * 32, (const uint8_t*)input, 8 * len, (uint8_t*)output);
+	xmr_skein((const uint8_t*)input, (uint8_t*)output);
 }
 
 void (* const extra_hashes[4])(const void *, size_t, char *) = {do_blake_hash, do_groestl_hash, do_jh_hash, do_skein_hash};
