@@ -21,10 +21,12 @@ testing="-fbranch-target-load-optimize2"
 # Arch / cross-compiling specific
 arch="-march=native -mtune=native"
 #arch="-march=sandybridge -mtune=sandybridge"
+
+# Defines
 static="OFF"
+flatten="-DDO_FLATTEN -DDO_FLATTEN2"  # -DDO_FLATTEN3
 
-
-export CFLAGS="$general $protect $codegen $params $sched $optim $loops $ftree $align $arch $lto $testing"
+export CFLAGS="$general $protect $codegen $params $sched $optim $loops $ftree $align $arch $lto $testing $flatten"
 cmake . -DCMAKE_LINK_STATIC="$static" -DHWLOC_ENABLE=OFF -DMICROHTTPD_ENABLE=OFF -DCMAKE_C_FLAGS="$CFLAGS" -DCMAKE_CXX_FLAGS="$CFLAGS" -DCMAKE_EXE_LINKER_FLAGS="$CFLAGS" -DCMAKE_C_FLAGS_RELEASE="-DNDEBUG" -DCMAKE_CXX_FLAGS_RELEASE="-DNDEBUG"
 
 make -j2

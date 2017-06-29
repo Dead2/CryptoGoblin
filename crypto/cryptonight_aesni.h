@@ -151,7 +151,7 @@ ALWAYS_INLINE FLATTEN static inline void soft_aes_round(__m128i key, __m128i* x0
 }
 
 template<size_t MEM, bool SOFT_AES, bool PREFETCH>
-FLATTEN void cn_explode_scratchpad(const __m128i* input, __m128i* output)
+FLATTEN2 void cn_explode_scratchpad(const __m128i* input, __m128i* output)
 {
 	// This is more than we have registers, compiler will assign 2 keys on the stack
 	__m128i xin0, xin1, xin2, xin3, xin4, xin5, xin6, xin7;
@@ -216,7 +216,7 @@ FLATTEN void cn_explode_scratchpad(const __m128i* input, __m128i* output)
 }
 
 template<size_t MEM, bool SOFT_AES, bool PREFETCH>
-FLATTEN void cn_implode_scratchpad(const __m128i* input, __m128i* output)
+FLATTEN2 void cn_implode_scratchpad(const __m128i* input, __m128i* output)
 {
 	// This is more than we have registers, compiler will assign 2 keys on the stack
 	__m128i xout0, xout1, xout2, xout3, xout4, xout5, xout6, xout7;
@@ -290,7 +290,7 @@ FLATTEN void cn_implode_scratchpad(const __m128i* input, __m128i* output)
 }
 
 template<size_t ITERATIONS, size_t MEM, bool SOFT_AES, bool PREFETCH>
-FLATTEN void cryptonight_hash(const void* input, size_t len, void* output, cryptonight_ctx* ctx0)
+FLATTEN3 void cryptonight_hash(const void* input, size_t len, void* output, cryptonight_ctx* ctx0)
 {
 	keccak((const uint8_t *)input, len, ctx0->hash_state, 200);
 
@@ -355,7 +355,7 @@ FLATTEN void cryptonight_hash(const void* input, size_t len, void* output, crypt
 // to fit temporary vars for two contexts. Function will read len*2 from input and write 64 bytes to output
 // We are still limited by L3 cache, so doubling will only work with CPUs where we have more than 2MB to core (Xeons)
 template<size_t ITERATIONS, size_t MEM, bool SOFT_AES, bool PREFETCH>
-FLATTEN void cryptonight_double_hash(const void* input, size_t len, void* output, cryptonight_ctx* __restrict ctx0, cryptonight_ctx* __restrict ctx1)
+FLATTEN3 void cryptonight_double_hash(const void* input, size_t len, void* output, cryptonight_ctx* __restrict ctx0, cryptonight_ctx* __restrict ctx1)
 {
 	keccak((const uint8_t *)input, len, ctx0->hash_state, 200);
 	keccak((const uint8_t *)input+len, len, ctx1->hash_state, 200);
