@@ -26,6 +26,13 @@
 null,
 
 /*
+ * If your cpu does support AES-NI instructions, but the Bios/VM/OS is suppressing detection for
+ * compatability reasons, then you can attempt to force enable the AES-NI instruction set anyway.
+ * If AES-NI is not available, xmr-stak-cpu will crash.
+*/
+"force_aesni" : false,
+
+/*
  * LARGE PAGE SUPPORT
  * Lare pages need a properly set up OS. It can be difficult if you are not used to systems administation,
  * but the performace results are worth the trouble - you will get around 20% boost. Slow memory mode is
