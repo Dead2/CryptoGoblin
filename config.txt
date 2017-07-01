@@ -119,7 +119,7 @@ null,
  * giveup_limit - Limit how many times we try to reconnect to the pool. Zero means no limit. Note that stak miners
  *                don't mine while the connection is lost, so your computer's power usage goes down to idle.
  */
-"call_timeout" : 10,
+"call_timeout" : 30,
 "retry_time" : 10,
 "giveup_limit" : 0,
 
