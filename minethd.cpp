@@ -413,7 +413,7 @@ void minethd::work_main()
 
 		while(iGlobalJobNo.load(std::memory_order_relaxed) == iJobNo)
 		{
-			if ((iCount & 0xF) == 0) //Store stats every 16 hashes
+			if ((iCount & 0x1F) == 0) //Store stats every 32 hashes
 			{
 				using namespace std::chrono;
 				uint64_t iStamp = time_point_cast<milliseconds>(high_resolution_clock::now()).time_since_epoch().count();
@@ -513,7 +513,7 @@ void minethd::double_work_main()
 
 		while (iGlobalJobNo.load(std::memory_order_relaxed) == iJobNo)
 		{
-			if ((iCount & 0x7) == 0) //Store stats every 16 hashes
+			if ((iCount & 0xF) == 0) //Store stats every 32 hashes
 			{
 				using namespace std::chrono;
 				uint64_t iStamp = time_point_cast<milliseconds>(high_resolution_clock::now()).time_since_epoch().count();
