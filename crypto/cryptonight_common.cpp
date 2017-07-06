@@ -21,20 +21,10 @@
   *
   */
 
-extern "C"
-{
-#include "c_groestl.h"
-#include "c_blake256.h"
-#include "c_jh.h"
-#include "c_skein.h"
-}
-#include "../common.h"
-#include "cryptonight.h"
-#include "cryptonight_aesni.h"
 #include <stdio.h>
 #include <stdlib.h>
 
-#ifdef __GNUC__
+#if defined(__GNUC__) && !defined(_WIN64)
 #include <mm_malloc.h>
 #else
 #include <malloc.h>
@@ -51,6 +41,17 @@ extern "C"
 #include <errno.h>
 #include <string.h>
 #endif // _WIN32
+
+extern "C"
+{
+#include "c_groestl.h"
+#include "c_blake256.h"
+#include "c_jh.h"
+#include "c_skein.h"
+}
+#include "../common.h"
+#include "cryptonight.h"
+#include "cryptonight_aesni.h"
 
 void do_blake_hash(const void* input, size_t len, char* output) {
 	blake256_hash((uint8_t*)output, (const uint8_t*)input, len);

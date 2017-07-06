@@ -35,7 +35,7 @@
 #include "donate-level.h"
 #include "webdesign.h"
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(__GNUC__)
 #define strncasecmp _strnicmp
 #endif // _WIN32
 

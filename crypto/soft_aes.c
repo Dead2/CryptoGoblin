@@ -26,9 +26,13 @@
  */
 
 #ifdef __GNUC__
-#include <x86intrin.h>
+# ifdef _WIN64
+#  include <intrin.h>
+# else
+#  include <x86intrin.h>
+# endif
 #else
-#include <intrin.h>
+# include <intrin.h>
 #endif // __GNUC__
 
 #include <inttypes.h>

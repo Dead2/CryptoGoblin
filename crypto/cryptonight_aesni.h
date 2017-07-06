@@ -20,18 +20,26 @@
 #include <memory.h>
 #include <stdio.h>
 
-#ifdef __GNUC__
-#include <x86intrin.h>
+#if defined(__GNUC__)
 ALWAYS_INLINE static inline uint64_t _umul128(uint64_t a, uint64_t b, uint64_t* hi)
 {
 	unsigned __int128 r = (unsigned __int128)a * (unsigned __int128)b;
 	*hi = r >> 64;
 	return (uint64_t)r;
 }
-#define _mm256_set_m128i(v0, v1)  _mm256_insertf128_si256(_mm256_castsi128_si256(v1), (v0), 1)
+#endif
+
+#if defined(__GNUC__)
+# if defined(_WIN64)
+#  include <intrin.h>
+# else
+#  include <x86intrin.h>
+# endif
+# define _mm256_set_m128i(v0, v1)  _mm256_insertf128_si256(_mm256_castsi128_si256(v1), (v0), 1)
 #else
-#include <intrin.h>
+# include <intrin.h>
 #endif // __GNUC__
+
 
 #if !defined(_LP64) && !defined(_WIN64)
 #error You are trying to do a 32-bit build. This will all end in tears. I know it.
