@@ -55,7 +55,7 @@ so make sure you try with false even if you normally would use true.
     make install (Or just copy/run the executable from the bin folder manually)
 ```
 
-- GCC version 5.1 or higher is required for full C++11 support. CMake release compile scripts, as well as CodeBlocks build environment for debug builds is included.
+- g++ version 5.1 or higher is required for full C++11 support. CMake release compile scripts, as well as CodeBlocks build environment for debug builds is included.
 
 ### To do a static build for a system without gcc 5.1+
 ```
