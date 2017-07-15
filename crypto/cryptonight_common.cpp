@@ -24,7 +24,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#if defined(__GNUC__) && !defined(_WIN64)
+#if defined(__GNUC__)
 #include <mm_malloc.h>
 #else
 #include <malloc.h>

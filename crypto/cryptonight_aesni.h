@@ -21,7 +21,7 @@
 #include <stdio.h>
 
 #if defined(__GNUC__)
-ALWAYS_INLINE static inline uint64_t _umul128(uint64_t a, uint64_t b, uint64_t* hi)
+ALWAYS_INLINE static inline uint64_t _xmr_umul128(uint64_t a, uint64_t b, uint64_t* hi)
 {
 	unsigned __int128 r = (unsigned __int128)a * (unsigned __int128)b;
 	*hi = r >> 64;
@@ -35,6 +35,7 @@ ALWAYS_INLINE static inline uint64_t _umul128(uint64_t a, uint64_t b, uint64_t* 
 # else
 #  include <x86intrin.h>
 # endif
+# define _umul128 _xmr_umul128
 # define _mm256_set_m128i(v0, v1)  _mm256_insertf128_si256(_mm256_castsi128_si256(v1), (v0), 1)
 #else
 # include <intrin.h>
