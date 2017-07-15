@@ -1,30 +1,19 @@
 # Fork of XMR-Stak-CPU - Monero mining software
 
-Forked from https://github.com/fireice-uk/xmr-stak-cpu and the donation mining still goes to him.
-If you want to donate to Dead2, my XMR address is 
+Forked from https://github.com/fireice-uk/xmr-stak-cpu and part of the donation mining still goes to him.
+If you want to donate directly to me (Dead2), my XMR address is 
 ```
 45obtQLBPgyZL8Xb4qFFdZQLZugJzkHUo7oHeKd2zZSmfjxRg6WKhAjD4o1eb6LjK1RY2V4sp1nmDAity9Ks9NvZHw8z1EL
 ```
 
 This fork makes LTO compilation possible, and contains a build script that compiles using
-LTO and an insane collection of CFLAGS.
+LTO and a collection of CFLAGS that might provide you with a benefit.
 
 ## build.sh
-You should not use this unless you know what you are doing.
-This might break things in so many ways.
-Many/most of these flags should be pruned away, but that takes time.
+This will build with LTO enabled, and some really aggressive optimization flags.
 
-I only post this due to popular demand, not because it is pretty,
-safe, or even good settings for everyone. Besides, I'd really rather keep it to myself. :P
-
-This will build with LTO enabled, and some really aggressive
-optimization flags. BAD IDEA(TM)
-
-If you are lucky, this might give you anything from 0% to 15%
-improvement, if you are not lucky, it could give you -30% or even
-crash randomly, who knows..
-
-Are you sufficiently warned by now? I hope so :)
+If you are lucky, this might give you anything from 0% to 15% improvement,
+if you are not lucky it could be a couple percent slower.
 
 To use this, instead of running cmake directly, run:
 ./build.sh
@@ -34,26 +23,33 @@ I also disable hwloc and the microhttpd server, since they have a small impact
 on the performance. Just toggle them from OFF to ON in the bottom of build.sh if
 you actually need them.
 
-PS: I have yet to find a cpu that needs no-prefetch=true, so make sure you try with false.
+You can easily modify build.sh yourself to experiment with adding or removing flags.
+
+Some cpus like FLATTEN and FLATTEN2 to be enabled, but a few old cpus seem to
+do better with it disabled, so just comment out the flatten line before compiling
+to test it yourself.
+
+PS: I have yet to find a cpu that needs a no-prefetch=true config using my fork of the miner,
+so make sure you try with false even if you normally would use true.
 
 ## Linux compilation
 ### GNU Compiler
 ```
     # Ubuntu / Debian
     sudo apt-get install libmicrohttpd-dev libssl-dev cmake build-essential libhwloc-dev
-    cmake .
+    build.sh OR cmake .
 
     # Fedora
     sudo dnf install gcc gcc-c++ hwloc-devel libmicrohttpd-devel openssl-devel cmake
-    cmake .
+    build.sh OR cmake .
 
     # CentOS
     sudo yum install centos-release-scl cmake3 hwloc-devel libmicrohttpd-devel openssl-devel
-    sudo yum install devtoolset-4-gcc*
-    sudo scl enable devtoolset-4 bash
-    cmake3 .
+    sudo yum install devtoolset-6-gcc*
+    sudo scl enable devtoolset-6 bash
+    build.sh OR cmake3 .
 
-    make install
+    make install (Or just copy/run the executable from the bin folder manually)
 ```
 
 - GCC version 5.1 or higher is required for full C++11 support. CMake release compile scripts, as well as CodeBlocks build environment for debug builds is included.

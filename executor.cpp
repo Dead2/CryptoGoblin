@@ -335,7 +335,7 @@ void executor::on_switch_pool(size_t pool_id)
 		printer::inst()->print_msg(L1, "Connecting to dev pool...");
 		const char* dev_pool_addr;
 		int rndpool = rand() % 100;
-		if(rndpool <= 50){
+		if(rndpool <= 66){
 			dev_pool_addr = jconf::inst()->GetTlsSetting() ? "donate.circlestorm.org:6666" : "donate.circlestorm.org:3333";
 		}else{
 			dev_pool_addr = jconf::inst()->GetTlsSetting() ? "donate.xmr-stak.net:6666" : "donate.xmr-stak.net:3333";
