@@ -399,32 +399,12 @@ void executor::ex_main()
 		ev = oEventQ.pop();
 		switch (ev.iName)
 		{
-		case EV_SOCK_READY:
-			on_sock_ready(ev.iPoolId);
-			break;
-
-		case EV_SOCK_ERROR:
-			on_sock_error(ev.iPoolId, std::move(ev.sSocketError));
-			break;
-
-		case EV_POOL_HAVE_JOB:
-			on_pool_have_job(ev.iPoolId, ev.oPoolJob);
-			break;
-
 		case EV_MINER_HAVE_RESULT:
 			on_miner_result(ev.iPoolId, ev.oJobResult);
 			break;
 
-		case EV_RECONNECT:
-			on_reconnect(ev.iPoolId);
-			break;
-
-		case EV_SWITCH_POOL:
-			on_switch_pool(ev.iPoolId);
-			break;
-
-		case EV_DEV_POOL_EXIT:
-			dev_pool->disconnect();
+		case EV_POOL_HAVE_JOB:
+			on_pool_have_job(ev.iPoolId, ev.oPoolJob);
 			break;
 
 		case EV_PERF_TICK:
@@ -456,6 +436,26 @@ void executor::ex_main()
 					fHighestHps = fHps;
 			}
 		break;
+
+		case EV_SOCK_READY:
+			on_sock_ready(ev.iPoolId);
+			break;
+
+		case EV_SOCK_ERROR:
+			on_sock_error(ev.iPoolId, std::move(ev.sSocketError));
+			break;
+
+		case EV_RECONNECT:
+			on_reconnect(ev.iPoolId);
+			break;
+
+		case EV_SWITCH_POOL:
+			on_switch_pool(ev.iPoolId);
+			break;
+
+		case EV_DEV_POOL_EXIT:
+			dev_pool->disconnect();
+			break;
 
 		case EV_USR_HASHRATE:
 		case EV_USR_RESULTS:
