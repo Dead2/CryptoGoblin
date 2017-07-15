@@ -53,19 +53,19 @@ extern "C"
 #include "cryptonight.h"
 #include "cryptonight_aesni.h"
 
-void do_blake_hash(const void* input, size_t len, char* output) {
+FLATTEN3 void do_blake_hash(const void* input, size_t len, char* output) {
 	blake256_hash((uint8_t*)output, (const uint8_t*)input, len);
 }
 
-void do_groestl_hash(const void* input, size_t len, char* output) {
+FLATTEN3 void do_groestl_hash(const void* input, size_t len, char* output) {
 	groestl((const uint8_t*)input, len * 8, (uint8_t*)output);
 }
 
-void do_jh_hash(const void* input, size_t len, char* output) {
+FLATTEN3 void do_jh_hash(const void* input, size_t len, char* output) {
 	jh_hash(32 * 8, (const uint8_t*)input, 8 * len, (uint8_t*)output);
 }
 
-void do_skein_hash(const void* input, size_t len, char* output) {
+FLATTEN3 void do_skein_hash(const void* input, size_t len, char* output) {
 	xmr_skein((const uint8_t*)input, (uint8_t*)output);
 }
 
