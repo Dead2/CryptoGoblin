@@ -486,11 +486,11 @@ inline const char* hps_format(double h, char* buf, size_t l)
 {
 	if(std::isnormal(h) || h == 0.0)
 	{
-		snprintf(buf, l, " %03.1f", h);
+		snprintf(buf, l, " %05.2f", h);
 		return buf;
 	}
 	else
-		return " (na)";
+		return "  (na)";
 }
 
 void executor::hashrate_report(std::string& out)
@@ -504,9 +504,9 @@ void executor::hashrate_report(std::string& out)
 	size_t i;
 
 	out.append("HASHRATE REPORT\n");
-	out.append("| ID | 2.5s |  60s |  15m |");
+	out.append("| ID |  2.5s |   60s |   15m |");
 	if(nthd != 1)
-		out.append(" ID | 2.5s |  60s |  15m |\n");
+		out.append(" ID |  2.5s |   60s |   15m |\n");
 	else
 		out.append(1, '\n');
 
@@ -536,9 +536,9 @@ void executor::hashrate_report(std::string& out)
 		out.append("|\n");
 
 	if(nthd != 1)
-		out.append("-----------------------------------------------------\n");
+		out.append("-----------------------------------------------------------\n");
 	else
-		out.append("---------------------------\n");
+		out.append("------------------------------\n");
 
 	out.append("Totals:  ");
 	out.append(hps_format(fTotal[0], num, sizeof(num)));
