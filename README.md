@@ -9,6 +9,15 @@ If you want to donate directly to me (Dead2), my XMR address is
 This fork makes LTO compilation possible, and contains a build script that compiles using
 LTO and a collection of CFLAGS that might provide you with a benefit.
 
+## HTML and JSON API report configuraton
+
+To configure the reports shown above you need to edit the httpd_port variable. Then enable wifi on your phone and navigate to <miner ip address>:<httpd_port> in your phone browser. If you want to use the data in scripts, you can get the JSON version of the data at url <miner ip address>:<httpd_port>/api.json
+
+## Usage on Windows 
+1) Edit the config.txt file to enter your pool login and password. 
+2) Double click the exe file. 
+
+
 ## build.sh
 This will build with LTO enabled, and some really aggressive optimization flags.
 
