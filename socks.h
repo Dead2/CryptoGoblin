@@ -6,6 +6,7 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <windows.h>
+#pragma comment(lib, "WS2_32.lib")
 
 inline void sock_init()
 {
