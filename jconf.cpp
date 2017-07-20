@@ -45,7 +45,7 @@ using namespace rapidjson;
 /*
  * This enum needs to match index in oConfigValues, otherwise we will get a runtime error
  */
-enum configEnum { aCpuThreadsConf, sUseSlowMem, bNiceHashMode, bForceAes,
+enum configEnum { aCpuThreadsConf, sUseSlowMem, bNiceHashMode,
 	bTlsMode, bTlsSecureAlgo, sTlsFingerprint, sPoolAddr, sWalletAddr, sPoolPwd,
 	iCallTimeout, iNetRetry, iGiveUpLimit, iVerboseLevel, iAutohashTime,
 	bDaemonMode, sOutputFile, iHttpdPort, bPreferIpv4 };
@@ -62,7 +62,6 @@ configVal oConfigValues[] = {
 	{ aCpuThreadsConf, "cpu_threads_conf", kNullType },
 	{ sUseSlowMem, "use_slow_memory", kStringType },
 	{ bNiceHashMode, "nicehash_nonce", kTrueType },
-	{ bForceAes, "force_aesni", kTrueType },
 	{ bTlsMode, "use_tls", kTrueType },
 	{ bTlsSecureAlgo, "tls_secure_algo", kTrueType },
 	{ sTlsFingerprint, "tls_fingerprint", kStringType },
@@ -456,13 +455,8 @@ bool jconf::parse_config(const char* sFilename)
 
 	if(!NeedsAutoconf())
 	{
-		if(!bHaveAes){
+		if(!bHaveAes)
 			printer::inst()->print_msg(L0, "Your CPU doesn't support hardware AES. Don't expect high hashrates.");
-			if(prv->configValues[bForceAes]->GetBool()){
-				printer::inst()->print_msg(L0, "force_aesni setting is enabled, attempting to use AES-NI instructions anyway.");
-				bHaveAes = true;
-			}
-		}
 	}
 
 	return true;
