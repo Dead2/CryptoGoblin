@@ -369,7 +369,11 @@ void minethd::pin_thd_affinity()
 #if defined(__APPLE__)
 	printer::inst()->print_msg(L1, "WARNING on MacOS thread affinity is only advisory.");
 #endif
+#if defined(__MINGW32__)
+    SetThreadAffinityMask(GetCurrentThread(), 1ULL << affinity);
+#else
 	thd_setaffinity(oWorkThd.native_handle(), affinity);
+#endif
 }
 
 void minethd::work_main()
