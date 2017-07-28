@@ -378,6 +378,9 @@ void minethd::pin_thd_affinity()
 #else
 	thd_setaffinity(oWorkThd.native_handle(), affinity);
 #endif
+
+    // Make sure we return to the scheduler at least once before allocating memory.
+	std::this_thread::yield();
 }
 
 void minethd::work_main()
