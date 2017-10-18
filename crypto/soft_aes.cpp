@@ -86,7 +86,9 @@
 #define bval(x,n) to_byte((x) >> (8 * (n)))
 
 #define bytes2word(b0, b1, b2, b3) (((uint32_t)(b3) << 24) | \
-    ((uint32_t)(b2) << 16) | ((uint32_t)(b1) << 8) | (b0))
+                                    ((uint32_t)(b2) << 16) | \
+                                    ((uint32_t)(b1) << 8) | \
+                                    (b0))
 
 #define u0(p)   bytes2word(f2(p), p, p, f3(p))
 #define u1(p)   bytes2word(f3(p), f2(p), p, p)
@@ -94,28 +96,10 @@
 #define u3(p)   bytes2word(p, p, f3(p), f2(p))
 
 #define h0(x) (x)
-
 #define f2(x)   ((x<<1) ^ (((x>>7) & 1) * WPOLY))
-#define f4(x)   ((x<<2) ^ (((x>>6) & 1) * WPOLY) ^ (((x>>6) & 2) * WPOLY))
-#define f8(x)   ((x<<3) ^ (((x>>5) & 1) * WPOLY) ^ (((x>>5) & 2) * WPOLY) ^ (((x>>5) & 4) * WPOLY))
 #define f3(x)   (f2(x) ^ x)
-#define f9(x)   (f8(x) ^ x)
-#define fb(x)   (f8(x) ^ f2(x) ^ x)
-#define fd(x)   (f8(x) ^ f4(x) ^ x)
-#define fe(x)   (f8(x) ^ f4(x) ^ f2(x))
 
-#define t_dec(m,n) t_##m##n
-
-#define d_4(t,n,b,e,f,g,h) ALIGN const t n[4][256] = { b(e), b(f), b(g), b(h) }
-
-#define four_tables(x,tab,vf,rf,c) \
-    (tab[0][bval(vf(x,0,c),rf(0,c))] \
-    ^ tab[1][bval(vf(x,1,c),rf(1,c))] \
-    ^ tab[2][bval(vf(x,2,c),rf(2,c))] \
-    ^ tab[3][bval(vf(x,3,c),rf(3,c))])
-
-d_4(uint32_t, t_dec(f,n), sb_data, u0, u1, u2, u3);
-
+alignas(TABLE_ALIGN) const uint32_t t_fn[4][256] = { sb_data(u0), sb_data(u1), sb_data(u2), sb_data(u3) };
 alignas(TABLE_ALIGN) const uint8_t aes_sbox[256] = sb_data(h0);
 
 __m128i soft_aesenc(__m128i in, __m128i key)
@@ -144,7 +128,7 @@ static inline void sub_word(uint8_t* key)
 }
 
 #ifdef __clang__
-uint32_t _rotr(uint32_t value, uint32_t amount)
+static inline uint32_t _rotr(uint32_t value, uint32_t amount)
 {
 	return (value >> amount) | (value << ((32 - amount) & 31));
 }
