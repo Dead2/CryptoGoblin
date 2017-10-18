@@ -39,9 +39,6 @@
 
 #define TABLE_ALIGN     32
 #define WPOLY           0x011b
-#define N_COLS          4
-#define AES_BLOCK_SIZE  16
-#define RC_LENGTH       (5 * (AES_BLOCK_SIZE / 4 - 2))
 
 #if defined(_MSC_VER)
 #define ALIGN __declspec(align(TABLE_ALIGN))
@@ -51,30 +48,8 @@
 #define ALIGN
 #endif
 
-#define rf1(r,c) (r)
-#define word_in(x,c) (*((uint32_t*)(x)+(c)))
-#define word_out(x,c,v) (*((uint32_t*)(x)+(c)) = (v))
-
-#define s(x,c) x[c]
-#define si(y,x,c) (s(y,c) = word_in(x, c))
-#define so(y,x,c) word_out(y, c, s(x,c))
-#define state_in(y,x) si(y,x,0); si(y,x,1); si(y,x,2); si(y,x,3)
-#define state_out(y,x)  so(y,x,0); so(y,x,1); so(y,x,2); so(y,x,3)
-#define round(y,x,k) \
-y[0] = (k)[0]  ^ (t_fn[0][x[0] & 0xff] ^ t_fn[1][(x[1] >> 8) & 0xff] ^ t_fn[2][(x[2] >> 16) & 0xff] ^ t_fn[3][x[3] >> 24]); \
-y[1] = (k)[1]  ^ (t_fn[0][x[1] & 0xff] ^ t_fn[1][(x[2] >> 8) & 0xff] ^ t_fn[2][(x[3] >> 16) & 0xff] ^ t_fn[3][x[0] >> 24]); \
-y[2] = (k)[2]  ^ (t_fn[0][x[2] & 0xff] ^ t_fn[1][(x[3] >> 8) & 0xff] ^ t_fn[2][(x[0] >> 16) & 0xff] ^ t_fn[3][x[1] >> 24]); \
-y[3] = (k)[3]  ^ (t_fn[0][x[3] & 0xff] ^ t_fn[1][(x[0] >> 8) & 0xff] ^ t_fn[2][(x[1] >> 16) & 0xff] ^ t_fn[3][x[2] >> 24]);
 #define to_byte(x) ((x) & 0xff)
 #define bval(x,n) to_byte((x) >> (8 * (n)))
-
-#define fwd_var(x,r,c)\
- ( r == 0 ? ( c == 0 ? s(x,0) : c == 1 ? s(x,1) : c == 2 ? s(x,2) : s(x,3))\
- : r == 1 ? ( c == 0 ? s(x,1) : c == 1 ? s(x,2) : c == 2 ? s(x,3) : s(x,0))\
- : r == 2 ? ( c == 0 ? s(x,2) : c == 1 ? s(x,3) : c == 2 ? s(x,0) : s(x,1))\
- :          ( c == 0 ? s(x,3) : c == 1 ? s(x,0) : c == 2 ? s(x,1) : s(x,2)))
-
-#define fwd_rnd(y,x,k,c)  (s(y,c) = (k)[c] ^ four_tables(x,t_use(f,n),fwd_var,rf1,c))
 
 #define sb_data(w) {\
     w(0x63), w(0x7c), w(0x77), w(0x7b), w(0xf2), w(0x6b), w(0x6f), w(0xc5),\
@@ -110,28 +85,13 @@ y[3] = (k)[3]  ^ (t_fn[0][x[3] & 0xff] ^ t_fn[1][(x[0] >> 8) & 0xff] ^ t_fn[2][(
     w(0x8c), w(0xa1), w(0x89), w(0x0d), w(0xbf), w(0xe6), w(0x42), w(0x68),\
     w(0x41), w(0x99), w(0x2d), w(0x0f), w(0xb0), w(0x54), w(0xbb), w(0x16) }
 
-#define rc_data(w) {\
-    w(0x01), w(0x02), w(0x04), w(0x08), w(0x10),w(0x20), w(0x40), w(0x80),\
-    w(0x1b), w(0x36) }
-
 #define bytes2word(b0, b1, b2, b3) (((uint32_t)(b3) << 24) | \
     ((uint32_t)(b2) << 16) | ((uint32_t)(b1) << 8) | (b0))
-
-#define h0(x)   (x)
-#define w0(p)   bytes2word(p, 0, 0, 0)
-#define w1(p)   bytes2word(0, p, 0, 0)
-#define w2(p)   bytes2word(0, 0, p, 0)
-#define w3(p)   bytes2word(0, 0, 0, p)
 
 #define u0(p)   bytes2word(f2(p), p, p, f3(p))
 #define u1(p)   bytes2word(f3(p), f2(p), p, p)
 #define u2(p)   bytes2word(p, f3(p), f2(p), p)
 #define u3(p)   bytes2word(p, p, f3(p), f2(p))
-
-#define v0(p)   bytes2word(fe(p), f9(p), fd(p), fb(p))
-#define v1(p)   bytes2word(fb(p), fe(p), f9(p), fd(p))
-#define v2(p)   bytes2word(fd(p), fb(p), fe(p), f9(p))
-#define v3(p)   bytes2word(f9(p), fd(p), fb(p), fe(p))
 
 #define f2(x)   ((x<<1) ^ (((x>>7) & 1) * WPOLY))
 #define f4(x)   ((x<<2) ^ (((x>>6) & 1) * WPOLY) ^ (((x>>6) & 2) * WPOLY))
@@ -143,8 +103,6 @@ y[3] = (k)[3]  ^ (t_fn[0][x[3] & 0xff] ^ t_fn[1][(x[0] >> 8) & 0xff] ^ t_fn[2][(
 #define fe(x)   (f8(x) ^ f4(x) ^ f2(x))
 
 #define t_dec(m,n) t_##m##n
-#define t_set(m,n) t_##m##n
-#define t_use(m,n) t_##m##n
 
 #define d_4(t,n,b,e,f,g,h) ALIGN const t n[4][256] = { b(e), b(f), b(g), b(h) }
 
