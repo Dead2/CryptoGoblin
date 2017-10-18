@@ -83,7 +83,8 @@ ALWAYS_INLINE FLATTEN static inline void aes_genkey_sub(__m128i* xout0, __m128i*
 	*xout2 = _mm_xor_si128(*xout2, xout1);
 }
 
-ALWAYS_INLINE FLATTEN static inline void soft_aes_genkey_sub(__m128i* xout0, __m128i* xout2, uint8_t rcon)
+template<uint8_t rcon>
+ALWAYS_INLINE FLATTEN static inline void soft_aes_genkey_sub(__m128i* xout0, __m128i* xout2)
 {
 	__m128i xout1 = soft_aeskeygenassist(*xout2, rcon);
 	xout1 = _mm_shuffle_epi32(xout1, 0xFF); // see PSHUFD, set all elems to 4th elem
@@ -107,28 +108,28 @@ FLATTEN static inline void aes_genkey(const __m128i* memory, __m128i* k0, __m128
 	*k1 = xout2;
 
 	if(SOFT_AES)
-		soft_aes_genkey_sub(&xout0, &xout2, 0x01);
+		soft_aes_genkey_sub<0x01>(&xout0, &xout2);
 	else
 		aes_genkey_sub<0x01>(&xout0, &xout2);
 	*k2 = xout0;
 	*k3 = xout2;
 
 	if(SOFT_AES)
-		soft_aes_genkey_sub(&xout0, &xout2, 0x02);
+		soft_aes_genkey_sub<0x02>(&xout0, &xout2);
 	else
 		aes_genkey_sub<0x02>(&xout0, &xout2);
 	*k4 = xout0;
 	*k5 = xout2;
 
 	if(SOFT_AES)
-		soft_aes_genkey_sub(&xout0, &xout2, 0x04);
+		soft_aes_genkey_sub<0x04>(&xout0, &xout2);
 	else
 		aes_genkey_sub<0x04>(&xout0, &xout2);
 	*k6 = xout0;
 	*k7 = xout2;
 
 	if(SOFT_AES)
-		soft_aes_genkey_sub(&xout0, &xout2, 0x08);
+		soft_aes_genkey_sub<0x08>(&xout0, &xout2);
 	else
 		aes_genkey_sub<0x08>(&xout0, &xout2);
 	*k8 = xout0;
@@ -327,22 +328,22 @@ void cryptonight_hash(const void* input, size_t len, void* output, cryptonight_c
 			cx = _mm_aesenc_si128(cx, _mm_set_epi64x(ah0, al0));
 
 		_mm_store_si128((__m128i *)&l0[idx0 & 0x1FFFF0], _mm_xor_si128(bx0, cx));
-		idx0 = _mm_cvtsi128_si64(cx);
+		uint64_t idx1 = _mm_cvtsi128_si64(cx);
 		bx0 = cx;
 
 		if(PREFETCH)
-			_mm_prefetch((const char*)&l0[idx0 & 0x1FFFF0], _MM_HINT_T0);
+			_mm_prefetch((const char*)&l0[idx1 & 0x1FFFF0], _MM_HINT_T0);
 
 		uint64_t hi, lo, cl, ch;
-		cl = ((uint64_t*)&l0[idx0 & 0x1FFFF0])[0];
-		ch = ((uint64_t*)&l0[idx0 & 0x1FFFF0])[1];
+		cl = ((uint64_t*)&l0[idx1 & 0x1FFFF0])[0];
+		ch = ((uint64_t*)&l0[idx1 & 0x1FFFF0])[1];
 
-		lo = _umul128(idx0, cl, &hi);
+		lo = _umul128(idx1, cl, &hi);
 
 		al0 += hi;
 		ah0 += lo;
-		((uint64_t*)&l0[idx0 & 0x1FFFF0])[0] = al0;
-		((uint64_t*)&l0[idx0 & 0x1FFFF0])[1] = ah0;
+		((uint64_t*)&l0[idx1 & 0x1FFFF0])[0] = al0;
+		((uint64_t*)&l0[idx1 & 0x1FFFF0])[1] = ah0;
 		ah0 ^= ch;
 		al0 ^= cl;
 		idx0 = al0;
