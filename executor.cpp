@@ -420,7 +420,7 @@ void executor::ex_main()
 
 				for (i = 0; i < pvThreads->size(); i++)
 				{
-					fTelem = telem->calc_telemetry_data(2500, i);
+					fTelem = telem->calc_telemetry_data(5000, i);
 					if(std::isnormal(fTelem))
 					{
 						fHps += fTelem;
@@ -505,9 +505,9 @@ void executor::hashrate_report(std::string& out)
 	size_t i;
 
 	out.append("HASHRATE REPORT\n");
-	out.append("| ID |  2.5s |   60s |   15m |");
+	out.append("| ID |   5s  |   60s |   15m |");
 	if(nthd != 1)
-		out.append(" ID |  2.5s |   60s |   15m |\n");
+		out.append(" ID |   5s  |   60s |   15m |\n");
 	else
 		out.append(1, '\n');
 
@@ -515,7 +515,7 @@ void executor::hashrate_report(std::string& out)
 	{
 		double fHps[3];
 
-		fHps[0] = telem->calc_telemetry_data(2500, i);
+		fHps[0] = telem->calc_telemetry_data(5000, i);
 		fHps[1] = telem->calc_telemetry_data(60000, i);
 		fHps[2] = telem->calc_telemetry_data(900000, i);
 
@@ -719,7 +719,7 @@ void executor::http_hashrate_report(std::string& out)
 	{
 		double fHps[3];
 
-		fHps[0] = telem->calc_telemetry_data(2500, i);
+		fHps[0] = telem->calc_telemetry_data(5000, i);
 		fHps[1] = telem->calc_telemetry_data(60000, i);
 		fHps[2] = telem->calc_telemetry_data(900000, i);
 
@@ -859,7 +859,7 @@ void executor::http_json_report(std::string& out)
 		if(i != 0) hr_thds.append(1, ',');
 
 		double fHps[3];
-		fHps[0] = telem->calc_telemetry_data(2500, i);
+		fHps[0] = telem->calc_telemetry_data(5000, i);
 		fHps[1] = telem->calc_telemetry_data(60000, i);
 		fHps[2] = telem->calc_telemetry_data(900000, i);
 
