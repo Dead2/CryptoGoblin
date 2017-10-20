@@ -37,6 +37,8 @@
 #	include "httpd.h"
 #endif
 
+#include "colors.hpp"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -146,20 +148,20 @@ int main(int argc, char *argv[])
 	}
 #endif
 
-	printer::inst()->print_str("-------------------------------------------------------------------\n");
-	printer::inst()->print_str( XMR_STAK_NAME" " XMR_STAK_VERSION " mining software, CPU Version.\n");
-	printer::inst()->print_str("Based on CPU mining code by wolf9466 (heavily optimized by fireice_uk).\n");
-	printer::inst()->print_str("Brought to you by fireice_uk and psychocrypt under GPLv3.\n");
-	printer::inst()->print_str("Further tweaked by Dead2.\n\n");
+	printer::inst()->print_str(CYAN("-------------------------------------------------------------------\n"));
+	printer::inst()->print_str(CYAN( XMR_STAK_NAME " " XMR_STAK_VERSION " CPU mining software.\n"));
+	printer::inst()->print_str(CYAN("Based on CPU mining code by ") GREEN("wolf9466") CYAN(".\n"));
+	printer::inst()->print_str(CYAN("Brought to you by ") GREEN("fireice_uk") CYAN(" and ") GREEN("psychocrypt") CYAN(" under ") RED("GPLv3") CYAN(".\n"));
+	printer::inst()->print_str(CYAN("Further improved by ") GREEN("Dead2") CYAN(".\n\n"));
 	char buffer[64];
-	snprintf(buffer, sizeof(buffer), "Configurable dev donation level is set to %.1f %%\n\n", fDevDonationLevel * 100.0);
+	snprintf(buffer, sizeof(buffer), CYAN("Dev donation level is %.1f %%\n\n"), fDevDonationLevel * 100.0);
 	printer::inst()->print_str(buffer);
-	printer::inst()->print_str("You can use following keys to display reports:\n");
-	printer::inst()->print_str("'h' - hashrate\n");
-	printer::inst()->print_str("'r' - results\n");
-	printer::inst()->print_str("'c' - connection\n");
-	printer::inst()->print_str("'q' - quit\n");
-	printer::inst()->print_str("-------------------------------------------------------------------\n");
+	printer::inst()->print_str(CYAN("You can use following keys to display reports:\n"));
+	printer::inst()->print_str(CYAN(" '") RED("h") CYAN("' - hashrate\n"));
+	printer::inst()->print_str(CYAN(" '") RED("r") CYAN("' - results\n"));
+	printer::inst()->print_str(CYAN(" '") RED("c") CYAN("' - connection\n"));
+	printer::inst()->print_str(CYAN(" '") RED("q") CYAN("' - quit\n"));
+	printer::inst()->print_str(CYAN("-------------------------------------------------------------------\n"));
 
 	if(strlen(jconf::inst()->GetOutputFile()) != 0)
 		printer::inst()->open_logfile(jconf::inst()->GetOutputFile());

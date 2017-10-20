@@ -1,6 +1,7 @@
 #pragma once
 
 #include "console.h"
+#include "colors.hpp"
 
 #ifndef CONF_NO_HWLOC
 
@@ -36,11 +37,11 @@ void bindMemoryToNUMANode( size_t puId )
 				HWLOC_MEMBIND_BIND,
 				HWLOC_MEMBIND_THREAD))
 			{
-				printer::inst()->print_msg(L0, "hwloc: can't bind memory");
+				printer::inst()->print_msg(L0, YELLOW("hwloc: can't bind memory"));
 			}
 			else
 			{
-				printer::inst()->print_msg(L0, "hwloc: memory pinned");
+				printer::inst()->print_msg(L0, GREEN("hwloc: memory pinned"));
 				break;
 			}
 		}

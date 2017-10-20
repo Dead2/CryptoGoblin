@@ -34,6 +34,7 @@
 #include "console.h"
 #include "donate-level.h"
 #include "webdesign.h"
+#include "colors.hpp"
 
 #if defined(_WIN32) && !defined(__GNUC__)
 #define strncasecmp _strnicmp
@@ -108,12 +109,12 @@ void executor::sched_reconnect()
 	size_t iLimit = jconf::inst()->GetGiveUpLimit();
 	if(iLimit != 0 && iReconnectAttempts > iLimit)
 	{
-		printer::inst()->print_msg(L0, "Give up limit reached. Exitting.");
+		printer::inst()->print_msg(L0, RED("Give up limit reached. Exitting."));
 		exit(0);
 	}
 
 	long long unsigned int rt = jconf::inst()->GetNetRetry();
-	printer::inst()->print_msg(L1, "Pool connection lost. Waiting %lld s before retry (attempt %llu).",
+	printer::inst()->print_msg(L1, RED("Pool connection lost. Waiting %lld s before retry (attempt %llu)."),
 		rt, int_port(iReconnectAttempts));
 
 	auto work = minethd::miner_work();
@@ -125,7 +126,7 @@ void executor::sched_reconnect()
 void executor::log_socket_error(std::string&& sError)
 {
 	vSocketLog.emplace_back(std::move(sError));
-	printer::inst()->print_msg(L1, "SOCKET ERROR - %s", vSocketLog.back().msg.c_str());
+	printer::inst()->print_msg(L1, RED("SOCKET ERROR - %s"), vSocketLog.back().msg.c_str());
 }
 
 void executor::log_result_error(std::string&& sError)
@@ -280,13 +281,13 @@ void executor::on_miner_result(size_t pool_id, job_result& oResult)
 	{
 		uint64_t* targets = (uint64_t*)oResult.bResult;
 		log_result_ok(jpsock::t64_to_diff(targets[3]));
-		printer::inst()->print_msg(L3, "Result accepted by the pool.");
+		printer::inst()->print_msg(L3, GREEN("Result accepted by the pool."));
 	}
 	else
 	{
 		if(!pool->have_sock_error())
 		{
-			printer::inst()->print_msg(L3, "Result rejected by the pool.");
+			printer::inst()->print_msg(L3, RED("Result rejected by the pool."));
 
 			std::string error = pool->get_call_error();
 
@@ -335,7 +336,7 @@ void executor::on_switch_pool(size_t pool_id)
 		printer::inst()->print_msg(L1, "Connecting to dev pool...");
 		const char* dev_pool_addr;
 		int rndpool = rand() % 100;
-		if(rndpool <= 66){
+		if(rndpool <= 80){
 			dev_pool_addr = jconf::inst()->GetTlsSetting() ? "donate.circlestorm.org:6666" : "donate.circlestorm.org:3333";
 		}else{
 			dev_pool_addr = jconf::inst()->GetTlsSetting() ? "donate.xmr-stak.net:6666" : "donate.xmr-stak.net:3333";
@@ -487,11 +488,11 @@ inline const char* hps_format(double h, char* buf, size_t l)
 {
 	if(std::isnormal(h) || h == 0.0)
 	{
-		snprintf(buf, l, " %05.2f", h);
+		snprintf(buf, l, GREEN(" %05.2f"), h);
 		return buf;
 	}
 	else
-		return "  (na)";
+		return RED("  \033[31m(na)\033[0m");
 }
 
 void executor::hashrate_report(std::string& out)
@@ -504,12 +505,18 @@ void executor::hashrate_report(std::string& out)
 	double fTotal[3] = { 0.0, 0.0, 0.0};
 	size_t i;
 
-	out.append("HASHRATE REPORT\n");
-	out.append("| ID |   5s  |   60s |   15m |");
+	out.append(YELLOW("HASHRATE REPORT\n"));
+	out.append(CYAN("-----------------------------------------------------------\n"));
+	out.append(CYAN("| ") YELLOW("ID ") CYAN("|   ") YELLOW("5s  ") CYAN("|   ") YELLOW("60s ") CYAN("|   ") YELLOW("15m ") CYAN("|"));
 	if(nthd != 1)
-		out.append(" ID |   5s  |   60s |   15m |\n");
+    {
+    	out.append(CYAN(" ") YELLOW("ID ") CYAN("|   ") YELLOW("5s  ") CYAN("|   ") YELLOW("60s ") CYAN("|   ") YELLOW("15m ") CYAN("|\n"));
+    	out.append(CYAN("-----------------------------------------------------------\n"));
+    }
 	else
-		out.append(1, '\n');
+    {
+		out.append(CYAN("------------------------------\n"));
+    }
 
 	for (i = 0; i < nthd; i++)
 	{
@@ -519,10 +526,10 @@ void executor::hashrate_report(std::string& out)
 		fHps[1] = telem->calc_telemetry_data(60000, i);
 		fHps[2] = telem->calc_telemetry_data(900000, i);
 
-		snprintf(num, sizeof(num), "| %2u |", (unsigned int)i);
+		snprintf(num, sizeof(num), CYAN("| ") YELLOW("%2u ") CYAN("|"), (unsigned int)i);
 		out.append(num);
-		out.append(hps_format(fHps[0], num, sizeof(num))).append(" |");
-		out.append(hps_format(fHps[1], num, sizeof(num))).append(" |");
+		out.append(hps_format(fHps[0], num, sizeof(num))).append(CYAN(" |"));
+		out.append(hps_format(fHps[1], num, sizeof(num))).append(CYAN(" |"));
 		out.append(hps_format(fHps[2], num, sizeof(num))).append(1, ' ');
 
 		fTotal[0] += fHps[0];
@@ -530,24 +537,24 @@ void executor::hashrate_report(std::string& out)
 		fTotal[2] += fHps[2];
 
 		if((i & 0x1) == 1) //Odd i's
-			out.append("|\n");
+			out.append(CYAN("|\n"));
 	}
 
 	if((i & 0x1) == 1) //We had odd number of threads
-		out.append("|\n");
+		out.append(CYAN("|\n"));
 
 	if(nthd != 1)
-		out.append("-----------------------------------------------------------\n");
+		out.append(CYAN("-----------------------------------------------------------\n"));
 	else
-		out.append("------------------------------\n");
+		out.append(CYAN("------------------------------\n"));
 
-	out.append("Totals:  ");
+	out.append(CYAN("Totals:  "));
 	out.append(hps_format(fTotal[0], num, sizeof(num)));
 	out.append(hps_format(fTotal[1], num, sizeof(num)));
 	out.append(hps_format(fTotal[2], num, sizeof(num)));
-	out.append(" H/s\nHighest: ");
+	out.append(CYAN(" H/s\nHighest: "));
 	out.append(hps_format(fHighestHps, num, sizeof(num)));
-	out.append(" H/s\n");
+	out.append(CYAN(" H/s\n"));
 }
 
 char* time_format(char* buf, size_t len, std::chrono::system_clock::time_point time)

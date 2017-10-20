@@ -3,6 +3,7 @@
 #include "console.h"
 #include <hwloc.h>
 #include <stdio.h>
+#include "colors.hpp"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -20,10 +21,10 @@ public:
 
 	void printConfig()
 	{
-		printer::inst()->print_str("The configuration for 'cpu_threads_conf' in your config file is 'null'.\n");
-		printer::inst()->print_str("The miner evaluates your system and prints a suggestion for the section `cpu_threads_conf` to the terminal.\n");
-		printer::inst()->print_str("The values are not optimal, please try to tweak the values based on notes in config.txt.\n");
-		printer::inst()->print_str("Please copy & paste the block within the asterisks to your config.\n\n");
+		printer::inst()->print_str(CYAN("The configuration for 'cpu_threads_conf' in your config file is 'null'.\n"));
+		printer::inst()->print_str(CYAN("The miner evaluates your system and prints a suggestion for the section `cpu_threads_conf` to the terminal.\n"));
+		printer::inst()->print_str(CYAN("The values are not optimal, please try to tweak the values based on notes in config.txt.\n"));
+		printer::inst()->print_str(CYAN("Please copy & paste the block within the asterisks to your config.\n\n"));
 
 		hwloc_topology_t topology;
 		hwloc_topology_init(&topology);
@@ -39,12 +40,12 @@ public:
 				[&tlcs](hwloc_obj_t found) { tlcs.emplace_back(found); } );
 
 			if(tlcs.size() == 0)
-				throw(std::runtime_error("The CPU doesn't seem to have a cache."));
+				throw(std::runtime_error(RED("The CPU doesn't seem to have a cache.")));
 
 			for(hwloc_obj_t obj : tlcs)
 				proccessTopLevelCache(obj);
 
-			printer::inst()->print_str("\n**************** Copy&Paste BEGIN ****************\n\n");
+			printer::inst()->print_str(CYAN("\n**************** Copy&Paste BEGIN ****************\n\n"));
 			printer::inst()->print_str("\"cpu_threads_conf\" :\n[\n");
 
 			for(uint32_t id : results)
@@ -55,16 +56,18 @@ public:
 				printer::inst()->print_str(str);
 			}
 
-			printer::inst()->print_str("],\n\n**************** Copy&Paste END ****************\n");
+			printer::inst()->print_str("],\n\n");
+			printer::inst()->print_str(CYAN("**************** Copy&Paste END ****************\n"));
 		}
 		catch(const std::runtime_error& err)
 		{
-			printer::inst()->print_msg(L0, "Autoconf FAILED: %s", err.what());
-			printer::inst()->print_str("\nPrinting config for a single thread. Please try to add new ones until the hashrate slows down.\n");
-			printer::inst()->print_str("\n**************** FAILURE Copy&Paste BEGIN ****************\n\n");
+			printer::inst()->print_msg(L0, RED("Autoconf FAILED: %s"), err.what());
+			printer::inst()->print_str(YELLOW("\nPrinting config for a single thread. Please try to add new ones until the hashrate slows down.\n"));
+			printer::inst()->print_str(YELLOW("\n**************** FAILURE Copy&Paste BEGIN ****************\n\n"));
 			printer::inst()->print_str("\"cpu_threads_conf\" :\n[\n");
 			printer::inst()->print_str("    { \"low_power_mode\" : false, \"no_prefetch\" : true, \"affine_to_cpu\" : false },\n");
-			printer::inst()->print_str("],\n\n**************** FAILURE Copy&Paste END ****************\n");
+			printer::inst()->print_str("],\n\n");
+			printer::inst()->print_str(YELLOW("**************** FAILURE Copy&Paste END ****************\n"));
 		}
 
 		/* Destroy topology object. */
