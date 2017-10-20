@@ -112,6 +112,7 @@ if(MICROHTTPD_ENABLE)
         NAMES
             microhttpd
             libmicrohttpd.lib
+            libmicrohttpd-dll
         PATHS
             ENV "MICROHTTPD_ROOT"
         PATH_SUFFIXES
