@@ -35,6 +35,7 @@
 #include "donate-level.h"
 #include "webdesign.h"
 #include "colors.hpp"
+#include "version.h"
 
 #if defined(_WIN32) && !defined(__GNUC__)
 #define strncasecmp _strnicmp
@@ -368,6 +369,28 @@ void executor::on_switch_pool(size_t pool_id)
 	}
 }
 
+inline const char* hps_format(double h, char* buf, size_t l)
+{
+	if(std::isfinite(h))
+	{
+		snprintf(buf, l, " %05.2lf", h);
+		return buf;
+	}
+	else
+		return "  (na)";
+}
+
+inline const char* hps_format_color(double h, char* buf, size_t l)
+{
+	if(std::isfinite(h))
+	{
+		snprintf(buf, l, GREEN(" %05.2lf"), h);
+		return buf;
+	}
+	else
+		return RED("  (na)");
+}
+
 void executor::ex_main()
 {
 	assert(1000 % iTickTime == 0);
@@ -418,6 +441,8 @@ void executor::ex_main()
 				double fHps = 0.0;
 				double fTelem;
 				bool normal = true;
+                char num[16];
+                char strbuf[64];
 
 				for (i = 0; i < pvThreads->size(); i++)
 				{
@@ -435,6 +460,9 @@ void executor::ex_main()
 
 				if(normal && fHighestHps < fHps)
 					fHighestHps = fHps;
+
+                snprintf(strbuf, sizeof(strbuf), "%sH/s %s", hps_format(fHps, num, sizeof(num)), XMR_STAK_NAME);
+                printer::inst()->set_title(strbuf);
 			}
 		break;
 
@@ -484,17 +512,6 @@ void executor::ex_main()
 	}
 }
 
-inline const char* hps_format(double h, char* buf, size_t l)
-{
-	if(std::isnormal(h) || h == 0.0)
-	{
-		snprintf(buf, l, GREEN(" %05.2f"), h);
-		return buf;
-	}
-	else
-		return RED("  \033[31m(na)\033[0m");
-}
-
 void executor::hashrate_report(std::string& out)
 {
 	char num[32];
@@ -528,9 +545,9 @@ void executor::hashrate_report(std::string& out)
 
 		snprintf(num, sizeof(num), CYAN("| ") YELLOW("%2u ") CYAN("|"), (unsigned int)i);
 		out.append(num);
-		out.append(hps_format(fHps[0], num, sizeof(num))).append(CYAN(" |"));
-		out.append(hps_format(fHps[1], num, sizeof(num))).append(CYAN(" |"));
-		out.append(hps_format(fHps[2], num, sizeof(num))).append(1, ' ');
+		out.append(hps_format_color(fHps[0], num, sizeof(num))).append(CYAN(" |"));
+		out.append(hps_format_color(fHps[1], num, sizeof(num))).append(CYAN(" |"));
+		out.append(hps_format_color(fHps[2], num, sizeof(num))).append(1, ' ');
 
 		fTotal[0] += fHps[0];
 		fTotal[1] += fHps[1];
@@ -549,11 +566,11 @@ void executor::hashrate_report(std::string& out)
 		out.append(CYAN("------------------------------\n"));
 
 	out.append(CYAN("Totals:  "));
-	out.append(hps_format(fTotal[0], num, sizeof(num)));
-	out.append(hps_format(fTotal[1], num, sizeof(num)));
-	out.append(hps_format(fTotal[2], num, sizeof(num)));
+	out.append(hps_format_color(fTotal[0], num, sizeof(num)));
+	out.append(hps_format_color(fTotal[1], num, sizeof(num)));
+	out.append(hps_format_color(fTotal[2], num, sizeof(num)));
 	out.append(CYAN(" H/s\nHighest: "));
-	out.append(hps_format(fHighestHps, num, sizeof(num)));
+	out.append(hps_format_color(fHighestHps, num, sizeof(num)));
 	out.append(CYAN(" H/s\n"));
 }
 

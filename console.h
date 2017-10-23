@@ -32,6 +32,7 @@ public:
 	void print_msg(verbosity verbose, const char* fmt, ...);
 	void print_str(const char* str);
 	bool open_logfile(const char* file);
+    void set_title(const char* str);
 
 private:
 	printer();

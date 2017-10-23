@@ -22,6 +22,7 @@
   */
 
 #include "console.h"
+#include "colors.hpp"
 #include <time.h>
 #include <stdio.h>
 #include <string.h>
@@ -210,4 +211,16 @@ void printer::print_str(const char* str)
 		fputs(str, logfile);
 		fflush(logfile);
 	}
+}
+
+void printer::set_title(const char* str)
+{
+#if !defined(_WIN32) || (defined(_WIN32) && defined(VT100))
+	char buf[128];
+    snprintf(buf, sizeof(buf), TITLE("%s"), str);
+
+	std::unique_lock<std::mutex> lck(print_mutex);
+    fputs(buf, stdout);
+    fflush(stdout);
+#endif
 }

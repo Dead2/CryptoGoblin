@@ -3,7 +3,7 @@ rm -rf CMakeFiles/ CMakeCache.txt
 # CFLAGS
 general="-O2 -pipe -Wall -Wextra -fdiagnostics-color=always -fuse-linker-plugin"
 protect=""   # -fstack-protector
-codegen="--fast-math -fomit-frame-pointer -momit-leaf-frame-pointer -fvisibility-inlines-hidden -fvisibility=internal -mlong-double-64 -fno-signed-zeros"
+codegen="-fomit-frame-pointer -momit-leaf-frame-pointer -fvisibility-inlines-hidden -fvisibility=internal -mlong-double-64 -fno-signed-zeros"
 params=" --param max-cse-path-length=20 --param max-cse-insns=2000 --param max-cselib-memory-locations=1000 --param max-reload-search-insns=200 --param max-sched-ready-insns=200 --param max-sched-region-insns=150 \
 --param selsched-max-lookahead=75 --param max-delay-slot-insn-search=150 --param max-delay-slot-live-search=400 --param max-gcse-memory=268435456  --param max-partial-antic-length=150 --param max-tail-merge-iterations=3 \
 --param max-tail-merge-comparisons=15 --param max-tracked-strlens=25000 --param inline-min-speedup=6 --param prefetch-latency=225 --param simultaneous-prefetches=4"

@@ -57,6 +57,12 @@
 
 //Do a press any key for the windows folk. *insert any key joke here*
 #ifdef _WIN32
+#include <windows.h>
+
+#if !defined(ENABLE_VIRTUAL_TERMINAL_PROCESSING) && defined(VT100)
+#define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
+#endif
+
 void win_exit()
 {
 	printer::inst()->print_str("Press any key to exit.");
@@ -87,6 +93,16 @@ int main(int argc, char *argv[])
 
 	const char* sFilename = "config.txt";
 	bool benchmark_mode = false;
+
+#if defined(_WIN32) && defined(VT100)
+    HANDLE hStdout;
+    DWORD handleMode;
+
+    hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
+    GetConsoleMode(hStdout, &handleMode);
+    handleMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+    SetConsoleMode(hStdout, handleMode);
+#endif
 
 	if(argc >= 2)
 	{
@@ -149,9 +165,9 @@ int main(int argc, char *argv[])
 #endif
 
 	printer::inst()->print_str(CYAN("-------------------------------------------------------------------\n"));
-	printer::inst()->print_str(CYAN( XMR_STAK_NAME " " XMR_STAK_VERSION " CPU mining software.\n"));
+	printer::inst()->print_str(GREEN( XMR_STAK_NAME " " XMR_STAK_VERSION) CYAN(" CPU mining software under ") RED("GPLv3\n"));
 	printer::inst()->print_str(CYAN("Based on CPU mining code by ") GREEN("wolf9466") CYAN(".\n"));
-	printer::inst()->print_str(CYAN("Brought to you by ") GREEN("fireice_uk") CYAN(" and ") GREEN("psychocrypt") CYAN(" under ") RED("GPLv3") CYAN(".\n"));
+	printer::inst()->print_str(CYAN("Re-implementation and big optimizations by ") GREEN("fireice_uk") CYAN(" and ") GREEN("psychocrypt") CYAN(".\n"));
 	printer::inst()->print_str(CYAN("Further improved by ") GREEN("Dead2") CYAN(".\n\n"));
 	char buffer[64];
 	snprintf(buffer, sizeof(buffer), CYAN("Dev donation level is %.1f %%\n\n"), fDevDonationLevel * 100.0);
@@ -188,6 +204,8 @@ int main(int argc, char *argv[])
 			executor::inst()->push_event(ex_event(EV_USR_CONNSTAT));
 			break;
 		case 'q':
+            fputs(RST, stdout);
+            fflush(stdout);
 			exit(0);
 			break;
 		default:
