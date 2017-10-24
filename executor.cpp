@@ -47,6 +47,7 @@ executor::executor()
 {
 }
 
+#pragma GCC optimize ("Os")
 void executor::push_timed_event(ex_event&& ev, size_t sec)
 {
 	std::unique_lock<std::mutex> lck(timed_event_mutex);
@@ -223,7 +224,9 @@ void executor::on_sock_error(size_t pool_id, std::string&& sError)
 	pool->disconnect();
 	sched_reconnect();
 }
+#pragma GCC reset_options
 
+#pragma GCC optimize ("O2")
 void executor::on_pool_have_job(size_t pool_id, pool_job& oPoolJob)
 {
 	if(pool_id != current_pool_id)
@@ -304,7 +307,9 @@ void executor::on_miner_result(size_t pool_id, job_result& oResult)
 			log_result_error("[NETWORK ERROR]");
 	}
 }
+#pragma GCC reset_options
 
+#pragma GCC optimize ("Os")
 void executor::on_reconnect(size_t pool_id)
 {
 	jpsock* pool = pick_pool_by_id(pool_id);
@@ -390,6 +395,7 @@ inline const char* hps_format_color(double h, char* buf, size_t l)
 	else
 		return RED("  (na)");
 }
+#pragma GCC reset_options
 
 void executor::ex_main()
 {
@@ -512,6 +518,7 @@ void executor::ex_main()
 	}
 }
 
+#pragma GCC optimize ("Os")
 void executor::hashrate_report(std::string& out)
 {
 	char num[32];
@@ -1018,3 +1025,4 @@ void executor::get_http_report(ex_event_name ev_id, std::string& data)
 	ready.wait();
 	pHttpString = nullptr;
 }
+#pragma GCC reset_options

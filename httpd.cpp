@@ -41,6 +41,8 @@
 #define strcasecmp _stricmp
 #endif // _WIN32
 
+#pragma GCC optimize ("Os")
+
 httpd* httpd::oInst = nullptr;
 
 httpd::httpd()
@@ -151,3 +153,4 @@ bool httpd::start_daemon()
 
 #endif
 
+#pragma GCC reset_options

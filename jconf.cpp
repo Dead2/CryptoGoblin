@@ -40,6 +40,8 @@
 #include "jext.h"
 #include "console.h"
 
+#pragma GCC optimize ("Os")
+
 using namespace rapidjson;
 
 /*
@@ -465,3 +467,4 @@ bool jconf::parse_config(const char* sFilename)
 
 	return true;
 }
+#pragma GCC reset_options

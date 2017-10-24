@@ -31,6 +31,8 @@
 #ifdef _WIN32
 #include <windows.h>
 
+#pragma GCC optimize ("Os")
+
 int get_key()
 {
 	DWORD mode, rd;
@@ -176,7 +178,7 @@ void printer::print_msg(verbosity verbose, const char* fmt, ...)
 
 	time_t now = time(nullptr);
 	comp_localtime(&now, &stime);
-	strftime(buf, sizeof(buf), "[%F %T] : ", &stime);
+	strftime(buf, sizeof(buf), "[%Y-%m-%d %H:%M:%S] ", &stime);
 	bpos = strlen(buf);
 
 	va_list args;
@@ -224,3 +226,5 @@ void printer::set_title(const char* str)
     fflush(stdout);
 #endif
 }
+
+#pragma GCC reset_options

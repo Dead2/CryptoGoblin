@@ -83,6 +83,19 @@ if(COMPILER_ALIGN)
     add_definitions(-DHAVE_ALIGNED)
 endif()
 
+check_c_source_compiles(
+    "int __attribute__((target_clones(\"avx,default\"))) foo() {
+      return 0;
+    }
+    int main()
+    {
+      return foo();
+    }"
+    COMPILER_TARGETS FAIL_REGEX "not supported")
+if(COMPILER_TARGETS)
+    add_definitions(-DHAVE_TARGET_CLONES)
+endif()
+
 ################################################################################
 # Find PThreads
 ################################################################################

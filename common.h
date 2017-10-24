@@ -30,9 +30,21 @@
 #endif
 
 #ifdef HAVE_ALIGNED
-#  define ALIGN16 __attribute__((aligned (16)))
+#  define ALIGN16  __attribute__((aligned (16)))
+#  define ALIGN32  __attribute__((aligned (32)))
+#  define ALIGN64  __attribute__((aligned (64)))
+#  define ALIGN128 __attribute__((aligned (128)))
 #else
 # define ALIGN16
+# define ALIGN32
+# define ALIGN64
+# define ALIGN128
+#endif
+
+#ifdef HAVE_TARGET_CLONES
+#  define TARGETS(x) __attribute__((target_clones(x)))
+#else
+#  define TARGETS(x)
 #endif
 
 #endif
