@@ -24,7 +24,7 @@ void bindMemoryToNUMANode( size_t puId )
 
 	if(!hwloc_topology_get_support(topology)->membind->set_thisthread_membind)
 	{
-		printer::inst()->print_msg(L0, "hwloc: set_thisthread_membind not supported");
+		printer::inst()->print_msg(L0, YELLOW("hwloc: set_thisthread_membind not supported"));
 		hwloc_topology_destroy(topology);
 		return;
 	}
