@@ -16,6 +16,7 @@
 #pragma once
 
 #include "cryptonight.h"
+#include "c_keccak.hpp"
 #include "../common.h"
 #include <memory.h>
 #include <stdio.h>
@@ -48,8 +49,6 @@ ALWAYS_INLINE static inline uint64_t _xmr_umul128(uint64_t a, uint64_t b, uint64
 
 extern "C"
 {
-	void keccak(const uint8_t *in, int inlen, uint8_t *md, int mdlen);
-	void keccakf(uint64_t st[25], int rounds);
 	extern void(*const extra_hashes[4])(const void *, size_t, char *);
 }
 
@@ -382,7 +381,7 @@ template<size_t ITERATIONS, size_t MEM, bool SOFT_AES, bool PREFETCH>
 TARGETS("avx2,avx,popcnt,fma,fma4,bmi,bmi2,xop,sse4.2,sse4.1,sse4a,ssse3,sse3,default")
 ALIGN64 void cryptonight_hash(const void* input, size_t len, void* output, cryptonight_ctx* ctx0)
 {
-	keccak((const uint8_t *)input, len, ctx0->hash_state, 200);
+	keccak<200>((const uint8_t *)input, len, ctx0->hash_state);
 
 	// Optim - 99% time boundary
 	if(SOFT_AES)
@@ -443,7 +442,7 @@ ALIGN64 void cryptonight_hash(const void* input, size_t len, void* output, crypt
 
 	// Optim - 99% time boundary
 
-	keccakf((uint64_t*)ctx0->hash_state, 24);
+	keccakf<24>((uint64_t*)ctx0->hash_state);
 	extra_hashes[ctx0->hash_state[0] & 3](ctx0->hash_state, 200, (char*)output);
 }
 
@@ -454,8 +453,8 @@ template<size_t ITERATIONS, size_t MEM, bool SOFT_AES, bool PREFETCH>
 TARGETS("avx2,avx,popcnt,fma,fma4,bmi,bmi2,xop,sse4.2,sse4.1,sse4a,ssse3,sse3,default")
 ALIGN64 void cryptonight_double_hash(const void* input, size_t len, void* output, cryptonight_ctx* __restrict ctx0, cryptonight_ctx* __restrict ctx1)
 {
-	keccak((const uint8_t *)input, len, ctx0->hash_state, 200);
-	keccak((const uint8_t *)input+len, len, ctx1->hash_state, 200);
+	keccak<200>((const uint8_t *)input, len, ctx0->hash_state);
+	keccak<200>((const uint8_t *)input+len, len, ctx1->hash_state);
 
 	// Optim - 99% time boundary
 	if(SOFT_AES){
@@ -558,8 +557,8 @@ ALIGN64 void cryptonight_double_hash(const void* input, size_t len, void* output
 
 	// Optim - 99% time boundary
 
-	keccakf((uint64_t*)ctx0->hash_state, 24);
+	keccakf<24>((uint64_t*)ctx0->hash_state);
 	extra_hashes[ctx0->hash_state[0] & 3](ctx0->hash_state, 200, (char*)output);
-	keccakf((uint64_t*)ctx1->hash_state, 24);
+	keccakf<24>((uint64_t*)ctx1->hash_state);
 	extra_hashes[ctx1->hash_state[0] & 3](ctx1->hash_state, 200, (char*)output + 32);
 }

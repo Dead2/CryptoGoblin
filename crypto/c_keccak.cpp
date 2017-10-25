@@ -4,6 +4,8 @@
 
 #include <stdint.h>
 #include <memory.h>
+#include "c_keccak.hpp"
+#include "../common.h"
 
 #define HASH_DATA_AREA 136
 #define KECCAK_ROUNDS 24
@@ -12,21 +14,22 @@
 #define ROTL64(x, y) (((x) << (y)) | ((x) >> (64 - (y))))
 #endif
 
-const uint64_t keccakf_rndc[24] = 
+ALIGN64 const uint64_t keccakf_rndc[24] =
 {
 	0x0000000000000001, 0x0000000000008082, 0x800000000000808a,
 	0x8000000080008000, 0x000000000000808b, 0x0000000080000001,
 	0x8000000080008081, 0x8000000000008009, 0x000000000000008a,
 	0x0000000000000088, 0x0000000080008009, 0x000000008000000a,
 	0x000000008000808b, 0x800000000000008b, 0x8000000000008089,
-	0x8000000000008003, 0x8000000000008002, 0x8000000000000080, 
+	0x8000000000008003, 0x8000000000008002, 0x8000000000000080,
 	0x000000000000800a, 0x800000008000000a, 0x8000000080008081,
 	0x8000000000008080, 0x0000000080000001, 0x8000000080008008
 };
 
 // update the state with given number of rounds
 
-void keccakf(uint64_t st[25], int rounds)
+template<int rounds>
+ALIGN64 void keccakf(uint64_t st[25])
 {
 	int i, j, round;
 	uint64_t t, bc[5];
@@ -130,16 +133,17 @@ void keccakf(uint64_t st[25], int rounds)
 		st[j + 2] ^= (~bc[3]) & bc[4];
 		st[j + 3] ^= (~bc[4]) & bc[0];
 		st[j + 4] ^= (~bc[0]) & bc[1];
-		
+
 		//  Iota
 		st[0] ^= keccakf_rndc[round];
 	}
 }
 
 // compute a keccak hash (md) of given byte length from "in"
-typedef uint64_t state_t[25];
+ALIGN16 typedef uint64_t state_t[25];
 
-void keccak(const uint8_t *in, int inlen, uint8_t *md, int mdlen)
+template<int mdlen>
+ALIGN64 void keccak(const uint8_t *in, int inlen, uint8_t *md)
 {
 	state_t st;
 	uint8_t temp[144];
@@ -147,15 +151,15 @@ void keccak(const uint8_t *in, int inlen, uint8_t *md, int mdlen)
 
 	rsiz = sizeof(state_t) == mdlen ? HASH_DATA_AREA : 200 - 2 * mdlen;
 	rsizw = rsiz / 8;
-	
+
 	memset(st, 0, sizeof(st));
 
 	for ( ; inlen >= rsiz; inlen -= rsiz, in += rsiz) {
 		for (i = 0; i < rsizw; i++)
 			st[i] ^= ((uint64_t *) in)[i];
-		keccakf(st, KECCAK_ROUNDS);
+		keccakf<KECCAK_ROUNDS>(st);
 	}
-	
+
 	// last block and padding
 	memcpy(temp, in, inlen);
 	temp[inlen++] = 1;
@@ -165,12 +169,13 @@ void keccak(const uint8_t *in, int inlen, uint8_t *md, int mdlen)
 	for (i = 0; i < rsizw; i++)
 		st[i] ^= ((uint64_t *) temp)[i];
 
-	keccakf(st, KECCAK_ROUNDS);
+	keccakf<KECCAK_ROUNDS>(st);
 
 	memcpy(md, st, mdlen);
 }
 
-void keccak1600(const uint8_t *in, int inlen, uint8_t *md)
-{
-	keccak(in, inlen, md, sizeof(state_t));
+// Instantiate templated functions
+export void keccak_dummy(const uint8_t *foo){
+    keccak<200>(foo, 42, (uint8_t *)foo);
+    keccakf<24>((uint64_t*)foo);
 }
