@@ -1,7 +1,7 @@
-# XMR-Stak-CPU-Dead2 - Monero CPU mining tool
+# CryptoGoblin - Monero CPU mining tool
 Forked from https://github.com/fireice-uk/xmr-stak-cpu and part of the donation mining still goes to them.
 
-If you want to make a little donation directly to me (Dead2), transfers or donation mining (at pool.supportxmr.com:5555), my XMR address is:
+If you want to make a little donation directly to me (Dead2), transfers or donation mining (at pool.supportxmr.com:3333), my XMR address is:
 ```
 45obtQLBPgyZL8Xb4qFFdZQLZugJzkHUo7oHeKd2zZSmfjxRg6WKhAjD4o1eb6LjK1RY2V4sp1nmDAity9Ks9NvZHw8z1EL
 ```
@@ -10,7 +10,7 @@ Any donation is much appreciated.
 ## Description
 This fork of xmr-stak-cpu makes LTO compilation possible, and contains a build script that compiles
 using LTO and a collection of CFLAGS that might provide you with a benefit.
-In addition, several tweaks and improvements have been implemented.
+In addition, a lot of optimizations, tweaks and improvements have been implemented.
 
 ## Configuration
 Run the miner with the default config file unchanged, and it will suggest a thread config for you.
@@ -29,8 +29,8 @@ might now be slower, but the rest will be faster, so hopefully you gained a few 
 ## Linux compilation using build.sh
 This will build with LTO enabled, and some really aggressive optimization flags.
 
-If you are lucky, this might give you anything from 0% to 15% improvement,
-if you are not lucky it could be a couple percent slower.
+If you are lucky, this might give you anything from 0% to 25% improvement, if you are not lucky
+it could be a couple percent slower. Soft-aes will see huge improvements.
 
 To use this, instead of running cmake directly, run:
 `./build.sh`
@@ -77,4 +77,4 @@ See below for compile requirements:
 - see [WINCOMPILE.md](WINCOMPILE.md)
 
 
-You can find the complete README file at https://github.com/fireice-uk/xmr-stak-cpu
+You can find the original README file at https://github.com/fireice-uk/xmr-stak-cpu

@@ -165,18 +165,26 @@ int main(int argc, char *argv[])
 #endif
 
 	printer::inst()->print_str(CYAN("-------------------------------------------------------------------\n"));
-	printer::inst()->print_str(GREEN( XMR_STAK_NAME " " XMR_STAK_VERSION) CYAN(" CPU mining software under ") RED("GPLv3\n"));
-	printer::inst()->print_str(CYAN("Based on CPU mining code by ") GREEN("wolf9466") CYAN(".\n"));
-	printer::inst()->print_str(CYAN("Re-implementation and big optimizations by ") GREEN("fireice_uk") CYAN(" and ") GREEN("psychocrypt") CYAN(".\n"));
-	printer::inst()->print_str(CYAN("Further improved by ") GREEN("Dead2") CYAN(".\n\n"));
-	char buffer[64];
-	snprintf(buffer, sizeof(buffer), CYAN("Dev donation level is %.1f %%\n\n"), fDevDonationLevel * 100.0);
-	printer::inst()->print_str(buffer);
-	printer::inst()->print_str(CYAN("You can use following keys to display reports:\n"));
-	printer::inst()->print_str(CYAN(" '") RED("h") CYAN("' - hashrate\n"));
-	printer::inst()->print_str(CYAN(" '") RED("r") CYAN("' - results\n"));
-	printer::inst()->print_str(CYAN(" '") RED("c") CYAN("' - connection\n"));
-	printer::inst()->print_str(CYAN(" '") RED("q") CYAN("' - quit\n"));
+	printer::inst()->print_str(GREEN( XMR_STAK_NAME " " XMR_STAK_VERSION) CYAN(" by ") GREEN("Dead2") CYAN(" CPU mining software under ") RED("GPLv3\n"));
+    printer::inst()->print_str(CYAN("Based on XMR-Stak-CPU by ") GREEN("fireice_uk") CYAN(" and ") GREEN("psychocrypt") CYAN(".\n"));
+    printer::inst()->print_str(CYAN("Original CPU miner code by ") GREEN("wolf9466") CYAN(".\n\n"));
+    if((fDevDonationLevel*100) > 0.99){
+    	char buffer[64];
+	    snprintf(buffer, sizeof(buffer), GREEN("Dev donation level is %.2f%%\n\n"), fDevDonationLevel * 100.0);
+    	printer::inst()->print_str(buffer);
+    	printer::inst()->print_str(GREEN("Thank you, it is very much appreciated!!\n\n"));
+    }else if((fDevDonationLevel*100) > 0.09){
+    	char buffer[64];
+	    snprintf(buffer, sizeof(buffer), CYAN("Dev donation level is %.2f%%\n\n"), fDevDonationLevel * 100.0);
+    	printer::inst()->print_str(buffer);
+    }else{
+    	printer::inst()->print_str(RED("Dev donation is disabled, thanks for nothing!\n\n"));
+    }
+	printer::inst()->print_str(CYAN("You can press the following keys to display reports:\n"));
+	printer::inst()->print_str(CYAN(" '") RED("H") CYAN("' - hashrate\n"));
+	printer::inst()->print_str(CYAN(" '") RED("R") CYAN("' - results\n"));
+	printer::inst()->print_str(CYAN(" '") RED("C") CYAN("' - connection\n"));
+	printer::inst()->print_str(CYAN(" '") RED("Q") CYAN("' - quit\n"));
 	printer::inst()->print_str(CYAN("-------------------------------------------------------------------\n"));
 
 	if(strlen(jconf::inst()->GetOutputFile()) != 0)

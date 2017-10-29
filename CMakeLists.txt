@@ -1,4 +1,4 @@
-project(xmr-stak-cpu)
+project(CryptoGoblin)
 
 cmake_minimum_required(VERSION 3.0.1)
 
@@ -223,13 +223,13 @@ endif()
 file(GLOB SRCFILES_CPP "*.cpp" "crypto/*.cpp")
 file(GLOB SRCFILES_C "crypto/*.c")
 
-add_executable(xmr-stak-cpu
+add_executable(CryptoGoblin
     ${SRCFILES_C}
     ${SRCFILES_CPP}
 )
 
 set(EXECUTABLE_OUTPUT_PATH "bin")
-target_link_libraries(xmr-stak-cpu ${LIBS})
+target_link_libraries(CryptoGoblin ${LIBS})
 
 ################################################################################
 # Install
@@ -237,7 +237,7 @@ target_link_libraries(xmr-stak-cpu ${LIBS})
 
 # do not install the binary if the project and install are equal
 if( NOT "${CMAKE_INSTALL_PREFIX}" STREQUAL "${PROJECT_BINARY_DIR}" )
-    install(TARGETS xmr-stak-cpu
+    install(TARGETS CryptoGoblin
             RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
 endif()
 

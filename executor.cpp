@@ -297,7 +297,7 @@ void executor::on_miner_result(size_t pool_id, job_result& oResult)
 
 			if(strncasecmp(error.c_str(), "Unauthenticated", 15) == 0)
 			{
-				printer::inst()->print_msg(L2, "Your miner was unable to find a share in time. Either the pool difficulty is too high, or the pool timeout is too low.");
+				printer::inst()->print_msg(L2, YELLOW("Your miner was unable to find a share in time. Either the pool difficulty is too high, or the pool timeout is too low."));
 				pool->disconnect();
 			}
 
@@ -342,7 +342,7 @@ void executor::on_switch_pool(size_t pool_id)
 		printer::inst()->print_msg(L1, "Connecting to dev pool...");
 		const char* dev_pool_addr;
 		int rndpool = rand() % 100;
-		if(rndpool <= 80){
+		if(rndpool <= 85){
 			dev_pool_addr = jconf::inst()->GetTlsSetting() ? "donate.circlestorm.org:6666" : "donate.circlestorm.org:3333";
 		}else{
 			dev_pool_addr = jconf::inst()->GetTlsSetting() ? "donate.xmr-stak.net:6666" : "donate.xmr-stak.net:3333";
