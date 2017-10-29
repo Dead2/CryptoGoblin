@@ -223,7 +223,7 @@ template<size_t MEM, bool PREFETCH>
 ALIGN16 FLATTEN2 void soft_cn_explode_scratchpad(const __m128i* input, __m128i* output)
 {
 	// This is more than we have registers, compiler will assign 2 keys on the stack
-	__m128i xin0, xin1, xin2, xin3, xin4, xin5, xin6, xin7;
+	__m128i xin0, xin1, xin2, xin3;
 	__m128i k0, k1, k2, k3, k4, k5, k6, k7, k8, k9;
 
 	aes_genkey<1>(input, &k0, &k1, &k2, &k3, &k4, &k5, &k6, &k7, &k8, &k9);
