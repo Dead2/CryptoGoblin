@@ -47,4 +47,18 @@
 #  define TARGETS(x)
 #endif
 
+
+#include <stdio.h>
+
+static void print_hex_memory(void *mem, int len) {
+  int i;
+  unsigned char *p = (unsigned char *)mem;
+  for (i=0;i<len;i++) {
+    printf("0x%02x ", p[i]);
+    if ((i%16==0) && i)
+      printf("\n");
+  }
+  printf("\n");
+}
+
 #endif
