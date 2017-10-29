@@ -42,7 +42,7 @@ public:
             printer::inst()->print_str(YELLOW("\nPrinting config for a single thread. Please try to add new ones until the hashrate slows down.\n"));
             printer::inst()->print_str(YELLOW("\n**************** FAILURE Copy&Paste BEGIN ****************\n\n"));
             printer::inst()->print_str("\"cpu_threads_conf\" :\n[\n");
-            printer::inst()->print_str("    { \"low_power_mode\" : false, \"no_prefetch\" : true, \"affine_to_cpu\" : false },\n");
+            printer::inst()->print_str("    { \"thread_mode\" : 1, \"prefetch\" : true, \"affine_to_cpu\" : false },\n");
             printer::inst()->print_str("],\n\n");
             printer::inst()->print_str(YELLOW("**************** FAILURE Copy&Paste END ****************\n"));
 			return;
@@ -69,8 +69,8 @@ public:
 
 			double_mode = L3KB_size / 2048 > (int32_t)(corecnt-i);
 
-			snprintf(strbuf, sizeof(strbuf), "   { \"low_power_mode\" : %s, \"no_prefetch\" : true, \"affine_to_cpu\" : %u },\n",
-				double_mode ? "true" : "false", aff_id);
+			snprintf(strbuf, sizeof(strbuf), "   { \"thread_mode\" : %s, \"prefetch\" : true, \"affine_to_cpu\" : %u },\n",
+				double_mode ? "2" : "1", aff_id);
 			printer::inst()->print_str(strbuf);
 
 			if(!linux_layout || old_amd)

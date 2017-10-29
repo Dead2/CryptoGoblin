@@ -51,8 +51,8 @@ public:
 			for(uint32_t id : results)
 			{
 				char str[128];
-				snprintf(str, sizeof(str), "    { \"low_power_mode\" : %s, \"no_prefetch\" : true, \"affine_to_cpu\" : %u },\n",
-					(id & 0x8000000) != 0 ? "true" : "false", id & 0x7FFFFFF);
+				snprintf(str, sizeof(str), "    { \"thread_mode\" : %s, \"prefetch\" : true, \"affine_to_cpu\" : %u },\n",
+					(id & 0x8000000) != 0 ? "2" : "1", id & 0x7FFFFFF);
 				printer::inst()->print_str(str);
 			}
 
@@ -65,7 +65,7 @@ public:
 			printer::inst()->print_str(YELLOW("\nPrinting config for a single thread. Please try to add new ones until the hashrate slows down.\n"));
 			printer::inst()->print_str(YELLOW("\n**************** FAILURE Copy&Paste BEGIN ****************\n\n"));
 			printer::inst()->print_str("\"cpu_threads_conf\" :\n[\n");
-			printer::inst()->print_str("    { \"low_power_mode\" : false, \"no_prefetch\" : true, \"affine_to_cpu\" : false },\n");
+			printer::inst()->print_str("    { \"thread_mode\" : false, \"prefetch\" : true, \"affine_to_cpu\" : false },\n");
 			printer::inst()->print_str("],\n\n");
 			printer::inst()->print_str(YELLOW("**************** FAILURE Copy&Paste END ****************\n"));
 		}
