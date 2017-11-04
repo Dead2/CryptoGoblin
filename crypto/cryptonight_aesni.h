@@ -175,6 +175,12 @@ ALIGN64 FLATTEN2 void cn_explode_scratchpad(const __m128i* input, __m128i* outpu
 	__m128i xin0, xin1, xin2, xin3, xin4, xin5, xin6, xin7;
 	__m128i k0, k1, k2, k3, k4, k5, k6, k7, k8, k9;
 
+	if(PREFETCH){
+		_mm_prefetch((const char*)input + 0, _MM_HINT_T0);
+		_mm_prefetch((const char*)input + 4, _MM_HINT_T0);
+		_mm_prefetch((const char*)input + 8, _MM_HINT_T0);
+    }
+
 	aes_genkey<0>(input, &k0, &k1, &k2, &k3, &k4, &k5, &k6, &k7, &k8, &k9);
 
 	xin0 = _mm_load_si128(input + 4);
@@ -198,6 +204,11 @@ ALIGN64 FLATTEN2 void cn_explode_scratchpad(const __m128i* input, __m128i* outpu
 		aes_8round(k7, &xin0, &xin1, &xin2, &xin3, &xin4, &xin5, &xin6, &xin7);
 		aes_8round(k8, &xin0, &xin1, &xin2, &xin3, &xin4, &xin5, &xin6, &xin7);
 		aes_8round(k9, &xin0, &xin1, &xin2, &xin3, &xin4, &xin5, &xin6, &xin7);
+
+		if(PREFETCH){
+			_mm_prefetch((const char*)output + i + 0, _MM_HINT_NTA);
+			_mm_prefetch((const char*)output + i + 4, _MM_HINT_NTA);
+        }
 
 		_mm_store_si128(output + i + 0, xin0);
 		_mm_store_si128(output + i + 1, xin1);
@@ -225,6 +236,12 @@ ALIGN16 FLATTEN2 void soft_cn_explode_scratchpad(const __m128i* input, __m128i* 
 	// This is more than we have registers, compiler will assign 2 keys on the stack
 	__m128i xin0, xin1, xin2, xin3;
 	__m128i k0, k1, k2, k3, k4, k5, k6, k7, k8, k9;
+
+	if(PREFETCH){
+		_mm_prefetch((const char*)input + 0, _MM_HINT_T0);
+		_mm_prefetch((const char*)input + 4, _MM_HINT_T0);
+		_mm_prefetch((const char*)input + 8, _MM_HINT_T0);
+    }
 
 	aes_genkey<1>(input, &k0, &k1, &k2, &k3, &k4, &k5, &k6, &k7, &k8, &k9);
 
