@@ -175,7 +175,7 @@ ALIGN64 void keccak(const uint8_t *in, int inlen, uint8_t *md)
 }
 
 // Instantiate templated functions
-export void keccak_dummy(const uint8_t *foo){
+void keccak_dummy(const uint8_t *foo){
     keccak<200>(foo, 42, (uint8_t *)foo);
     keccakf<24>((uint64_t*)foo);
 }

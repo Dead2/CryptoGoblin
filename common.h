@@ -48,8 +48,8 @@
 #endif
 
 
+#ifdef DEBUG
 #include <stdio.h>
-
 static void print_hex_memory(void *mem, int len) {
   int i;
   unsigned char *p = (unsigned char *)mem;
@@ -60,5 +60,6 @@ static void print_hex_memory(void *mem, int len) {
   }
   printf("\n");
 }
+#endif //DEBUG
 
 #endif
