@@ -14,7 +14,7 @@ void reset_colour();
 // now we can use %llu on both compilers
 inline long long unsigned int int_port(size_t i)
 {
-	return i;
+    return i;
 }
 
 enum verbosity : size_t { L0 = 0, L1 = 1, L2 = 2, L3 = 3, L4 = 4, LINF = 100};
@@ -22,23 +22,23 @@ enum verbosity : size_t { L0 = 0, L1 = 1, L2 = 2, L3 = 3, L4 = 4, LINF = 100};
 class printer
 {
 public:
-	static inline printer* inst()
-	{
-		if (oInst == nullptr) oInst = new printer;
-		return oInst;
-	};
+    static inline printer* inst()
+    {
+        if (oInst == nullptr) oInst = new printer;
+        return oInst;
+    };
 
-	inline void set_verbose_level(size_t level) { verbose_level = (verbosity)level; }
-	void print_msg(verbosity verbose, const char* fmt, ...);
-	void print_str(const char* str);
-	bool open_logfile(const char* file);
+    inline void set_verbose_level(size_t level) { verbose_level = (verbosity)level; }
+    void print_msg(verbosity verbose, const char* fmt, ...);
+    void print_str(const char* str);
+    bool open_logfile(const char* file);
     void set_title(const char* str);
 
 private:
-	printer();
-	static printer* oInst;
+    printer();
+    static printer* oInst;
 
-	std::mutex print_mutex;
-	verbosity verbose_level;
-	FILE* logfile;
+    std::mutex print_mutex;
+    verbosity verbose_level;
+    FILE* logfile;
 };

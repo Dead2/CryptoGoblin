@@ -42,7 +42,7 @@ typedef u08b_t   SkeinBitSequence;               /* bit stream type */
 
 /* "all-in-one" call */
 SkeinHashReturn skein_hash(int hashbitlen,   const SkeinBitSequence *data,
-		SkeinDataLength databitlen, SkeinBitSequence *hashval);
+        SkeinDataLength databitlen, SkeinBitSequence *hashval);
 
 void xmr_skein(const SkeinBitSequence *data, SkeinBitSequence *hashval);
 

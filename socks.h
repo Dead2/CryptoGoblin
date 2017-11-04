@@ -10,46 +10,46 @@
 
 inline void sock_init()
 {
-	static bool bWSAInit = false;
+    static bool bWSAInit = false;
 
-	if (!bWSAInit)
-	{
-		WSADATA wsaData;
-		WSAStartup(MAKEWORD(2, 2), &wsaData);
-		bWSAInit = true;
-	}
+    if (!bWSAInit)
+    {
+        WSADATA wsaData;
+        WSAStartup(MAKEWORD(2, 2), &wsaData);
+        bWSAInit = true;
+    }
 }
 
 inline void sock_close(SOCKET s)
 {
-	shutdown(s, SD_BOTH);
-	closesocket(s);
+    shutdown(s, SD_BOTH);
+    closesocket(s);
 }
 
 inline const char* sock_strerror(char* buf, size_t len)
 {
-	buf[0] = '\0';
+    buf[0] = '\0';
 
-	FormatMessageA(
-		FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS | FORMAT_MESSAGE_MAX_WIDTH_MASK,
-		NULL, WSAGetLastError(),
-		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-		(LPSTR)buf, len, NULL);
+    FormatMessageA(
+        FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS | FORMAT_MESSAGE_MAX_WIDTH_MASK,
+        NULL, WSAGetLastError(),
+        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+        (LPSTR)buf, len, NULL);
 
-	return buf;
+    return buf;
 }
 
 inline const char* sock_gai_strerror(int err, char* buf, size_t len)
 {
-	buf[0] = '\0';
+    buf[0] = '\0';
 
-	FormatMessageA(
-		FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS | FORMAT_MESSAGE_MAX_WIDTH_MASK,
-		NULL, (DWORD)err,
-		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-		(LPSTR)buf, len, NULL);
+    FormatMessageA(
+        FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS | FORMAT_MESSAGE_MAX_WIDTH_MASK,
+        NULL, (DWORD)err,
+        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+        (LPSTR)buf, len, NULL);
 
-	return buf;
+    return buf;
 }
 
 #else
@@ -73,24 +73,24 @@ typedef int SOCKET;
 
 inline void sock_close(SOCKET s)
 {
-	shutdown(s, SHUT_RDWR);
-	close(s);
+    shutdown(s, SHUT_RDWR);
+    close(s);
 }
 
 inline const char* sock_strerror(char* buf, size_t len)
 {
-	buf[0] = '\0';
+    buf[0] = '\0';
 #if defined(__APPLE__) || defined(__FreeBSD__) || !defined(_GNU_SOURCE) || !defined(__GLIBC__)
-	strerror_r(errno, buf, len);
-	return buf;
+    strerror_r(errno, buf, len);
+    return buf;
 #else
-	return strerror_r(errno, buf, len);
+    return strerror_r(errno, buf, len);
 #endif
 }
 
 inline const char* sock_gai_strerror(int err, char* buf, size_t len)
 {
-	buf[0] = '\0';
-	return gai_strerror(err);
+    buf[0] = '\0';
+    return gai_strerror(err);
 }
 #endif

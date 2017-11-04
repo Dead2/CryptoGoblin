@@ -20,46 +20,46 @@ const uint8_t indices_cyclic[15] = {0,1,2,3,4,5,6,7,0,1,2,3,4,5,6};
 
 
 #define ROTATE_COLUMN_DOWN(v1, v2, amount_bytes, temp_var) {temp_var = (v1<<(8*amount_bytes))|(v2>>(8*(4-amount_bytes))); \
-															v2 = (v2<<(8*amount_bytes))|(v1>>(8*(4-amount_bytes))); \
-															v1 = temp_var;}
+                                                            v2 = (v2<<(8*amount_bytes))|(v1>>(8*(4-amount_bytes))); \
+                                                            v1 = temp_var;}
   
 
-#define COLUMN(x,y,i,c0,c1,c2,c3,c4,c5,c6,c7,tv1,tv2,tu,tl,t)				\
-   tu = T[2*(uint32_t)x[4*c0+0]];			    \
-   tl = T[2*(uint32_t)x[4*c0+0]+1];		    \
-   tv1 = T[2*(uint32_t)x[4*c1+1]];			\
-   tv2 = T[2*(uint32_t)x[4*c1+1]+1];			\
-   ROTATE_COLUMN_DOWN(tv1,tv2,1,t)	\
-   tu ^= tv1;						\
-   tl ^= tv2;						\
-   tv1 = T[2*(uint32_t)x[4*c2+2]];			\
-   tv2 = T[2*(uint32_t)x[4*c2+2]+1];			\
-   ROTATE_COLUMN_DOWN(tv1,tv2,2,t)	\
-   tu ^= tv1;						\
-   tl ^= tv2;   					\
-   tv1 = T[2*(uint32_t)x[4*c3+3]];			\
-   tv2 = T[2*(uint32_t)x[4*c3+3]+1];			\
-   ROTATE_COLUMN_DOWN(tv1,tv2,3,t)	\
-   tu ^= tv1;						\
-   tl ^= tv2;						\
-   tl ^= T[2*(uint32_t)x[4*c4+0]];			\
-   tu ^= T[2*(uint32_t)x[4*c4+0]+1];			\
-   tv1 = T[2*(uint32_t)x[4*c5+1]];			\
-   tv2 = T[2*(uint32_t)x[4*c5+1]+1];			\
-   ROTATE_COLUMN_DOWN(tv1,tv2,1,t)	\
-   tl ^= tv1;						\
-   tu ^= tv2;						\
-   tv1 = T[2*(uint32_t)x[4*c6+2]];			\
-   tv2 = T[2*(uint32_t)x[4*c6+2]+1];			\
-   ROTATE_COLUMN_DOWN(tv1,tv2,2,t)	\
-   tl ^= tv1;						\
-   tu ^= tv2;   					\
-   tv1 = T[2*(uint32_t)x[4*c7+3]];			\
-   tv2 = T[2*(uint32_t)x[4*c7+3]+1];			\
-   ROTATE_COLUMN_DOWN(tv1,tv2,3,t)	\
-   tl ^= tv1;						\
-   tu ^= tv2;						\
-   y[i] = tu;						\
+#define COLUMN(x,y,i,c0,c1,c2,c3,c4,c5,c6,c7,tv1,tv2,tu,tl,t)               \
+   tu = T[2*(uint32_t)x[4*c0+0]];               \
+   tl = T[2*(uint32_t)x[4*c0+0]+1];         \
+   tv1 = T[2*(uint32_t)x[4*c1+1]];          \
+   tv2 = T[2*(uint32_t)x[4*c1+1]+1];            \
+   ROTATE_COLUMN_DOWN(tv1,tv2,1,t)  \
+   tu ^= tv1;                       \
+   tl ^= tv2;                       \
+   tv1 = T[2*(uint32_t)x[4*c2+2]];          \
+   tv2 = T[2*(uint32_t)x[4*c2+2]+1];            \
+   ROTATE_COLUMN_DOWN(tv1,tv2,2,t)  \
+   tu ^= tv1;                       \
+   tl ^= tv2;                       \
+   tv1 = T[2*(uint32_t)x[4*c3+3]];          \
+   tv2 = T[2*(uint32_t)x[4*c3+3]+1];            \
+   ROTATE_COLUMN_DOWN(tv1,tv2,3,t)  \
+   tu ^= tv1;                       \
+   tl ^= tv2;                       \
+   tl ^= T[2*(uint32_t)x[4*c4+0]];          \
+   tu ^= T[2*(uint32_t)x[4*c4+0]+1];            \
+   tv1 = T[2*(uint32_t)x[4*c5+1]];          \
+   tv2 = T[2*(uint32_t)x[4*c5+1]+1];            \
+   ROTATE_COLUMN_DOWN(tv1,tv2,1,t)  \
+   tl ^= tv1;                       \
+   tu ^= tv2;                       \
+   tv1 = T[2*(uint32_t)x[4*c6+2]];          \
+   tv2 = T[2*(uint32_t)x[4*c6+2]+1];            \
+   ROTATE_COLUMN_DOWN(tv1,tv2,2,t)  \
+   tl ^= tv1;                       \
+   tu ^= tv2;                       \
+   tv1 = T[2*(uint32_t)x[4*c7+3]];          \
+   tv2 = T[2*(uint32_t)x[4*c7+3]+1];            \
+   ROTATE_COLUMN_DOWN(tv1,tv2,3,t)  \
+   tl ^= tv1;                       \
+   tu ^= tv2;                       \
+   y[i] = tu;                       \
    y[i+1] = tl;
 
 
@@ -124,8 +124,8 @@ static void F512(uint32_t *h, const uint32_t *m) {
   uint32_t z[2*COLS512];
 
   for (i = 0; i < 2*COLS512; i++) {
-	z[i] = m[i];
-	Ptmp[i] = h[i]^m[i];
+    z[i] = m[i];
+    Ptmp[i] = h[i]^m[i];
   }
 
   /* compute Q(m) */
@@ -154,24 +154,24 @@ static void F512(uint32_t *h, const uint32_t *m) {
 
   /* compute P(h+m) + Q(m) + h */
   for (i = 0; i < 2*COLS512; i++) {
-	h[i] ^= Ptmp[i]^Qtmp[i];
+    h[i] ^= Ptmp[i]^Qtmp[i];
   }
 }
 
 
 /* digest up to msglen bytes of input (full blocks only) */
 static void Transform(groestlHashState *ctx,
-	       const uint8_t *input, 
-	       int msglen) {
+           const uint8_t *input, 
+           int msglen) {
 
   /* digest message, one block at a time */
   for (; msglen >= SIZE512; 
-	   msglen -= SIZE512, input += SIZE512) {
-	F512(ctx->chaining,(uint32_t*)input);
+       msglen -= SIZE512, input += SIZE512) {
+    F512(ctx->chaining,(uint32_t*)input);
 
-	/* increment block counter */
-	ctx->block_counter1++;
-	if (ctx->block_counter1 == 0) ctx->block_counter2++;
+    /* increment block counter */
+    ctx->block_counter1++;
+    if (ctx->block_counter1 == 0) ctx->block_counter2++;
   }
 }
 
@@ -184,22 +184,22 @@ static void OutputTransformation(groestlHashState *ctx) {
 
 
 
-	for (j = 0; j < 2*COLS512; j++) {
-	  temp[j] = ctx->chaining[j];
-	}
-	RND512P((uint8_t*)temp, y, 0x00000000);
-	RND512P((uint8_t*)y, z, 0x00000001);
-	RND512P((uint8_t*)z, y, 0x00000002);
-	RND512P((uint8_t*)y, z, 0x00000003);
-	RND512P((uint8_t*)z, y, 0x00000004);
-	RND512P((uint8_t*)y, z, 0x00000005);
-	RND512P((uint8_t*)z, y, 0x00000006);
-	RND512P((uint8_t*)y, z, 0x00000007);
-	RND512P((uint8_t*)z, y, 0x00000008);
-	RND512P((uint8_t*)y, temp, 0x00000009);
-	for (j = 0; j < 2*COLS512; j++) {
-	  ctx->chaining[j] ^= temp[j];
-	}									  
+    for (j = 0; j < 2*COLS512; j++) {
+      temp[j] = ctx->chaining[j];
+    }
+    RND512P((uint8_t*)temp, y, 0x00000000);
+    RND512P((uint8_t*)y, z, 0x00000001);
+    RND512P((uint8_t*)z, y, 0x00000002);
+    RND512P((uint8_t*)y, z, 0x00000003);
+    RND512P((uint8_t*)z, y, 0x00000004);
+    RND512P((uint8_t*)y, z, 0x00000005);
+    RND512P((uint8_t*)z, y, 0x00000006);
+    RND512P((uint8_t*)y, z, 0x00000007);
+    RND512P((uint8_t*)z, y, 0x00000008);
+    RND512P((uint8_t*)y, temp, 0x00000009);
+    for (j = 0; j < 2*COLS512; j++) {
+      ctx->chaining[j] ^= temp[j];
+    }                                     
 }
 
 /* initialise context */
@@ -209,7 +209,7 @@ static void Init(groestlHashState* ctx) {
 
   for(;i<(SIZE512/sizeof(uint32_t));i++)
   {
-	ctx->chaining[i] = 0;
+    ctx->chaining[i] = 0;
   }
 
   /* set initial value */
@@ -224,30 +224,30 @@ static void Init(groestlHashState* ctx) {
 
 /* update state with databitlen bits of input */
 static void Update(groestlHashState* ctx,
-		  const BitSequence* input,
-		  DataLength databitlen) {
+          const BitSequence* input,
+          DataLength databitlen) {
   int index = 0;
   int msglen = (int)(databitlen/8);
   int rem = (int)(databitlen%8);
 
   /* if the buffer contains data that has not yet been digested, first
-	 add data to buffer until full */
+     add data to buffer until full */
   if (ctx->buf_ptr) {
-	while (ctx->buf_ptr < SIZE512 && index < msglen) {
-	  ctx->buffer[(int)ctx->buf_ptr++] = input[index++];
-	}
-	if (ctx->buf_ptr < SIZE512) {
-	  /* buffer still not full, return */
-	  if (rem) {
-	ctx->bits_in_last_byte = rem;
-	ctx->buffer[(int)ctx->buf_ptr++] = input[index];
-	  }
-	  return;
-	}
+    while (ctx->buf_ptr < SIZE512 && index < msglen) {
+      ctx->buffer[(int)ctx->buf_ptr++] = input[index++];
+    }
+    if (ctx->buf_ptr < SIZE512) {
+      /* buffer still not full, return */
+      if (rem) {
+    ctx->bits_in_last_byte = rem;
+    ctx->buffer[(int)ctx->buf_ptr++] = input[index];
+      }
+      return;
+    }
 
-	/* digest buffer */
-	ctx->buf_ptr = 0;
-	Transform(ctx, ctx->buffer, SIZE512);
+    /* digest buffer */
+    ctx->buf_ptr = 0;
+    Transform(ctx, ctx->buffer, SIZE512);
   }
 
   /* digest bulk of message */
@@ -256,15 +256,15 @@ static void Update(groestlHashState* ctx,
 
   /* store remaining data in buffer */
   while (index < msglen) {
-	ctx->buffer[(int)ctx->buf_ptr++] = input[index++];
+    ctx->buffer[(int)ctx->buf_ptr++] = input[index++];
   }
 
   /* if non-integral number of bytes have been supplied, store
-	 remaining bits in last byte, together with information about
-	 number of bits */
+     remaining bits in last byte, together with information about
+     number of bits */
   if (rem) {
-	ctx->bits_in_last_byte = rem;
-	ctx->buffer[(int)ctx->buf_ptr++] = input[index];
+    ctx->bits_in_last_byte = rem;
+    ctx->buffer[(int)ctx->buf_ptr++] = input[index];
   }
 }
 
@@ -273,30 +273,30 @@ static void Update(groestlHashState* ctx,
 /* finalise: process remaining data (including padding), perform
    output transformation, and write hash result to 'output' */
 static void Final(groestlHashState* ctx,
-		 BitSequence* output) {
+         BitSequence* output) {
   int i, j = 0, hashbytelen = HASH_BIT_LEN/8;
   uint8_t *s = (BitSequence*)ctx->chaining;
 
   /* pad with '1'-bit and first few '0'-bits */
   if (BILB) {
-	ctx->buffer[(int)ctx->buf_ptr-1] &= ((1<<BILB)-1)<<(8-BILB);
-	ctx->buffer[(int)ctx->buf_ptr-1] ^= 0x1<<(7-BILB);
-	BILB = 0;
+    ctx->buffer[(int)ctx->buf_ptr-1] &= ((1<<BILB)-1)<<(8-BILB);
+    ctx->buffer[(int)ctx->buf_ptr-1] ^= 0x1<<(7-BILB);
+    BILB = 0;
   }
   else ctx->buffer[(int)ctx->buf_ptr++] = 0x80;
 
   /* pad with '0'-bits */
   if (ctx->buf_ptr > SIZE512-LENGTHFIELDLEN) {
-	/* padding requires two blocks */
-	while (ctx->buf_ptr < SIZE512) {
-	  ctx->buffer[(int)ctx->buf_ptr++] = 0;
-	}
-	/* digest first padding block */
-	Transform(ctx, ctx->buffer, SIZE512);
-	ctx->buf_ptr = 0;
+    /* padding requires two blocks */
+    while (ctx->buf_ptr < SIZE512) {
+      ctx->buffer[(int)ctx->buf_ptr++] = 0;
+    }
+    /* digest first padding block */
+    Transform(ctx, ctx->buffer, SIZE512);
+    ctx->buf_ptr = 0;
   }
   while (ctx->buf_ptr < SIZE512-LENGTHFIELDLEN) {
-	ctx->buffer[(int)ctx->buf_ptr++] = 0;
+    ctx->buffer[(int)ctx->buf_ptr++] = 0;
   }
 
   /* length padding */
@@ -305,12 +305,12 @@ static void Final(groestlHashState* ctx,
   ctx->buf_ptr = SIZE512;
 
   while (ctx->buf_ptr > SIZE512-(int)sizeof(uint32_t)) {
-	ctx->buffer[(int)--ctx->buf_ptr] = (uint8_t)ctx->block_counter1;
-	ctx->block_counter1 >>= 8;
+    ctx->buffer[(int)--ctx->buf_ptr] = (uint8_t)ctx->block_counter1;
+    ctx->block_counter1 >>= 8;
   }
   while (ctx->buf_ptr > SIZE512-LENGTHFIELDLEN) {
-	ctx->buffer[(int)--ctx->buf_ptr] = (uint8_t)ctx->block_counter2;
-	ctx->block_counter2 >>= 8;
+    ctx->buffer[(int)--ctx->buf_ptr] = (uint8_t)ctx->block_counter2;
+    ctx->block_counter2 >>= 8;
   }
   /* digest final padding block */
   Transform(ctx, ctx->buffer, SIZE512); 
@@ -319,27 +319,27 @@ static void Final(groestlHashState* ctx,
 
   /* store hash result in output */
   for (i = SIZE512-hashbytelen; i < SIZE512; i++,j++) {
-	output[j] = s[i];
+    output[j] = s[i];
   }
 
   /* zeroise relevant variables and deallocate memory */
   for (i = 0; i < COLS512; i++) {
-	ctx->chaining[i] = 0;
+    ctx->chaining[i] = 0;
   }
   for (i = 0; i < SIZE512; i++) {
-	ctx->buffer[i] = 0;
+    ctx->buffer[i] = 0;
   }
 }
 
 /* hash bit sequence */
 void groestl(const BitSequence* data, 
-		DataLength databitlen,
-		BitSequence* hashval) {
+        DataLength databitlen,
+        BitSequence* hashval) {
 
   groestlHashState context;
 
   /* initialise */
-	Init(&context);
+    Init(&context);
 
 
   /* process message */
@@ -350,8 +350,8 @@ void groestl(const BitSequence* data,
 }
 /*
 static int crypto_hash(unsigned char *out,
-		const unsigned char *in,
-		unsigned long long len)
+        const unsigned char *in,
+        unsigned long long len)
 {
   groestl(in, 8*len, out);
   return 0;

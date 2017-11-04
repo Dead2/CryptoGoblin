@@ -23,18 +23,18 @@ typedef uint64_t uint64;
 
 /*define data alignment for different C compilers*/
 #if defined(__GNUC__)
-	  #define DATA_ALIGN16(x) x __attribute__ ((aligned(16)))
+      #define DATA_ALIGN16(x) x __attribute__ ((aligned(16)))
 #else
-	  #define DATA_ALIGN16(x) __declspec(align(16)) x
+      #define DATA_ALIGN16(x) __declspec(align(16)) x
 #endif
 
 
 typedef struct {
-	int hashbitlen;	   	              /*the message digest size*/
-	unsigned long long databitlen;    /*the message size in bits*/
-	unsigned long long datasize_in_buffer;      /*the size of the message remained in buffer; assumed to be multiple of 8bits except for the last partial block at the end of the message*/
-	DATA_ALIGN16(uint64 x[8][2]);     /*the 1024-bit state, ( x[i][0] || x[i][1] ) is the ith row of the state in the pseudocode*/
-	unsigned char buffer[64];         /*the 512-bit message block to be hashed;*/
+    int hashbitlen;                   /*the message digest size*/
+    unsigned long long databitlen;    /*the message size in bits*/
+    unsigned long long datasize_in_buffer;      /*the size of the message remained in buffer; assumed to be multiple of 8bits except for the last partial block at the end of the message*/
+    DATA_ALIGN16(uint64 x[8][2]);     /*the 1024-bit state, ( x[i][0] || x[i][1] ) is the ith row of the state in the pseudocode*/
+    unsigned char buffer[64];         /*the 512-bit message block to be hashed;*/
 } hashState;
 
 
@@ -114,238 +114,238 @@ HashReturn jh_hash(int hashbitlen, const BitSequence *data,DataLength databitlen
 
 /*The MDS transform*/
 #define L(m0,m1,m2,m3,m4,m5,m6,m7) \
-	  (m4) ^= (m1);                \
-	  (m5) ^= (m2);                \
-	  (m6) ^= (m0) ^ (m3);         \
-	  (m7) ^= (m0);                \
-	  (m0) ^= (m5);                \
-	  (m1) ^= (m6);                \
-	  (m2) ^= (m4) ^ (m7);         \
-	  (m3) ^= (m4);
+      (m4) ^= (m1);                \
+      (m5) ^= (m2);                \
+      (m6) ^= (m0) ^ (m3);         \
+      (m7) ^= (m0);                \
+      (m0) ^= (m5);                \
+      (m1) ^= (m6);                \
+      (m2) ^= (m4) ^ (m7);         \
+      (m3) ^= (m4);
 
 /*Two Sboxes are computed in parallel, each Sbox implements S0 and S1, selected by a constant bit*/
 /*The reason to compute two Sboxes in parallel is to try to fully utilize the parallel processing power*/
 #define SS(m0,m1,m2,m3,m4,m5,m6,m7,cc0,cc1)   \
-	  m3  = ~(m3);                  \
-	  m7  = ~(m7);                  \
-	  m0 ^= ((~(m2)) & (cc0));      \
-	  m4 ^= ((~(m6)) & (cc1));      \
-	  temp0 = (cc0) ^ ((m0) & (m1));\
-	  temp1 = (cc1) ^ ((m4) & (m5));\
-	  m0 ^= ((m2) & (m3));          \
-	  m4 ^= ((m6) & (m7));          \
-	  m3 ^= ((~(m1)) & (m2));       \
-	  m7 ^= ((~(m5)) & (m6));       \
-	  m1 ^= ((m0) & (m2));          \
-	  m5 ^= ((m4) & (m6));          \
-	  m2 ^= ((m0) & (~(m3)));       \
-	  m6 ^= ((m4) & (~(m7)));       \
-	  m0 ^= ((m1) | (m3));          \
-	  m4 ^= ((m5) | (m7));          \
-	  m3 ^= ((m1) & (m2));          \
-	  m7 ^= ((m5) & (m6));          \
-	  m1 ^= (temp0 & (m0));         \
-	  m5 ^= (temp1 & (m4));         \
-	  m2 ^= temp0;                  \
-	  m6 ^= temp1;
+      m3  = ~(m3);                  \
+      m7  = ~(m7);                  \
+      m0 ^= ((~(m2)) & (cc0));      \
+      m4 ^= ((~(m6)) & (cc1));      \
+      temp0 = (cc0) ^ ((m0) & (m1));\
+      temp1 = (cc1) ^ ((m4) & (m5));\
+      m0 ^= ((m2) & (m3));          \
+      m4 ^= ((m6) & (m7));          \
+      m3 ^= ((~(m1)) & (m2));       \
+      m7 ^= ((~(m5)) & (m6));       \
+      m1 ^= ((m0) & (m2));          \
+      m5 ^= ((m4) & (m6));          \
+      m2 ^= ((m0) & (~(m3)));       \
+      m6 ^= ((m4) & (~(m7)));       \
+      m0 ^= ((m1) | (m3));          \
+      m4 ^= ((m5) | (m7));          \
+      m3 ^= ((m1) & (m2));          \
+      m7 ^= ((m5) & (m6));          \
+      m1 ^= (temp0 & (m0));         \
+      m5 ^= (temp1 & (m4));         \
+      m2 ^= temp0;                  \
+      m6 ^= temp1;
 
 /*The bijective function E8, in bitslice form*/
 static void E8(hashState *state)
 {
-	  uint64 i,roundnumber,temp0,temp1;
+      uint64 i,roundnumber,temp0,temp1;
 
-	  for (roundnumber = 0; roundnumber < 42; roundnumber = roundnumber+7) {
-			/*round 7*roundnumber+0: Sbox, MDS and Swapping layers*/
-			for (i = 0; i < 2; i++) {
-				  SS(state->x[0][i],state->x[2][i],state->x[4][i],state->x[6][i],state->x[1][i],state->x[3][i],state->x[5][i],state->x[7][i],((uint64*)E8_bitslice_roundconstant[roundnumber+0])[i],((uint64*)E8_bitslice_roundconstant[roundnumber+0])[i+2] );
-				  L(state->x[0][i],state->x[2][i],state->x[4][i],state->x[6][i],state->x[1][i],state->x[3][i],state->x[5][i],state->x[7][i]);
-				  SWAP1(state->x[1][i]); SWAP1(state->x[3][i]); SWAP1(state->x[5][i]); SWAP1(state->x[7][i]);
-			}
+      for (roundnumber = 0; roundnumber < 42; roundnumber = roundnumber+7) {
+            /*round 7*roundnumber+0: Sbox, MDS and Swapping layers*/
+            for (i = 0; i < 2; i++) {
+                  SS(state->x[0][i],state->x[2][i],state->x[4][i],state->x[6][i],state->x[1][i],state->x[3][i],state->x[5][i],state->x[7][i],((uint64*)E8_bitslice_roundconstant[roundnumber+0])[i],((uint64*)E8_bitslice_roundconstant[roundnumber+0])[i+2] );
+                  L(state->x[0][i],state->x[2][i],state->x[4][i],state->x[6][i],state->x[1][i],state->x[3][i],state->x[5][i],state->x[7][i]);
+                  SWAP1(state->x[1][i]); SWAP1(state->x[3][i]); SWAP1(state->x[5][i]); SWAP1(state->x[7][i]);
+            }
 
-			/*round 7*roundnumber+1: Sbox, MDS and Swapping layers*/
-			for (i = 0; i < 2; i++) {
-				  SS(state->x[0][i],state->x[2][i],state->x[4][i],state->x[6][i],state->x[1][i],state->x[3][i],state->x[5][i],state->x[7][i],((uint64*)E8_bitslice_roundconstant[roundnumber+1])[i],((uint64*)E8_bitslice_roundconstant[roundnumber+1])[i+2] );
-				  L(state->x[0][i],state->x[2][i],state->x[4][i],state->x[6][i],state->x[1][i],state->x[3][i],state->x[5][i],state->x[7][i]);
-				  SWAP2(state->x[1][i]); SWAP2(state->x[3][i]); SWAP2(state->x[5][i]); SWAP2(state->x[7][i]);
-			}
+            /*round 7*roundnumber+1: Sbox, MDS and Swapping layers*/
+            for (i = 0; i < 2; i++) {
+                  SS(state->x[0][i],state->x[2][i],state->x[4][i],state->x[6][i],state->x[1][i],state->x[3][i],state->x[5][i],state->x[7][i],((uint64*)E8_bitslice_roundconstant[roundnumber+1])[i],((uint64*)E8_bitslice_roundconstant[roundnumber+1])[i+2] );
+                  L(state->x[0][i],state->x[2][i],state->x[4][i],state->x[6][i],state->x[1][i],state->x[3][i],state->x[5][i],state->x[7][i]);
+                  SWAP2(state->x[1][i]); SWAP2(state->x[3][i]); SWAP2(state->x[5][i]); SWAP2(state->x[7][i]);
+            }
 
-			/*round 7*roundnumber+2: Sbox, MDS and Swapping layers*/
-			for (i = 0; i < 2; i++) {
-				  SS(state->x[0][i],state->x[2][i],state->x[4][i],state->x[6][i],state->x[1][i],state->x[3][i],state->x[5][i],state->x[7][i],((uint64*)E8_bitslice_roundconstant[roundnumber+2])[i],((uint64*)E8_bitslice_roundconstant[roundnumber+2])[i+2] );
-				  L(state->x[0][i],state->x[2][i],state->x[4][i],state->x[6][i],state->x[1][i],state->x[3][i],state->x[5][i],state->x[7][i]);
-				  SWAP4(state->x[1][i]); SWAP4(state->x[3][i]); SWAP4(state->x[5][i]); SWAP4(state->x[7][i]);
-			}
+            /*round 7*roundnumber+2: Sbox, MDS and Swapping layers*/
+            for (i = 0; i < 2; i++) {
+                  SS(state->x[0][i],state->x[2][i],state->x[4][i],state->x[6][i],state->x[1][i],state->x[3][i],state->x[5][i],state->x[7][i],((uint64*)E8_bitslice_roundconstant[roundnumber+2])[i],((uint64*)E8_bitslice_roundconstant[roundnumber+2])[i+2] );
+                  L(state->x[0][i],state->x[2][i],state->x[4][i],state->x[6][i],state->x[1][i],state->x[3][i],state->x[5][i],state->x[7][i]);
+                  SWAP4(state->x[1][i]); SWAP4(state->x[3][i]); SWAP4(state->x[5][i]); SWAP4(state->x[7][i]);
+            }
 
-			/*round 7*roundnumber+3: Sbox, MDS and Swapping layers*/
-			for (i = 0; i < 2; i++) {
-				  SS(state->x[0][i],state->x[2][i],state->x[4][i],state->x[6][i],state->x[1][i],state->x[3][i],state->x[5][i],state->x[7][i],((uint64*)E8_bitslice_roundconstant[roundnumber+3])[i],((uint64*)E8_bitslice_roundconstant[roundnumber+3])[i+2] );
-				  L(state->x[0][i],state->x[2][i],state->x[4][i],state->x[6][i],state->x[1][i],state->x[3][i],state->x[5][i],state->x[7][i]);
-				  SWAP8(state->x[1][i]); SWAP8(state->x[3][i]); SWAP8(state->x[5][i]); SWAP8(state->x[7][i]);
-			}
+            /*round 7*roundnumber+3: Sbox, MDS and Swapping layers*/
+            for (i = 0; i < 2; i++) {
+                  SS(state->x[0][i],state->x[2][i],state->x[4][i],state->x[6][i],state->x[1][i],state->x[3][i],state->x[5][i],state->x[7][i],((uint64*)E8_bitslice_roundconstant[roundnumber+3])[i],((uint64*)E8_bitslice_roundconstant[roundnumber+3])[i+2] );
+                  L(state->x[0][i],state->x[2][i],state->x[4][i],state->x[6][i],state->x[1][i],state->x[3][i],state->x[5][i],state->x[7][i]);
+                  SWAP8(state->x[1][i]); SWAP8(state->x[3][i]); SWAP8(state->x[5][i]); SWAP8(state->x[7][i]);
+            }
 
-			/*round 7*roundnumber+4: Sbox, MDS and Swapping layers*/
-			for (i = 0; i < 2; i++) {
-				  SS(state->x[0][i],state->x[2][i],state->x[4][i],state->x[6][i],state->x[1][i],state->x[3][i],state->x[5][i],state->x[7][i],((uint64*)E8_bitslice_roundconstant[roundnumber+4])[i],((uint64*)E8_bitslice_roundconstant[roundnumber+4])[i+2] );
-				  L(state->x[0][i],state->x[2][i],state->x[4][i],state->x[6][i],state->x[1][i],state->x[3][i],state->x[5][i],state->x[7][i]);
-				  SWAP16(state->x[1][i]); SWAP16(state->x[3][i]); SWAP16(state->x[5][i]); SWAP16(state->x[7][i]);
-			}
+            /*round 7*roundnumber+4: Sbox, MDS and Swapping layers*/
+            for (i = 0; i < 2; i++) {
+                  SS(state->x[0][i],state->x[2][i],state->x[4][i],state->x[6][i],state->x[1][i],state->x[3][i],state->x[5][i],state->x[7][i],((uint64*)E8_bitslice_roundconstant[roundnumber+4])[i],((uint64*)E8_bitslice_roundconstant[roundnumber+4])[i+2] );
+                  L(state->x[0][i],state->x[2][i],state->x[4][i],state->x[6][i],state->x[1][i],state->x[3][i],state->x[5][i],state->x[7][i]);
+                  SWAP16(state->x[1][i]); SWAP16(state->x[3][i]); SWAP16(state->x[5][i]); SWAP16(state->x[7][i]);
+            }
 
-			/*round 7*roundnumber+5: Sbox, MDS and Swapping layers*/
-			for (i = 0; i < 2; i++) {
-				  SS(state->x[0][i],state->x[2][i],state->x[4][i],state->x[6][i],state->x[1][i],state->x[3][i],state->x[5][i],state->x[7][i],((uint64*)E8_bitslice_roundconstant[roundnumber+5])[i],((uint64*)E8_bitslice_roundconstant[roundnumber+5])[i+2] );
-				  L(state->x[0][i],state->x[2][i],state->x[4][i],state->x[6][i],state->x[1][i],state->x[3][i],state->x[5][i],state->x[7][i]);
-				  SWAP32(state->x[1][i]); SWAP32(state->x[3][i]); SWAP32(state->x[5][i]); SWAP32(state->x[7][i]);
-			}
+            /*round 7*roundnumber+5: Sbox, MDS and Swapping layers*/
+            for (i = 0; i < 2; i++) {
+                  SS(state->x[0][i],state->x[2][i],state->x[4][i],state->x[6][i],state->x[1][i],state->x[3][i],state->x[5][i],state->x[7][i],((uint64*)E8_bitslice_roundconstant[roundnumber+5])[i],((uint64*)E8_bitslice_roundconstant[roundnumber+5])[i+2] );
+                  L(state->x[0][i],state->x[2][i],state->x[4][i],state->x[6][i],state->x[1][i],state->x[3][i],state->x[5][i],state->x[7][i]);
+                  SWAP32(state->x[1][i]); SWAP32(state->x[3][i]); SWAP32(state->x[5][i]); SWAP32(state->x[7][i]);
+            }
 
-			/*round 7*roundnumber+6: Sbox and MDS layers*/
-			for (i = 0; i < 2; i++) {
-				  SS(state->x[0][i],state->x[2][i],state->x[4][i],state->x[6][i],state->x[1][i],state->x[3][i],state->x[5][i],state->x[7][i],((uint64*)E8_bitslice_roundconstant[roundnumber+6])[i],((uint64*)E8_bitslice_roundconstant[roundnumber+6])[i+2] );
-				  L(state->x[0][i],state->x[2][i],state->x[4][i],state->x[6][i],state->x[1][i],state->x[3][i],state->x[5][i],state->x[7][i]);
-			}
-			/*round 7*roundnumber+6: swapping layer*/
-			for (i = 1; i < 8; i = i+2) {
-				  temp0 = state->x[i][0]; state->x[i][0] = state->x[i][1]; state->x[i][1] = temp0;
-			}
-	  }
+            /*round 7*roundnumber+6: Sbox and MDS layers*/
+            for (i = 0; i < 2; i++) {
+                  SS(state->x[0][i],state->x[2][i],state->x[4][i],state->x[6][i],state->x[1][i],state->x[3][i],state->x[5][i],state->x[7][i],((uint64*)E8_bitslice_roundconstant[roundnumber+6])[i],((uint64*)E8_bitslice_roundconstant[roundnumber+6])[i+2] );
+                  L(state->x[0][i],state->x[2][i],state->x[4][i],state->x[6][i],state->x[1][i],state->x[3][i],state->x[5][i],state->x[7][i]);
+            }
+            /*round 7*roundnumber+6: swapping layer*/
+            for (i = 1; i < 8; i = i+2) {
+                  temp0 = state->x[i][0]; state->x[i][0] = state->x[i][1]; state->x[i][1] = temp0;
+            }
+      }
 
 }
 
 /*The compression function F8 */
 static void F8(hashState *state)
 {
-	  uint64  i;
+      uint64  i;
 
-	  /*xor the 512-bit message with the fist half of the 1024-bit hash state*/
-	  for (i = 0; i < 8; i++)  state->x[i >> 1][i & 1] ^= ((uint64*)state->buffer)[i];
+      /*xor the 512-bit message with the fist half of the 1024-bit hash state*/
+      for (i = 0; i < 8; i++)  state->x[i >> 1][i & 1] ^= ((uint64*)state->buffer)[i];
 
-	  /*the bijective function E8 */
-	  E8(state);
+      /*the bijective function E8 */
+      E8(state);
 
-	  /*xor the 512-bit message with the second half of the 1024-bit hash state*/
-	  for (i = 0; i < 8; i++)  state->x[(8+i) >> 1][(8+i) & 1] ^= ((uint64*)state->buffer)[i];
+      /*xor the 512-bit message with the second half of the 1024-bit hash state*/
+      for (i = 0; i < 8; i++)  state->x[(8+i) >> 1][(8+i) & 1] ^= ((uint64*)state->buffer)[i];
 }
 
 /*before hashing a message, initialize the hash state as H0 */
 static HashReturn Init(hashState *state, int hashbitlen)
 {
-	  state->databitlen = 0;
-	  state->datasize_in_buffer = 0;
+      state->databitlen = 0;
+      state->datasize_in_buffer = 0;
 
-	  /*initialize the initial hash value of JH*/
-	  state->hashbitlen = hashbitlen;
+      /*initialize the initial hash value of JH*/
+      state->hashbitlen = hashbitlen;
 
-	  /*load the intital hash value into state*/
-	  switch (hashbitlen)
-	  {
-			case 224: memcpy(state->x,JH224_H0,128); break;
-			case 256: memcpy(state->x,JH256_H0,128); break;
-			case 384: memcpy(state->x,JH384_H0,128); break;
-			case 512: memcpy(state->x,JH512_H0,128); break;
-	  }
+      /*load the intital hash value into state*/
+      switch (hashbitlen)
+      {
+            case 224: memcpy(state->x,JH224_H0,128); break;
+            case 256: memcpy(state->x,JH256_H0,128); break;
+            case 384: memcpy(state->x,JH384_H0,128); break;
+            case 512: memcpy(state->x,JH512_H0,128); break;
+      }
 
-	  return(SUCCESS);
+      return(SUCCESS);
 }
 
 
 /*hash each 512-bit message block, except the last partial block*/
 static HashReturn Update(hashState *state, const BitSequence *data, DataLength databitlen)
 {
-	  DataLength index; /*the starting address of the data to be compressed*/
+      DataLength index; /*the starting address of the data to be compressed*/
 
-	  state->databitlen += databitlen;
-	  index = 0;
+      state->databitlen += databitlen;
+      index = 0;
 
-	  /*if there is remaining data in the buffer, fill it to a full message block first*/
-	  /*we assume that the size of the data in the buffer is the multiple of 8 bits if it is not at the end of a message*/
+      /*if there is remaining data in the buffer, fill it to a full message block first*/
+      /*we assume that the size of the data in the buffer is the multiple of 8 bits if it is not at the end of a message*/
 
-	  /*There is data in the buffer, but the incoming data is insufficient for a full block*/
-	  if ( (state->datasize_in_buffer > 0 ) && (( state->datasize_in_buffer + databitlen) < 512)  ) {
-			if ( (databitlen & 7) == 0 ) {
-				 memcpy(state->buffer + (state->datasize_in_buffer >> 3), data, 64-(state->datasize_in_buffer >> 3)) ;
-		    }
-			else memcpy(state->buffer + (state->datasize_in_buffer >> 3), data, 64-(state->datasize_in_buffer >> 3)+1) ;
-			state->datasize_in_buffer += databitlen;
-			databitlen = 0;
-	  }
+      /*There is data in the buffer, but the incoming data is insufficient for a full block*/
+      if ( (state->datasize_in_buffer > 0 ) && (( state->datasize_in_buffer + databitlen) < 512)  ) {
+            if ( (databitlen & 7) == 0 ) {
+                 memcpy(state->buffer + (state->datasize_in_buffer >> 3), data, 64-(state->datasize_in_buffer >> 3)) ;
+            }
+            else memcpy(state->buffer + (state->datasize_in_buffer >> 3), data, 64-(state->datasize_in_buffer >> 3)+1) ;
+            state->datasize_in_buffer += databitlen;
+            databitlen = 0;
+      }
 
-	  /*There is data in the buffer, and the incoming data is sufficient for a full block*/
-	  if ( (state->datasize_in_buffer > 0 ) && (( state->datasize_in_buffer + databitlen) >= 512)  ) {
-	        memcpy( state->buffer + (state->datasize_in_buffer >> 3), data, 64-(state->datasize_in_buffer >> 3) ) ;
-	        index = 64-(state->datasize_in_buffer >> 3);
-	        databitlen = databitlen - (512 - state->datasize_in_buffer);
-	        F8(state);
-	        state->datasize_in_buffer = 0;
-	  }
+      /*There is data in the buffer, and the incoming data is sufficient for a full block*/
+      if ( (state->datasize_in_buffer > 0 ) && (( state->datasize_in_buffer + databitlen) >= 512)  ) {
+            memcpy( state->buffer + (state->datasize_in_buffer >> 3), data, 64-(state->datasize_in_buffer >> 3) ) ;
+            index = 64-(state->datasize_in_buffer >> 3);
+            databitlen = databitlen - (512 - state->datasize_in_buffer);
+            F8(state);
+            state->datasize_in_buffer = 0;
+      }
 
-	  /*hash the remaining full message blocks*/
-	  for ( ; databitlen >= 512; index = index+64, databitlen = databitlen - 512) {
-			memcpy(state->buffer, data+index, 64);
-			F8(state);
-	  }
+      /*hash the remaining full message blocks*/
+      for ( ; databitlen >= 512; index = index+64, databitlen = databitlen - 512) {
+            memcpy(state->buffer, data+index, 64);
+            F8(state);
+      }
 
-	  /*store the partial block into buffer, assume that -- if part of the last byte is not part of the message, then that part consists of 0 bits*/
-	  if ( databitlen > 0) {
-			if ((databitlen & 7) == 0)
-				  memcpy(state->buffer, data+index, (databitlen & 0x1ff) >> 3);
-			else
-				  memcpy(state->buffer, data+index, ((databitlen & 0x1ff) >> 3)+1);
-			state->datasize_in_buffer = databitlen;
-	  }
+      /*store the partial block into buffer, assume that -- if part of the last byte is not part of the message, then that part consists of 0 bits*/
+      if ( databitlen > 0) {
+            if ((databitlen & 7) == 0)
+                  memcpy(state->buffer, data+index, (databitlen & 0x1ff) >> 3);
+            else
+                  memcpy(state->buffer, data+index, ((databitlen & 0x1ff) >> 3)+1);
+            state->datasize_in_buffer = databitlen;
+      }
 
-	  return(SUCCESS);
+      return(SUCCESS);
 }
 
 /*pad the message, process the padded block(s), truncate the hash value H to obtain the message digest*/
 static HashReturn Final(hashState *state, BitSequence *hashval)
 {
-	  unsigned int i;
+      unsigned int i;
 
-	  if ( (state->databitlen & 0x1ff) == 0 ) {
-			/*pad the message when databitlen is multiple of 512 bits, then process the padded block*/
-			memset(state->buffer, 0, 64);
-			state->buffer[0]  = 0x80;
-			state->buffer[63] = state->databitlen & 0xff;
-			state->buffer[62] = (state->databitlen >> 8)  & 0xff;
-			state->buffer[61] = (state->databitlen >> 16) & 0xff;
-			state->buffer[60] = (state->databitlen >> 24) & 0xff;
-			state->buffer[59] = (state->databitlen >> 32) & 0xff;
-			state->buffer[58] = (state->databitlen >> 40) & 0xff;
-			state->buffer[57] = (state->databitlen >> 48) & 0xff;
-			state->buffer[56] = (state->databitlen >> 56) & 0xff;
-			F8(state);
-	  }
-	  else {
-		    /*set the rest of the bytes in the buffer to 0*/
-			if ( (state->datasize_in_buffer & 7) == 0)
-				  for (i = (state->databitlen & 0x1ff) >> 3; i < 64; i++)  state->buffer[i] = 0;
-			else
-				  for (i = ((state->databitlen & 0x1ff) >> 3)+1; i < 64; i++)  state->buffer[i] = 0;
+      if ( (state->databitlen & 0x1ff) == 0 ) {
+            /*pad the message when databitlen is multiple of 512 bits, then process the padded block*/
+            memset(state->buffer, 0, 64);
+            state->buffer[0]  = 0x80;
+            state->buffer[63] = state->databitlen & 0xff;
+            state->buffer[62] = (state->databitlen >> 8)  & 0xff;
+            state->buffer[61] = (state->databitlen >> 16) & 0xff;
+            state->buffer[60] = (state->databitlen >> 24) & 0xff;
+            state->buffer[59] = (state->databitlen >> 32) & 0xff;
+            state->buffer[58] = (state->databitlen >> 40) & 0xff;
+            state->buffer[57] = (state->databitlen >> 48) & 0xff;
+            state->buffer[56] = (state->databitlen >> 56) & 0xff;
+            F8(state);
+      }
+      else {
+            /*set the rest of the bytes in the buffer to 0*/
+            if ( (state->datasize_in_buffer & 7) == 0)
+                  for (i = (state->databitlen & 0x1ff) >> 3; i < 64; i++)  state->buffer[i] = 0;
+            else
+                  for (i = ((state->databitlen & 0x1ff) >> 3)+1; i < 64; i++)  state->buffer[i] = 0;
 
-			/*pad and process the partial block when databitlen is not multiple of 512 bits, then hash the padded blocks*/
-			state->buffer[((state->databitlen & 0x1ff) >> 3)] |= 1 << (7- (state->databitlen & 7));
+            /*pad and process the partial block when databitlen is not multiple of 512 bits, then hash the padded blocks*/
+            state->buffer[((state->databitlen & 0x1ff) >> 3)] |= 1 << (7- (state->databitlen & 7));
 
-			F8(state);
-			memset(state->buffer, 0, 64);
-			state->buffer[63] = state->databitlen & 0xff;
-			state->buffer[62] = (state->databitlen >> 8) & 0xff;
-			state->buffer[61] = (state->databitlen >> 16) & 0xff;
-			state->buffer[60] = (state->databitlen >> 24) & 0xff;
-			state->buffer[59] = (state->databitlen >> 32) & 0xff;
-			state->buffer[58] = (state->databitlen >> 40) & 0xff;
-			state->buffer[57] = (state->databitlen >> 48) & 0xff;
-			state->buffer[56] = (state->databitlen >> 56) & 0xff;
-			F8(state);
-	  }
+            F8(state);
+            memset(state->buffer, 0, 64);
+            state->buffer[63] = state->databitlen & 0xff;
+            state->buffer[62] = (state->databitlen >> 8) & 0xff;
+            state->buffer[61] = (state->databitlen >> 16) & 0xff;
+            state->buffer[60] = (state->databitlen >> 24) & 0xff;
+            state->buffer[59] = (state->databitlen >> 32) & 0xff;
+            state->buffer[58] = (state->databitlen >> 40) & 0xff;
+            state->buffer[57] = (state->databitlen >> 48) & 0xff;
+            state->buffer[56] = (state->databitlen >> 56) & 0xff;
+            F8(state);
+      }
 
-	  /*truncating the final hash value to generate the message digest*/
-	  switch(state->hashbitlen) {
-			case 224: memcpy(hashval,(unsigned char*)state->x+64+36,28);  break;
-			case 256: memcpy(hashval,(unsigned char*)state->x+64+32,32);  break;
-			case 384: memcpy(hashval,(unsigned char*)state->x+64+16,48);  break;
-			case 512: memcpy(hashval,(unsigned char*)state->x+64,64);     break;
-	  }
+      /*truncating the final hash value to generate the message digest*/
+      switch(state->hashbitlen) {
+            case 224: memcpy(hashval,(unsigned char*)state->x+64+36,28);  break;
+            case 256: memcpy(hashval,(unsigned char*)state->x+64+32,32);  break;
+            case 384: memcpy(hashval,(unsigned char*)state->x+64+16,48);  break;
+            case 512: memcpy(hashval,(unsigned char*)state->x+64,64);     break;
+      }
 
-	  return(SUCCESS);
+      return(SUCCESS);
 }
 
 /* hash a message,
@@ -354,14 +354,14 @@ static HashReturn Final(hashState *state, BitSequence *hashval)
 */
 HashReturn jh_hash(int hashbitlen, const BitSequence *data,DataLength databitlen, BitSequence *hashval)
 {
-	  hashState state;
+      hashState state;
 
-	  if ( hashbitlen == 224 || hashbitlen == 256 || hashbitlen == 384 || hashbitlen == 512 ) {
-			Init(&state, hashbitlen);
-			Update(&state, data, databitlen);
-			Final(&state, hashval);
-			return SUCCESS;
-	  }
-	  else
-			return(BAD_HASHLEN);
+      if ( hashbitlen == 224 || hashbitlen == 256 || hashbitlen == 384 || hashbitlen == 512 ) {
+            Init(&state, hashbitlen);
+            Update(&state, data, databitlen);
+            Final(&state, hashval);
+            return SUCCESS;
+      }
+      else
+            return(BAD_HASHLEN);
 }

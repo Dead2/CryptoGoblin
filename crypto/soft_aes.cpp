@@ -104,41 +104,41 @@ alignas(TABLE_ALIGN) const uint8_t aes_sbox[256] = sb_data(h0);
 
 __m128i soft_aesenc(__m128i in, __m128i key)
 {
-	uint32_t x0, x1, x2, x3;
-	x0 = _mm_cvtsi128_si32(in);
-	x1 = _mm_cvtsi128_si32(_mm_shuffle_epi32(in, 0x55));
-	x2 = _mm_cvtsi128_si32(_mm_shuffle_epi32(in, 0xAA));
-	x3 = _mm_cvtsi128_si32(_mm_shuffle_epi32(in, 0xFF));
+    uint32_t x0, x1, x2, x3;
+    x0 = _mm_cvtsi128_si32(in);
+    x1 = _mm_cvtsi128_si32(_mm_shuffle_epi32(in, 0x55));
+    x2 = _mm_cvtsi128_si32(_mm_shuffle_epi32(in, 0xAA));
+    x3 = _mm_cvtsi128_si32(_mm_shuffle_epi32(in, 0xFF));
 
-	__m128i out = _mm_set_epi32(
-		(t_fn[0][x3 & 0xff] ^ t_fn[1][(x0 >> 8) & 0xff] ^ t_fn[2][(x1 >> 16) & 0xff] ^ t_fn[3][x2 >> 24]),
-		(t_fn[0][x2 & 0xff] ^ t_fn[1][(x3 >> 8) & 0xff] ^ t_fn[2][(x0 >> 16) & 0xff] ^ t_fn[3][x1 >> 24]),
-		(t_fn[0][x1 & 0xff] ^ t_fn[1][(x2 >> 8) & 0xff] ^ t_fn[2][(x3 >> 16) & 0xff] ^ t_fn[3][x0 >> 24]),
-		(t_fn[0][x0 & 0xff] ^ t_fn[1][(x1 >> 8) & 0xff] ^ t_fn[2][(x2 >> 16) & 0xff] ^ t_fn[3][x3 >> 24]));
+    __m128i out = _mm_set_epi32(
+        (t_fn[0][x3 & 0xff] ^ t_fn[1][(x0 >> 8) & 0xff] ^ t_fn[2][(x1 >> 16) & 0xff] ^ t_fn[3][x2 >> 24]),
+        (t_fn[0][x2 & 0xff] ^ t_fn[1][(x3 >> 8) & 0xff] ^ t_fn[2][(x0 >> 16) & 0xff] ^ t_fn[3][x1 >> 24]),
+        (t_fn[0][x1 & 0xff] ^ t_fn[1][(x2 >> 8) & 0xff] ^ t_fn[2][(x3 >> 16) & 0xff] ^ t_fn[3][x0 >> 24]),
+        (t_fn[0][x0 & 0xff] ^ t_fn[1][(x1 >> 8) & 0xff] ^ t_fn[2][(x2 >> 16) & 0xff] ^ t_fn[3][x3 >> 24]));
 
-	return _mm_xor_si128(out, key);
+    return _mm_xor_si128(out, key);
 }
 
 static inline void sub_word(uint8_t* key)
 {
-	key[0] = aes_sbox[key[0]];
-	key[1] = aes_sbox[key[1]];
-	key[2] = aes_sbox[key[2]];
-	key[3] = aes_sbox[key[3]];
+    key[0] = aes_sbox[key[0]];
+    key[1] = aes_sbox[key[1]];
+    key[2] = aes_sbox[key[2]];
+    key[3] = aes_sbox[key[3]];
 }
 
 #ifdef __clang__
 static inline uint32_t _rotr(uint32_t value, uint32_t amount)
 {
-	return (value >> amount) | (value << ((32 - amount) & 31));
+    return (value >> amount) | (value << ((32 - amount) & 31));
 }
 #endif
 
 __m128i soft_aeskeygenassist(__m128i key, uint8_t rcon)
 {
-	uint32_t X1 = _mm_cvtsi128_si32(_mm_shuffle_epi32(key, 0x55));
-	uint32_t X3 = _mm_cvtsi128_si32(_mm_shuffle_epi32(key, 0xFF));
-	sub_word((uint8_t*)&X1);
-	sub_word((uint8_t*)&X3);
-	return _mm_set_epi32(_rotr(X3, 8) ^ rcon, X3,_rotr(X1, 8) ^ rcon, X1);
+    uint32_t X1 = _mm_cvtsi128_si32(_mm_shuffle_epi32(key, 0x55));
+    uint32_t X3 = _mm_cvtsi128_si32(_mm_shuffle_epi32(key, 0xFF));
+    sub_word((uint8_t*)&X1);
+    sub_word((uint8_t*)&X3);
+    return _mm_set_epi32(_rotr(X3, 8) ^ rcon, X3,_rotr(X1, 8) ^ rcon, X1);
 }

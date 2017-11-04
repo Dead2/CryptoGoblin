@@ -34,7 +34,7 @@
 #include "version.h"
 
 #ifndef CONF_NO_HTTPD
-#	include "httpd.h"
+#   include "httpd.h"
 #endif
 
 #include "colors.hpp"
@@ -65,9 +65,9 @@
 
 void win_exit()
 {
-	printer::inst()->print_str("Press any key to exit.");
-	get_key();
-	return;
+    printer::inst()->print_str("Press any key to exit.");
+    get_key();
+    return;
 }
 
 #define strcasecmp _stricmp
@@ -81,18 +81,18 @@ void do_benchmark();
 int main(int argc, char *argv[])
 {
 #ifndef CONF_NO_TLS
-	SSL_library_init();
-	SSL_load_error_strings();
-	ERR_load_BIO_strings();
-	ERR_load_crypto_strings();
-	SSL_load_error_strings();
-	OpenSSL_add_all_digests();
+    SSL_library_init();
+    SSL_load_error_strings();
+    ERR_load_BIO_strings();
+    ERR_load_crypto_strings();
+    SSL_load_error_strings();
+    OpenSSL_add_all_digests();
 #endif
 
-	srand(time(0));
+    srand(time(0));
 
-	const char* sFilename = "config.txt";
-	bool benchmark_mode = false;
+    const char* sFilename = "config.txt";
+    bool benchmark_mode = false;
 
 #if defined(_WIN32) && defined(VT100)
     HANDLE hStdout;
@@ -104,160 +104,160 @@ int main(int argc, char *argv[])
     SetConsoleMode(hStdout, handleMode);
 #endif
 
-	if(argc >= 2)
-	{
-		if(strcmp(argv[1], "-h") == 0)
-		{
-			printer::inst()->print_msg(L0, "Usage %s [CONFIG FILE]", argv[0]);
-			win_exit();
-			return 0;
-		}
+    if(argc >= 2)
+    {
+        if(strcmp(argv[1], "-h") == 0)
+        {
+            printer::inst()->print_msg(L0, "Usage %s [CONFIG FILE]", argv[0]);
+            win_exit();
+            return 0;
+        }
 
-		if(argc >= 3 && strcasecmp(argv[1], "-c") == 0)
-		{
-			sFilename = argv[2];
-		}
-		else if(argc >= 3 && strcasecmp(argv[1], "benchmark_mode") == 0)
-		{
-			sFilename = argv[2];
-			benchmark_mode = true;
-		}
-		else
-			sFilename = argv[1];
-	}
+        if(argc >= 3 && strcasecmp(argv[1], "-c") == 0)
+        {
+            sFilename = argv[2];
+        }
+        else if(argc >= 3 && strcasecmp(argv[1], "benchmark_mode") == 0)
+        {
+            sFilename = argv[2];
+            benchmark_mode = true;
+        }
+        else
+            sFilename = argv[1];
+    }
 
-	if(!jconf::inst()->parse_config(sFilename))
-	{
-		win_exit();
-		return 0;
-	}
+    if(!jconf::inst()->parse_config(sFilename))
+    {
+        win_exit();
+        return 0;
+    }
 
-	if(jconf::inst()->NeedsAutoconf())
-	{
-		autoAdjust adjust;
-		adjust.printConfig();
-		win_exit();
-		return 0;
-	}
+    if(jconf::inst()->NeedsAutoconf())
+    {
+        autoAdjust adjust;
+        adjust.printConfig();
+        win_exit();
+        return 0;
+    }
 
-	if (!minethd::self_test())
-	{
-		win_exit();
-		return 0;
-	}
+    if (!minethd::self_test())
+    {
+        win_exit();
+        return 0;
+    }
 
-	if(benchmark_mode)
-	{
-		do_benchmark();
-		win_exit();
-		return 0;
-	}
+    if(benchmark_mode)
+    {
+        do_benchmark();
+        win_exit();
+        return 0;
+    }
 
 #ifndef CONF_NO_HTTPD
-	if(jconf::inst()->GetHttpdPort() != 0)
-	{
-		if (!httpd::inst()->start_daemon())
-		{
-			win_exit();
-			return 0;
-		}
-	}
+    if(jconf::inst()->GetHttpdPort() != 0)
+    {
+        if (!httpd::inst()->start_daemon())
+        {
+            win_exit();
+            return 0;
+        }
+    }
 #endif
 
-	printer::inst()->print_str(CYAN("-------------------------------------------------------------------\n"));
-	printer::inst()->print_str(GREEN( XMR_STAK_NAME " " XMR_STAK_VERSION) CYAN(" by ") GREEN("Dead2") CYAN(" CPU mining software under ") RED("GPLv3\n"));
+    printer::inst()->print_str(CYAN("-------------------------------------------------------------------\n"));
+    printer::inst()->print_str(GREEN( XMR_STAK_NAME " " XMR_STAK_VERSION) CYAN(" by ") GREEN("Dead2") CYAN(" CPU mining software under ") RED("GPLv3\n"));
     printer::inst()->print_str(CYAN("Based on XMR-Stak-CPU by ") GREEN("fireice_uk") CYAN(" and ") GREEN("psychocrypt") CYAN(".\n"));
     printer::inst()->print_str(CYAN("Original CPU miner code by ") GREEN("wolf9466") CYAN(".\n\n"));
     if((fDevDonationLevel*100) > 0.99){
-    	char buffer[64];
-	    snprintf(buffer, sizeof(buffer), GREEN("Dev donation level is %.2f%%\n\n"), fDevDonationLevel * 100.0);
-    	printer::inst()->print_str(buffer);
-    	printer::inst()->print_str(GREEN("Thank you, it is very much appreciated!!\n\n"));
+        char buffer[64];
+        snprintf(buffer, sizeof(buffer), GREEN("Dev donation level is %.2f%%\n\n"), fDevDonationLevel * 100.0);
+        printer::inst()->print_str(buffer);
+        printer::inst()->print_str(GREEN("Thank you, it is very much appreciated!!\n\n"));
     }else if((fDevDonationLevel*100) > 0.09){
-    	char buffer[64];
-	    snprintf(buffer, sizeof(buffer), CYAN("Dev donation level is %.2f%%\n\n"), fDevDonationLevel * 100.0);
-    	printer::inst()->print_str(buffer);
+        char buffer[64];
+        snprintf(buffer, sizeof(buffer), CYAN("Dev donation level is %.2f%%\n\n"), fDevDonationLevel * 100.0);
+        printer::inst()->print_str(buffer);
     }else{
-    	printer::inst()->print_str(RED("Dev donation is disabled, thanks for nothing!\n\n"));
+        printer::inst()->print_str(RED("Dev donation is disabled, thanks for nothing!\n\n"));
     }
-	printer::inst()->print_str(CYAN("You can press the following keys to display reports:\n"));
-	printer::inst()->print_str(CYAN(" '") RED("H") CYAN("' - hashrate\n"));
-	printer::inst()->print_str(CYAN(" '") RED("R") CYAN("' - results\n"));
-	printer::inst()->print_str(CYAN(" '") RED("C") CYAN("' - connection\n"));
-	printer::inst()->print_str(CYAN(" '") RED("Q") CYAN("' - quit\n"));
-	printer::inst()->print_str(CYAN("-------------------------------------------------------------------\n"));
+    printer::inst()->print_str(CYAN("You can press the following keys to display reports:\n"));
+    printer::inst()->print_str(CYAN(" '") RED("H") CYAN("' - hashrate\n"));
+    printer::inst()->print_str(CYAN(" '") RED("R") CYAN("' - results\n"));
+    printer::inst()->print_str(CYAN(" '") RED("C") CYAN("' - connection\n"));
+    printer::inst()->print_str(CYAN(" '") RED("Q") CYAN("' - quit\n"));
+    printer::inst()->print_str(CYAN("-------------------------------------------------------------------\n"));
 
-	if(strlen(jconf::inst()->GetOutputFile()) != 0)
-		printer::inst()->open_logfile(jconf::inst()->GetOutputFile());
+    if(strlen(jconf::inst()->GetOutputFile()) != 0)
+        printer::inst()->open_logfile(jconf::inst()->GetOutputFile());
 
-	executor::inst()->ex_start(jconf::inst()->DaemonMode());
+    executor::inst()->ex_start(jconf::inst()->DaemonMode());
 
-	using namespace std::chrono;
-	uint64_t lastTime = time_point_cast<milliseconds>(high_resolution_clock::now()).time_since_epoch().count();
+    using namespace std::chrono;
+    uint64_t lastTime = time_point_cast<milliseconds>(high_resolution_clock::now()).time_since_epoch().count();
 
-	int key;
-	while(true)
-	{
-		key = get_key();
+    int key;
+    while(true)
+    {
+        key = get_key();
 
-		switch(key)
-		{
-		case 'h':
-			executor::inst()->push_event(ex_event(EV_USR_HASHRATE));
-			break;
-		case 'r':
-			executor::inst()->push_event(ex_event(EV_USR_RESULTS));
-			break;
-		case 'c':
-			executor::inst()->push_event(ex_event(EV_USR_CONNSTAT));
-			break;
-		case 'q':
+        switch(key)
+        {
+        case 'h':
+            executor::inst()->push_event(ex_event(EV_USR_HASHRATE));
+            break;
+        case 'r':
+            executor::inst()->push_event(ex_event(EV_USR_RESULTS));
+            break;
+        case 'c':
+            executor::inst()->push_event(ex_event(EV_USR_CONNSTAT));
+            break;
+        case 'q':
             fputs(RST, stdout);
             fflush(stdout);
-			exit(0);
-			break;
-		default:
-			break;
-		}
+            exit(0);
+            break;
+        default:
+            break;
+        }
 
-		uint64_t currentTime = time_point_cast<milliseconds>(high_resolution_clock::now()).time_since_epoch().count();
+        uint64_t currentTime = time_point_cast<milliseconds>(high_resolution_clock::now()).time_since_epoch().count();
 
-		/* Hard guard to make sure we never get called more than twice per second */
-		if( currentTime - lastTime < 500)
-			std::this_thread::sleep_for(std::chrono::milliseconds(500 - (currentTime - lastTime)));
-		lastTime = currentTime;
-	}
+        /* Hard guard to make sure we never get called more than twice per second */
+        if( currentTime - lastTime < 500)
+            std::this_thread::sleep_for(std::chrono::milliseconds(500 - (currentTime - lastTime)));
+        lastTime = currentTime;
+    }
 
-	return 0;
+    return 0;
 }
 
 void do_benchmark()
 {
-	using namespace std::chrono;
-	std::vector<minethd*>* pvThreads;
+    using namespace std::chrono;
+    std::vector<minethd*>* pvThreads;
 
-	printer::inst()->print_msg(L0, "Running a 60 second benchmark...");
+    printer::inst()->print_msg(L0, "Running a 60 second benchmark...");
 
-	uint8_t work[76] = {0};
-	minethd::miner_work oWork = minethd::miner_work("", work, sizeof(work), 0, 0, false, 0);
-	pvThreads = minethd::thread_starter(oWork);
+    uint8_t work[76] = {0};
+    minethd::miner_work oWork = minethd::miner_work("", work, sizeof(work), 0, 0, false, 0);
+    pvThreads = minethd::thread_starter(oWork);
 
-	uint64_t iStartStamp = time_point_cast<milliseconds>(high_resolution_clock::now()).time_since_epoch().count();
+    uint64_t iStartStamp = time_point_cast<milliseconds>(high_resolution_clock::now()).time_since_epoch().count();
 
-	std::this_thread::sleep_for(std::chrono::seconds(60));
+    std::this_thread::sleep_for(std::chrono::seconds(60));
 
-	oWork = minethd::miner_work();
-	minethd::switch_work(oWork);
+    oWork = minethd::miner_work();
+    minethd::switch_work(oWork);
 
-	double fTotalHps = 0.0;
-	for (uint32_t i = 0; i < pvThreads->size(); i++)
-	{
-		double fHps = pvThreads->at(i)->iHashCount;
-		fHps /= (pvThreads->at(i)->iTimestamp - iStartStamp) / 1000.0;
+    double fTotalHps = 0.0;
+    for (uint32_t i = 0; i < pvThreads->size(); i++)
+    {
+        double fHps = pvThreads->at(i)->iHashCount;
+        fHps /= (pvThreads->at(i)->iTimestamp - iStartStamp) / 1000.0;
 
-		printer::inst()->print_msg(L0, "Thread %u: %.1f H/S", i, fHps);
-		fTotalHps += fHps;
-	}
+        printer::inst()->print_msg(L0, "Thread %u: %.1f H/S", i, fHps);
+        fTotalHps += fHps;
+    }
 
-	printer::inst()->print_msg(L0, "Total: %.1f H/S", fTotalHps);
+    printer::inst()->print_msg(L0, "Total: %.1f H/S", fTotalHps);
 }

@@ -35,59 +35,59 @@
 
 int get_key()
 {
-	DWORD mode, rd;
-	HANDLE h;
+    DWORD mode, rd;
+    HANDLE h;
 
-	if ((h = GetStdHandle(STD_INPUT_HANDLE)) == NULL)
-		return -1;
+    if ((h = GetStdHandle(STD_INPUT_HANDLE)) == NULL)
+        return -1;
 
-	GetConsoleMode( h, &mode );
-	SetConsoleMode( h, mode & ~(ENABLE_LINE_INPUT | ENABLE_ECHO_INPUT) );
+    GetConsoleMode( h, &mode );
+    SetConsoleMode( h, mode & ~(ENABLE_LINE_INPUT | ENABLE_ECHO_INPUT) );
 
-	int c = 0;
-	ReadConsole( h, &c, 1, &rd, NULL );
-	SetConsoleMode( h, mode );
+    int c = 0;
+    ReadConsole( h, &c, 1, &rd, NULL );
+    SetConsoleMode( h, mode );
 
-	return c;
+    return c;
 }
 
 void set_colour(out_colours cl)
 {
-	WORD attr = 0;
+    WORD attr = 0;
 
-	switch(cl)
-	{
-	case K_RED:
-		attr = FOREGROUND_RED | FOREGROUND_INTENSITY;
-		break;
-	case K_GREEN:
-		attr = FOREGROUND_GREEN | FOREGROUND_INTENSITY;
-		break;
-	case K_BLUE:
-		attr = FOREGROUND_BLUE | FOREGROUND_INTENSITY;
-		break;
-	case K_YELLOW:
-		attr = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY;
-		break;
-	case K_CYAN:
-		attr = FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_INTENSITY;
-		break;
-	case K_MAGENTA:
-		attr = FOREGROUND_BLUE | FOREGROUND_RED | FOREGROUND_INTENSITY;
-		break;
-	case K_WHITE:
-		attr = FOREGROUND_BLUE | FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY;
-		break;
-	default:
-		break;
-	}
+    switch(cl)
+    {
+    case K_RED:
+        attr = FOREGROUND_RED | FOREGROUND_INTENSITY;
+        break;
+    case K_GREEN:
+        attr = FOREGROUND_GREEN | FOREGROUND_INTENSITY;
+        break;
+    case K_BLUE:
+        attr = FOREGROUND_BLUE | FOREGROUND_INTENSITY;
+        break;
+    case K_YELLOW:
+        attr = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY;
+        break;
+    case K_CYAN:
+        attr = FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_INTENSITY;
+        break;
+    case K_MAGENTA:
+        attr = FOREGROUND_BLUE | FOREGROUND_RED | FOREGROUND_INTENSITY;
+        break;
+    case K_WHITE:
+        attr = FOREGROUND_BLUE | FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY;
+        break;
+    default:
+        break;
+    }
 
-	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), attr);
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), attr);
 }
 
 void reset_colour()
 {
-	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
 }
 
 #else
@@ -97,59 +97,59 @@ void reset_colour()
 
 int get_key()
 {
-	struct termios oldattr, newattr;
-	int ch;
-	tcgetattr( STDIN_FILENO, &oldattr );
-	newattr = oldattr;
-	newattr.c_lflag &= ~( ICANON | ECHO );
-	tcsetattr( STDIN_FILENO, TCSANOW, &newattr );
-	ch = getchar();
-	tcsetattr( STDIN_FILENO, TCSANOW, &oldattr );
-	return ch;
+    struct termios oldattr, newattr;
+    int ch;
+    tcgetattr( STDIN_FILENO, &oldattr );
+    newattr = oldattr;
+    newattr.c_lflag &= ~( ICANON | ECHO );
+    tcsetattr( STDIN_FILENO, TCSANOW, &newattr );
+    ch = getchar();
+    tcsetattr( STDIN_FILENO, TCSANOW, &oldattr );
+    return ch;
 }
 
 void set_colour(out_colours cl)
 {
-	switch(cl)
-	{
-	case K_RED:
-		fputs("\x1B[1;31m", stdout);
-		break;
-	case K_GREEN:
-		fputs("\x1B[1;32m", stdout);
-		break;
-	case K_BLUE:
-		fputs("\x1B[1;34m", stdout);
-		break;
-	case K_YELLOW:
-		fputs("\x1B[1;33m", stdout);
-		break;
-	case K_CYAN:
-		fputs("\x1B[1;36m", stdout);
-		break;
-	case K_MAGENTA:
-		fputs("\x1B[1;35m", stdout);
-		break;
-	case K_WHITE:
-		fputs("\x1B[1;37m", stdout);
-		break;
-	default:
-		break;
-	}
+    switch(cl)
+    {
+    case K_RED:
+        fputs("\x1B[1;31m", stdout);
+        break;
+    case K_GREEN:
+        fputs("\x1B[1;32m", stdout);
+        break;
+    case K_BLUE:
+        fputs("\x1B[1;34m", stdout);
+        break;
+    case K_YELLOW:
+        fputs("\x1B[1;33m", stdout);
+        break;
+    case K_CYAN:
+        fputs("\x1B[1;36m", stdout);
+        break;
+    case K_MAGENTA:
+        fputs("\x1B[1;35m", stdout);
+        break;
+    case K_WHITE:
+        fputs("\x1B[1;37m", stdout);
+        break;
+    default:
+        break;
+    }
 }
 
 void reset_colour()
 {
-	fputs("\x1B[0m", stdout);
+    fputs("\x1B[0m", stdout);
 }
 #endif // _WIN32
 
 inline void comp_localtime(const time_t* ctime, tm* stime)
 {
 #ifdef _WIN32
-	localtime_s(stime, ctime);
+    localtime_s(stime, ctime);
 #else
-	localtime_r(ctime, stime);
+    localtime_r(ctime, stime);
 #endif // __WIN32
 }
 
@@ -157,71 +157,71 @@ printer* printer::oInst = nullptr;
 
 printer::printer()
 {
-	verbose_level = LINF;
-	logfile = nullptr;
+    verbose_level = LINF;
+    logfile = nullptr;
 }
 
 bool printer::open_logfile(const char* file)
 {
-	logfile = fopen(file, "ab+");
-	return logfile != nullptr;
+    logfile = fopen(file, "ab+");
+    return logfile != nullptr;
 }
 
 void printer::print_msg(verbosity verbose, const char* fmt, ...)
 {
-	if(verbose > verbose_level)
-		return;
+    if(verbose > verbose_level)
+        return;
 
-	char buf[1024];
-	size_t bpos;
-	tm stime;
+    char buf[1024];
+    size_t bpos;
+    tm stime;
 
-	time_t now = time(nullptr);
-	comp_localtime(&now, &stime);
-	strftime(buf, sizeof(buf), "[%Y-%m-%d %H:%M:%S] ", &stime);
-	bpos = strlen(buf);
+    time_t now = time(nullptr);
+    comp_localtime(&now, &stime);
+    strftime(buf, sizeof(buf), "[%Y-%m-%d %H:%M:%S] ", &stime);
+    bpos = strlen(buf);
 
-	va_list args;
-	va_start(args, fmt);
-	vsnprintf(buf+bpos, sizeof(buf)-bpos, fmt, args);
-	va_end(args);
-	bpos = strlen(buf);
+    va_list args;
+    va_start(args, fmt);
+    vsnprintf(buf+bpos, sizeof(buf)-bpos, fmt, args);
+    va_end(args);
+    bpos = strlen(buf);
 
-	if(bpos+2 >= sizeof(buf))
-		return;
+    if(bpos+2 >= sizeof(buf))
+        return;
 
-	buf[bpos] = '\n';
-	buf[bpos+1] = '\0';
+    buf[bpos] = '\n';
+    buf[bpos+1] = '\0';
 
-	std::unique_lock<std::mutex> lck(print_mutex);
-	fputs(buf, stdout);
+    std::unique_lock<std::mutex> lck(print_mutex);
+    fputs(buf, stdout);
 
-	if(logfile != nullptr)
-	{
-		fputs(buf, logfile);
-		fflush(logfile);
-	}
+    if(logfile != nullptr)
+    {
+        fputs(buf, logfile);
+        fflush(logfile);
+    }
 }
 
 void printer::print_str(const char* str)
 {
-	std::unique_lock<std::mutex> lck(print_mutex);
-	fputs(str, stdout);
+    std::unique_lock<std::mutex> lck(print_mutex);
+    fputs(str, stdout);
 
-	if(logfile != nullptr)
-	{
-		fputs(str, logfile);
-		fflush(logfile);
-	}
+    if(logfile != nullptr)
+    {
+        fputs(str, logfile);
+        fflush(logfile);
+    }
 }
 
 void printer::set_title(const char* str)
 {
 #if !defined(_WIN32) || (defined(_WIN32) && defined(VT100))
-	char buf[128];
+    char buf[128];
     snprintf(buf, sizeof(buf), TITLE("%s"), str);
 
-	std::unique_lock<std::mutex> lck(print_mutex);
+    std::unique_lock<std::mutex> lck(print_mutex);
     fputs(buf, stdout);
     fflush(stdout);
 #endif

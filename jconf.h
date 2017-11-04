@@ -5,70 +5,70 @@
 class jconf
 {
 public:
-	static jconf* inst()
-	{
-		if (oInst == nullptr) oInst = new jconf;
-		return oInst;
-	};
+    static jconf* inst()
+    {
+        if (oInst == nullptr) oInst = new jconf;
+        return oInst;
+    };
 
-	bool parse_config(const char* sFilename);
+    bool parse_config(const char* sFilename);
 
-	struct thd_cfg {
-		bool bDoubleMode;
-		bool bNoPrefetch;
-		long long iCpuAff;
-	};
+    struct thd_cfg {
+        bool bDoubleMode;
+        bool bNoPrefetch;
+        long long iCpuAff;
+    };
 
-	enum slow_mem_cfg {
-		always_use,
-		no_mlck,
-		print_warning,
-		never_use,
-		unknown_value
-	};
+    enum slow_mem_cfg {
+        always_use,
+        no_mlck,
+        print_warning,
+        never_use,
+        unknown_value
+    };
 
-	size_t GetThreadCount();
-	bool GetThreadConfig(size_t id, thd_cfg &cfg);
-	bool NeedsAutoconf();
+    size_t GetThreadCount();
+    bool GetThreadConfig(size_t id, thd_cfg &cfg);
+    bool NeedsAutoconf();
 
-	slow_mem_cfg GetSlowMemSetting();
+    slow_mem_cfg GetSlowMemSetting();
 
-	bool GetTlsSetting();
-	bool TlsSecureAlgos();
-	const char* GetTlsFingerprint();
+    bool GetTlsSetting();
+    bool TlsSecureAlgos();
+    const char* GetTlsFingerprint();
 
-	const char* GetPoolAddress();
-	const char* GetPoolPwd();
-	const char* GetWalletAddress();
+    const char* GetPoolAddress();
+    const char* GetPoolPwd();
+    const char* GetWalletAddress();
 
-	uint64_t GetVerboseLevel();
-	uint64_t GetAutohashTime();
+    uint64_t GetVerboseLevel();
+    uint64_t GetAutohashTime();
 
-	const char* GetOutputFile();
+    const char* GetOutputFile();
 
-	uint64_t GetCallTimeout();
-	uint64_t GetNetRetry();
-	uint64_t GetGiveUpLimit();
+    uint64_t GetCallTimeout();
+    uint64_t GetNetRetry();
+    uint64_t GetGiveUpLimit();
 
-	uint16_t GetHttpdPort();
+    uint16_t GetHttpdPort();
 
-	bool NiceHashMode();
+    bool NiceHashMode();
 
-	bool DaemonMode();
+    bool DaemonMode();
 
-	bool PreferIpv4();
+    bool PreferIpv4();
 
-	inline bool HaveHardwareAes() { return bHaveAes; }
+    inline bool HaveHardwareAes() { return bHaveAes; }
 
-	static void cpuid(uint32_t eax, int32_t ecx, int32_t val[4]);
+    static void cpuid(uint32_t eax, int32_t ecx, int32_t val[4]);
 
 private:
-	jconf();
-	static jconf* oInst;
+    jconf();
+    static jconf* oInst;
 
-	bool check_cpu_features();
-	struct opaque_private;
-	opaque_private* prv;
+    bool check_cpu_features();
+    struct opaque_private;
+    opaque_private* prv;
 
-	bool bHaveAes;
+    bool bHaveAes;
 };

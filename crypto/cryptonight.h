@@ -12,13 +12,13 @@ extern "C" {
 #define MEMORY  2097152
 
 typedef struct {
-	uint8_t hash_state[224]; // Need only 200, explicit align
-	uint8_t* long_state;
-	uint8_t ctx_info[24]; //Use some of the extra memory for flags
+    uint8_t hash_state[224]; // Need only 200, explicit align
+    uint8_t* long_state;
+    uint8_t ctx_info[24]; //Use some of the extra memory for flags
 } ALIGN16 cryptonight_ctx;
 
 typedef struct {
-	const char* warning;
+    const char* warning;
 } alloc_msg;
 
 size_t cryptonight_init(size_t use_fast_mem, size_t use_mlock, alloc_msg* msg);
