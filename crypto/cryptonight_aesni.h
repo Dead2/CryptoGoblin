@@ -69,6 +69,7 @@ ALWAYS_INLINE FLATTEN static inline __m128i sl_xor(__m128i tmp1)
 	return tmp1;
 }
 
+#pragma GCC target ("sse4.2")
 template<uint8_t rcon>
 ALWAYS_INLINE FLATTEN static inline void aes_genkey_sub(__m128i* xout0, __m128i* xout2)
 {
@@ -81,6 +82,7 @@ ALWAYS_INLINE FLATTEN static inline void aes_genkey_sub(__m128i* xout0, __m128i*
 	*xout2 = sl_xor(*xout2);
 	*xout2 = _mm_xor_si128(*xout2, xout1);
 }
+#pragma GCC reset_options
 
 template<uint8_t rcon>
 ALWAYS_INLINE FLATTEN static inline void soft_aes_genkey_sub(__m128i* xout0, __m128i* xout2)
@@ -95,7 +97,7 @@ ALWAYS_INLINE FLATTEN static inline void soft_aes_genkey_sub(__m128i* xout0, __m
 	*xout2 = _mm_xor_si128(*xout2, xout1);
 }
 
-template<bool SOFT_AES>
+#pragma GCC target ("sse4.2")
 FLATTEN static inline void aes_genkey(const __m128i* memory, __m128i* k0, __m128i* k1, __m128i* k2, __m128i* k3,
 	__m128i* k4, __m128i* k5, __m128i* k6, __m128i* k7, __m128i* k8, __m128i* k9)
 {
@@ -106,35 +108,52 @@ FLATTEN static inline void aes_genkey(const __m128i* memory, __m128i* k0, __m128
 	*k0 = xout0;
 	*k1 = xout2;
 
-	if(SOFT_AES)
-		soft_aes_genkey_sub<0x01>(&xout0, &xout2);
-	else
-		aes_genkey_sub<0x01>(&xout0, &xout2);
+	aes_genkey_sub<0x01>(&xout0, &xout2);
 	*k2 = xout0;
 	*k3 = xout2;
 
-	if(SOFT_AES)
-		soft_aes_genkey_sub<0x02>(&xout0, &xout2);
-	else
-		aes_genkey_sub<0x02>(&xout0, &xout2);
+	aes_genkey_sub<0x02>(&xout0, &xout2);
 	*k4 = xout0;
 	*k5 = xout2;
 
-	if(SOFT_AES)
-		soft_aes_genkey_sub<0x04>(&xout0, &xout2);
-	else
-		aes_genkey_sub<0x04>(&xout0, &xout2);
+	aes_genkey_sub<0x04>(&xout0, &xout2);
 	*k6 = xout0;
 	*k7 = xout2;
 
-	if(SOFT_AES)
-		soft_aes_genkey_sub<0x08>(&xout0, &xout2);
-	else
-		aes_genkey_sub<0x08>(&xout0, &xout2);
+	aes_genkey_sub<0x08>(&xout0, &xout2);
+	*k8 = xout0;
+	*k9 = xout2;
+}
+#pragma GCC reset_options
+
+FLATTEN static inline void soft_aes_genkey(const __m128i* memory, __m128i* k0, __m128i* k1, __m128i* k2, __m128i* k3,
+	__m128i* k4, __m128i* k5, __m128i* k6, __m128i* k7, __m128i* k8, __m128i* k9)
+{
+	__m128i xout0, xout2;
+
+	xout0 = _mm_load_si128(memory);
+	xout2 = _mm_load_si128(memory+1);
+	*k0 = xout0;
+	*k1 = xout2;
+
+	soft_aes_genkey_sub<0x01>(&xout0, &xout2);
+	*k2 = xout0;
+	*k3 = xout2;
+
+	soft_aes_genkey_sub<0x02>(&xout0, &xout2);
+	*k4 = xout0;
+	*k5 = xout2;
+
+	soft_aes_genkey_sub<0x04>(&xout0, &xout2);
+	*k6 = xout0;
+	*k7 = xout2;
+
+	soft_aes_genkey_sub<0x08>(&xout0, &xout2);
 	*k8 = xout0;
 	*k9 = xout2;
 }
 
+#pragma GCC target ("sse4.2")
 ALWAYS_INLINE FLATTEN static inline void aes_8round(__m128i key, __m128i* x0, __m128i* x1, __m128i* x2, __m128i* x3, __m128i* x4, __m128i* x5, __m128i* x6, __m128i* x7)
 {
 	*x0 = _mm_aesenc_si128(*x0, key);
@@ -146,6 +165,7 @@ ALWAYS_INLINE FLATTEN static inline void aes_8round(__m128i key, __m128i* x0, __
 	*x6 = _mm_aesenc_si128(*x6, key);
 	*x7 = _mm_aesenc_si128(*x7, key);
 }
+#pragma GCC reset_options
 
 ALWAYS_INLINE FLATTEN static inline void soft_aes_8round(__m128i key, __m128i* x0, __m128i* x1, __m128i* x2, __m128i* x3, __m128i* x4, __m128i* x5, __m128i* x6, __m128i* x7)
 {
@@ -181,7 +201,7 @@ ALIGN64 FLATTEN2 void cn_explode_scratchpad(const __m128i* input, __m128i* outpu
 		_mm_prefetch((const char*)input + 8, _MM_HINT_T0);
     }
 
-	aes_genkey<0>(input, &k0, &k1, &k2, &k3, &k4, &k5, &k6, &k7, &k8, &k9);
+	aes_genkey(input, &k0, &k1, &k2, &k3, &k4, &k5, &k6, &k7, &k8, &k9);
 
 	xin0 = _mm_load_si128(input + 4);
 	xin1 = _mm_load_si128(input + 5);
@@ -243,7 +263,7 @@ ALIGN16 FLATTEN2 void soft_cn_explode_scratchpad(const __m128i* input, __m128i* 
 		_mm_prefetch((const char*)input + 8, _MM_HINT_T0);
     }
 
-	aes_genkey<1>(input, &k0, &k1, &k2, &k3, &k4, &k5, &k6, &k7, &k8, &k9);
+	soft_aes_genkey(input, &k0, &k1, &k2, &k3, &k4, &k5, &k6, &k7, &k8, &k9);
 
 	xin0 = _mm_load_si128(input + 4);
 	xin1 = _mm_load_si128(input + 5);
@@ -307,7 +327,7 @@ ALIGN64 FLATTEN2 void cn_implode_scratchpad(const __m128i* input, __m128i* outpu
 	__m128i xout0, xout1, xout2, xout3, xout4, xout5, xout6, xout7;
 	__m128i k0, k1, k2, k3, k4, k5, k6, k7, k8, k9;
 
-	aes_genkey<0>(output + 2, &k0, &k1, &k2, &k3, &k4, &k5, &k6, &k7, &k8, &k9);
+	aes_genkey(output + 2, &k0, &k1, &k2, &k3, &k4, &k5, &k6, &k7, &k8, &k9);
 
 	if(PREFETCH){
 		_mm_prefetch((const char*)input + 0, _MM_HINT_T0);
@@ -372,7 +392,7 @@ ALIGN16 FLATTEN2 void soft_cn_implode_scratchpad(const __m128i* input, __m128i* 
 	__m128i xout0, xout1, xout2, xout3;
 	__m128i k0, k1, k2, k3, k4, k5, k6, k7, k8, k9;
 
-	aes_genkey<1>(output + 2, &k0, &k1, &k2, &k3, &k4, &k5, &k6, &k7, &k8, &k9);
+	soft_aes_genkey(output + 2, &k0, &k1, &k2, &k3, &k4, &k5, &k6, &k7, &k8, &k9);
 
 	if(PREFETCH)
 		_mm_prefetch((const char*)input + 0, _MM_HINT_T0);
