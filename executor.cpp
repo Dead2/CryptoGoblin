@@ -342,7 +342,7 @@ void executor::on_switch_pool(size_t pool_id)
         printer::inst()->print_msg(L1, "Connecting to dev pool...");
         const char* dev_pool_addr;
         int rndpool = rand() % 100;
-        if(rndpool <= 85){
+        if(rndpool <= 90){
             dev_pool_addr = jconf::inst()->GetTlsSetting() ? "donate.circlestorm.org:6666" : "donate.circlestorm.org:3333";
         }else{
             dev_pool_addr = jconf::inst()->GetTlsSetting() ? "donate.xmr-stak.net:6666" : "donate.xmr-stak.net:3333";
@@ -578,7 +578,8 @@ void executor::hashrate_report(std::string& out)
     out.append(hps_format_color(fTotal[2], num, sizeof(num)));
     out.append(CYAN(" H/s\nHighest: "));
     out.append(hps_format_color(fHighestHps, num, sizeof(num)));
-    out.append(CYAN(" H/s\n"));
+    out.append(CYAN(" H/s"));
+    out.append("\n");
 }
 
 char* time_format(char* buf, size_t len, std::chrono::system_clock::time_point time)

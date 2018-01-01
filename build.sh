@@ -1,7 +1,7 @@
 rm -rf CMakeFiles/ CMakeCache.txt
 
 # CFLAGS
-general="-O2 -pipe -Wall -Wextra -fdiagnostics-color=always -fuse-linker-plugin"
+general="-O2 -pipe -Wall -fdiagnostics-color=always -fuse-linker-plugin"
 protect=""   # -fstack-protector
 codegen="-fomit-frame-pointer -momit-leaf-frame-pointer -fvisibility-inlines-hidden -fvisibility=internal -mlong-double-64 -fno-signed-zeros"
 params=" --param max-cse-path-length=20 --param max-cse-insns=2000 --param max-cselib-memory-locations=1000 --param max-reload-search-insns=200 --param max-sched-ready-insns=200 --param max-sched-region-insns=150 \
@@ -24,9 +24,13 @@ arch="-march=native -mtune=native"
 
 # Defines
 static="OFF"
+
+# Most cpus like FLATTEN and FLATTEN2 enabled, and FLATTEN3 disabled, but you
+# can experiment with enabling/disabling these at will.
 flatten="-DDO_FLATTEN -DDO_FLATTEN2"  # -DDO_FLATTEN3
 
+
 export CFLAGS="$general $protect $codegen $params $sched $optim $loops $ftree $align $arch $lto $testing $flatten"
-cmake . -DCMAKE_LINK_STATIC="$static" -DHWLOC_ENABLE=OFF -DMICROHTTPD_ENABLE=OFF -DCMAKE_C_FLAGS="$CFLAGS" -DCMAKE_CXX_FLAGS="$CFLAGS" -DCMAKE_EXE_LINKER_FLAGS="$CFLAGS" -DCMAKE_C_FLAGS_RELEASE="-DNDEBUG" -DCMAKE_CXX_FLAGS_RELEASE="-DNDEBUG"
+cmake . -DCMAKE_LINK_STATIC="$static" -DHWLOC_ENABLE=ON -DMICROHTTPD_ENABLE=OFF -DCMAKE_C_FLAGS="$CFLAGS" -DCMAKE_CXX_FLAGS="$CFLAGS" -DCMAKE_EXE_LINKER_FLAGS="$CFLAGS" -DCMAKE_C_FLAGS_RELEASE="-DNDEBUG" -DCMAKE_CXX_FLAGS_RELEASE="-DNDEBUG"
 
 make -j2
