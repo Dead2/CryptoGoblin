@@ -95,6 +95,7 @@ nr_hugepages is the number of 2MB blocks, you need at least one per normal miner
 nr_overcommit_hugepages will allow the system to find more hugepages if a program requests them.
 hugetlb_shm_group should be set to the group numer of a group the user running the miner is a member of.
 
+Optional: increasing memlock limit, this normally has no effect on hashrate.
 To increase memlock limit, put the following in /etc/security/limits.conf
 * soft memlock 262144
 * hard memlock 262144

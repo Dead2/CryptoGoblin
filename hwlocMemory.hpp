@@ -24,7 +24,9 @@ void bindMemoryToNUMANode( size_t puId )
 
     if(!hwloc_topology_get_support(topology)->membind->set_thisthread_membind)
     {
+        #ifdef EXTRAWARNINGS
         printer::inst()->print_msg(L0, YELLOW("hwloc: set_thisthread_membind not supported"));
+        #endif
         hwloc_topology_destroy(topology);
         return;
     }
@@ -44,11 +46,13 @@ void bindMemoryToNUMANode( size_t puId )
                 HWLOC_MEMBIND_BIND,
                 HWLOC_MEMBIND_THREAD))
             {
-                printer::inst()->print_msg(L0, YELLOW("hwloc: can't bind memory"));
+                #ifdef EXTRAWARNINGS
+                printer::inst()->print_msg(L0, YELLOW("hwloc: can't bind memory, continuing"));
+                #endif
             }
             else
             {
-                printer::inst()->print_msg(L0, GREEN("hwloc: memory pinned"));
+                printer::inst()->print_msg(L0, GREEN("hwloc: memory pinned to NUMA node"));
                 break;
             }
         }

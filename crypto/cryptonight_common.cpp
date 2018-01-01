@@ -252,14 +252,20 @@ cryptonight_ctx* cryptonight_alloc_ctx(size_t use_fast_mem, size_t use_mlock, al
 
     ptr->ctx_info[0] = 1;
 
-    if(madvise(ptr->long_state, MEMORY, MADV_RANDOM|MADV_WILLNEED) != 0)
+    if(madvise(ptr->long_state, MEMORY, MADV_RANDOM|MADV_WILLNEED) != 0){
+        #ifdef EXTRAWARNINGS
         msg->warning = "madvise failed";
+        #endif
+    }
 
-    ptr->ctx_info[1] = 0;
-    if(use_mlock != 0 && mlock(ptr->long_state, MEMORY) != 0)
+    if(use_mlock != 0 && mlock(ptr->long_state, MEMORY) != 0){
+        ptr->ctx_info[1] = 0;
+        #ifdef EXTRAWARNINGS
         msg->warning = "mlock failed";
-    else
+        #endif
+    }else{
         ptr->ctx_info[1] = 1;
+    }
 
     return ptr;
 #endif // _WIN32
