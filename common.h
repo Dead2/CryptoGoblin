@@ -1,6 +1,10 @@
 #ifndef COMMON_H
 #define COMMON_H
 
+#define XMR_HASHBITLEN 256U
+#define XMR_DATABITLEN 1600UL
+
+
 #ifdef HAVE_ALWAYS_INLINE
 #  define ALWAYS_INLINE __attribute__((always_inline))
 #else

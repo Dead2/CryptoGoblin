@@ -47,9 +47,9 @@ extern "C"
 {
 #include "c_groestl.h"
 #include "c_blake256.h"
-#include "c_jh.h"
 #include "c_skein.h"
 }
+#include "jh.hpp"
 #include "../common.h"
 #include "cryptonight.h"
 #include "cryptonight_aesni.h"
@@ -63,7 +63,7 @@ FLATTEN3 void do_groestl_hash(const void* input, size_t len, char* output) {
 }
 
 FLATTEN3 void do_jh_hash(const void* input, size_t len, char* output) {
-    jh_hash(32 * 8, (const uint8_t*)input, 8 * len, (uint8_t*)output);
+    xmr_jh256((const uint8_t*)input, (uint8_t*)output);
 }
 
 FLATTEN3 void do_skein_hash(const void* input, size_t len, char* output) {
