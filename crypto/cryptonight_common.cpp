@@ -54,23 +54,23 @@ extern "C"
 #include "cryptonight.h"
 #include "cryptonight_aesni.h"
 
-FLATTEN3 void do_blake_hash(const void* input, size_t len, char* output) {
-    blake256_hash((uint8_t*)output, (const uint8_t*)input, len);
+void do_blake_hash(const void* input, char* output) {
+    blake256_hash((uint8_t*)output, (const uint8_t*)input, 200);
 }
 
-FLATTEN3 void do_groestl_hash(const void* input, size_t len, char* output) {
-    groestl((const uint8_t*)input, len * 8, (uint8_t*)output);
+void do_groestl_hash(const void* input, char* output) {
+    groestl((const uint8_t*)input, 200 * 8, (uint8_t*)output);
 }
 
-FLATTEN3 void do_jh_hash(const void* input, size_t len, char* output) {
+void do_jh_hash(const void* input, char* output) {
     xmr_jh256((const uint8_t*)input, (uint8_t*)output);
 }
 
-FLATTEN3 void do_skein_hash(const void* input, size_t len, char* output) {
+void do_skein_hash(const void* input, char* output) {
     xmr_skein((const uint8_t*)input, (uint8_t*)output);
 }
 
-void (* const extra_hashes[4])(const void *, size_t, char *) = {do_blake_hash, do_groestl_hash, do_jh_hash, do_skein_hash};
+void (* const extra_hashes[4])(const void *, char *) = {do_blake_hash, do_groestl_hash, do_jh_hash, do_skein_hash};
 
 #ifdef _WIN32
 BOOL bRebootDesirable = FALSE; //If VirtualAlloc fails, suggest a reboot

@@ -16,7 +16,7 @@
 #pragma once
 
 #include "cryptonight.h"
-#include "c_keccak.hpp"
+#include "keccak.hpp"
 #include "../common.h"
 #include <memory.h>
 #include <stdio.h>
@@ -47,10 +47,7 @@ ALWAYS_INLINE static inline uint64_t _xmr_umul128(uint64_t a, uint64_t b, uint64
 #error You are trying to do a 32-bit build. This will all end in tears. I know it.
 #endif
 
-extern "C"
-{
-    extern void(*const extra_hashes[4])(const void *, size_t, char *);
-}
+extern void(*const extra_hashes[4])(const void *, char *);
 
 __m128i soft_aesenc(__m128i in, __m128i key);
 __m128i soft_aeskeygenassist(__m128i key, uint8_t rcon);
@@ -532,7 +529,7 @@ ALIGN(64) void cryptonight_hash(const void* input, size_t len, void* output, cry
     // Optim - 99% time boundary
 
     keccakf<24>((uint64_t*)ctx0->hash_state);
-    extra_hashes[ctx0->hash_state[0] & 3](ctx0->hash_state, 200, (char*)output);
+    extra_hashes[ctx0->hash_state[0] & 3](ctx0->hash_state, (char*)output);
 }
 
 // This lovely creation will do 2 cn hashes at a time. We have plenty of space on silicon
@@ -648,7 +645,7 @@ ALIGN(64) void cryptonight_double_hash(const void* input, size_t len, void* outp
     // Optim - 99% time boundary
 
     keccakf<24>((uint64_t*)ctx0->hash_state);
-    extra_hashes[ctx0->hash_state[0] & 3](ctx0->hash_state, 200, (char*)output);
+    extra_hashes[ctx0->hash_state[0] & 3](ctx0->hash_state, (char*)output);
     keccakf<24>((uint64_t*)ctx1->hash_state);
-    extra_hashes[ctx1->hash_state[0] & 3](ctx1->hash_state, 200, (char*)output + 32);
+    extra_hashes[ctx1->hash_state[0] & 3](ctx1->hash_state, (char*)output + 32);
 }

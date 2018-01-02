@@ -4,7 +4,7 @@
 
 #include <stdint.h>
 #include <memory.h>
-#include "c_keccak.hpp"
+#include "keccak.hpp"
 #include "../common.h"
 
 #define HASH_DATA_AREA 136
