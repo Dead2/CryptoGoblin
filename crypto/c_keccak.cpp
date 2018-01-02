@@ -14,7 +14,7 @@
 #define ROTL64(x, y) (((x) << (y)) | ((x) >> (64 - (y))))
 #endif
 
-ALIGN64 const uint64_t keccakf_rndc[24] =
+ALIGN(64) const uint64_t keccakf_rndc[24] =
 {
     0x0000000000000001, 0x0000000000008082, 0x800000000000808a,
     0x8000000080008000, 0x000000000000808b, 0x0000000080000001,
@@ -29,7 +29,7 @@ ALIGN64 const uint64_t keccakf_rndc[24] =
 // update the state with given number of rounds
 
 template<int rounds>
-ALIGN64 void keccakf(uint64_t st[25])
+ALIGN(64) void keccakf(uint64_t st[25])
 {
     int i, j, round;
     uint64_t t, bc[5];
@@ -140,10 +140,10 @@ ALIGN64 void keccakf(uint64_t st[25])
 }
 
 // compute a keccak hash (md) of given byte length from "in"
-ALIGN16 typedef uint64_t state_t[25];
+ALIGN(16) typedef uint64_t state_t[25];
 
 template<int mdlen>
-ALIGN64 void keccak(const uint8_t *in, int inlen, uint8_t *md)
+ALIGN(64) void keccak(const uint8_t *in, int inlen, uint8_t *md)
 {
     state_t st;
     uint8_t temp[144];

@@ -84,6 +84,20 @@ if(COMPILER_ALIGN)
 endif()
 
 check_c_source_compiles(
+    "
+    typedef struct{
+        int foo;
+    } __attribute__ ((optimize (\"align-loops=8\"))) bar;
+    int main()
+    {
+      return 0;
+    }"
+    COMPILER_OPTIMIZE FAIL_REGEX "not supported")
+if(COMPILER_OPTIMIZE)
+    add_definitions(-DHAVE_OPTIMIZE)
+endif()
+
+check_c_source_compiles(
     "int __attribute__((target_clones(\"avx,default\"))) foo() {
       return 0;
     }

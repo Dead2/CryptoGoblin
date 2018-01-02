@@ -30,15 +30,15 @@
 #endif
 
 #ifdef HAVE_ALIGNED
-#  define ALIGN16  __attribute__((aligned (16)))
-#  define ALIGN32  __attribute__((aligned (32)))
-#  define ALIGN64  __attribute__((aligned (64)))
-#  define ALIGN128 __attribute__((aligned (128)))
+#  define ALIGN(x)  __attribute__((aligned (x)))
 #else
-# define ALIGN16
-# define ALIGN32
-# define ALIGN64
-# define ALIGN128
+# define ALIGN(x)
+#endif
+
+#ifdef HAVE_OPTIMIZE
+#  define OPTIMIZE(x)  __attribute__((optimize (x)))
+#else
+# define OPTIMIZE(x)
 #endif
 
 #ifdef HAVE_TARGET_CLONES

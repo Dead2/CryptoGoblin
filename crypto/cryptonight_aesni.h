@@ -189,7 +189,7 @@ ALWAYS_INLINE FLATTEN static inline void soft_aes_4round(__m128i key, __m128i* x
 
 #pragma GCC target ("sse4.2")
 template<size_t MEM, bool PREFETCH>
-ALIGN64 FLATTEN2 void cn_explode_scratchpad(const __m128i* input, __m128i* output)
+ALIGN(64) FLATTEN2 void cn_explode_scratchpad(const __m128i* input, __m128i* output)
 {
     // This is more than we have registers, compiler will assign 2 keys on the stack
     __m128i xin0, xin1, xin2, xin3, xin4, xin5, xin6, xin7;
@@ -251,7 +251,7 @@ ALIGN64 FLATTEN2 void cn_explode_scratchpad(const __m128i* input, __m128i* outpu
 #pragma GCC reset_options
 
 template<size_t MEM, bool PREFETCH>
-ALIGN16 FLATTEN2 void soft_cn_explode_scratchpad(const __m128i* input, __m128i* output)
+ALIGN(64) FLATTEN2 void soft_cn_explode_scratchpad(const __m128i* input, __m128i* output)
 {
     // This is more than we have registers, compiler will assign 2 keys on the stack
     __m128i xin0, xin1, xin2, xin3;
@@ -321,7 +321,7 @@ ALIGN16 FLATTEN2 void soft_cn_explode_scratchpad(const __m128i* input, __m128i* 
 
 #pragma GCC target ("sse4.2")
 template<size_t MEM, bool PREFETCH>
-ALIGN64 FLATTEN2 void cn_implode_scratchpad(const __m128i* input, __m128i* output)
+ALIGN(64) FLATTEN2 void cn_implode_scratchpad(const __m128i* input, __m128i* output)
 {
     // This is more than we have registers, compiler will assign 2 keys on the stack
     __m128i xout0, xout1, xout2, xout3, xout4, xout5, xout6, xout7;
@@ -386,7 +386,7 @@ ALIGN64 FLATTEN2 void cn_implode_scratchpad(const __m128i* input, __m128i* outpu
 
 
 template<size_t MEM, bool PREFETCH>
-ALIGN16 FLATTEN2 void soft_cn_implode_scratchpad(const __m128i* input, __m128i* output)
+ALIGN(64) FLATTEN2 void soft_cn_implode_scratchpad(const __m128i* input, __m128i* output)
 {
     // This is more than we have registers, compiler will assign 2 keys on the stack
     __m128i xout0, xout1, xout2, xout3;
@@ -467,7 +467,8 @@ ALIGN16 FLATTEN2 void soft_cn_implode_scratchpad(const __m128i* input, __m128i* 
 
 template<size_t ITERATIONS, size_t MEM, bool SOFT_AES, bool PREFETCH>
 TARGETS("avx2,avx,popcnt,fma,fma4,bmi,bmi2,xop,sse4.2,sse4.1,sse4a,ssse3,sse3,default")
-ALIGN64 void cryptonight_hash(const void* input, size_t len, void* output, cryptonight_ctx* ctx0)
+OPTIMIZE("no-align-loops")
+ALIGN(64) void cryptonight_hash(const void* input, size_t len, void* output, cryptonight_ctx* ctx0)
 {
     keccak<200>((const uint8_t *)input, len, ctx0->hash_state);
 
@@ -539,7 +540,8 @@ ALIGN64 void cryptonight_hash(const void* input, size_t len, void* output, crypt
 // We are still limited by L3 cache, so doubling will only work with CPUs where we have more than 2MB to core (Xeons)
 template<size_t ITERATIONS, size_t MEM, bool SOFT_AES, bool PREFETCH>
 TARGETS("avx2,avx,popcnt,fma,fma4,bmi,bmi2,xop,sse4.2,sse4.1,sse4a,ssse3,sse3,default")
-ALIGN64 void cryptonight_double_hash(const void* input, size_t len, void* output, cryptonight_ctx* __restrict ctx0, cryptonight_ctx* __restrict ctx1)
+OPTIMIZE("no-align-loops")
+ALIGN(64) void cryptonight_double_hash(const void* input, size_t len, void* output, cryptonight_ctx* __restrict ctx0, cryptonight_ctx* __restrict ctx1)
 {
     keccak<200>((const uint8_t *)input, len, ctx0->hash_state);
     keccak<200>((const uint8_t *)input+len, len, ctx1->hash_state);
