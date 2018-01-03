@@ -52,6 +52,8 @@ public:
 
     size_t pool_id;
 
+    char hostname[120];
+
     bool set_socket_error(const char* a);
     bool set_socket_error(const char* a, const char* b);
     bool set_socket_error(const char* a, size_t len);

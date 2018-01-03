@@ -677,6 +677,7 @@ void executor::connection_report(std::string& out)
 
     out.append("CONNECTION REPORT\n");
     out.append("Pool address    : ").append(jconf::inst()->GetPoolAddress()).append(1, '\n');
+    out.append("Actual address  : ").append(pool->hostname).append(1, '\n');
     if (pool->is_running() && pool->is_logged_in())
         out.append("Connected since : ").append(time_format(date, sizeof(date), tPoolConnTime)).append(1, '\n');
     else

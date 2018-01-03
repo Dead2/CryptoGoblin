@@ -218,6 +218,8 @@ bool jpsock::jpsock_thd_main()
     if(!sck->connect())
         return false;
 
+    snprintf(hostname, sizeof(hostname), "%s", sck->hostname);
+
     executor::inst()->push_event(ex_event(EV_SOCK_READY, pool_id));
 
     char buf[iSockBufferSize];

@@ -10,6 +10,7 @@ public:
     virtual int recv(char* buf, unsigned int len) = 0;
     virtual bool send(const char* buf) = 0;
     virtual void close(bool free) = 0;
+    char hostname[NI_MAXHOST];
 };
 
 class plain_socket : public base_socket
