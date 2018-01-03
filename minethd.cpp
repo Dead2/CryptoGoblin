@@ -368,7 +368,9 @@ void minethd::pin_thd_affinity()
     std::lock_guard<std::mutex> lock(work_thd_mtx);
 
     // pin memory to NUMA node
+#if defined(BINDNUMAMEM)
     bindMemoryToNUMANode(affinity);
+#endif
 
 #if defined(__APPLE__)
     printer::inst()->print_msg(L1, "WARNING on MacOS thread affinity is only advisory.");
