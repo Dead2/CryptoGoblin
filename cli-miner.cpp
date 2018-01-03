@@ -194,6 +194,7 @@ int main(int argc, char *argv[])
 
     using namespace std::chrono;
     uint64_t lastTime = time_point_cast<milliseconds>(high_resolution_clock::now()).time_since_epoch().count();
+    uint64_t currentTime;
 
     int key;
     while(true)
@@ -220,7 +221,7 @@ int main(int argc, char *argv[])
             break;
         }
 
-        uint64_t currentTime = time_point_cast<milliseconds>(high_resolution_clock::now()).time_since_epoch().count();
+        currentTime = time_point_cast<milliseconds>(high_resolution_clock::now()).time_since_epoch().count();
 
         /* Hard guard to make sure we never get called more than twice per second */
         if( currentTime - lastTime < 500)

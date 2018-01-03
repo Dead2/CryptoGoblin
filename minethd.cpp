@@ -411,7 +411,7 @@ void minethd::work_main()
                 raison d'etre of this software it us sensible to just wait until we have something*/
 
             while (iGlobalJobNo.load(std::memory_order_relaxed) == iJobNo)
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
             consume_work();
             continue;
@@ -520,7 +520,7 @@ void minethd::double_work_main()
             raison d'etre of this software it us sensible to just wait until we have something*/
 
             while (iGlobalJobNo.load(std::memory_order_relaxed) == iJobNo)
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
             consume_work();
             piNonce1 = prep_double_work(bDoubleWorkBlob);

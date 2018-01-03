@@ -1,6 +1,7 @@
 #pragma once
 
 #include <queue>
+#include <chrono>
 #include <thread>
 #include <mutex>
 #include <condition_variable>
@@ -12,7 +13,10 @@ public:
     T pop()
     {
         std::unique_lock<std::mutex> mlock(mutex_);
-        while (queue_.empty()) { cond_.wait(mlock); }
+        while (queue_.empty()) {
+            std::this_thread::sleep_for(std::chrono::microseconds(50));
+            cond_.wait(mlock);
+        }
         auto item = std::move(queue_.front());
         queue_.pop();
         return item;
@@ -21,7 +25,10 @@ public:
     void pop(T& item)
     {
         std::unique_lock<std::mutex> mlock(mutex_);
-        while (queue_.empty()) { cond_.wait(mlock); }
+        while (queue_.empty()) {
+            std::this_thread::sleep_for(std::chrono::microseconds(50));
+            cond_.wait(mlock);
+        }
         item = queue_.front();
         queue_.pop();
     }
