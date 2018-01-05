@@ -26,18 +26,18 @@ public:
     {
         char        sJobID[64];
         uint8_t     bWorkBlob[112];
+        uint64_t    iTarget;
+        size_t      iPoolId;
         uint32_t    iWorkSize;
         uint32_t    iResumeCnt;
-        uint64_t    iTarget;
         bool        bNiceHash;
         bool        bStall;
-        size_t      iPoolId;
 
-        miner_work() : iWorkSize(0), bStall(true), iPoolId(0) { }
+        miner_work() : iPoolId(0), iWorkSize(0), bStall(true) { }
 
         miner_work(const char* sJobID, const uint8_t* bWork, uint32_t iWorkSize, uint32_t iResumeCnt,
-            uint64_t iTarget, bool bNiceHash, size_t iPoolId) : iWorkSize(iWorkSize), iResumeCnt(iResumeCnt),
-            iTarget(iTarget), bNiceHash(bNiceHash), bStall(false), iPoolId(iPoolId)
+            uint64_t iTarget, bool bNiceHash, size_t iPoolId) :  iTarget(iTarget), iPoolId(iPoolId),
+            iWorkSize(iWorkSize), iResumeCnt(iResumeCnt), bNiceHash(bNiceHash), bStall(false)
         {
             assert(iWorkSize <= sizeof(bWorkBlob));
             memcpy(this->sJobID, sJobID, sizeof(miner_work::sJobID));
@@ -53,9 +53,9 @@ public:
             iWorkSize = from.iWorkSize;
             iResumeCnt = from.iResumeCnt;
             iTarget = from.iTarget;
+            iPoolId = from.iPoolId;
             bNiceHash = from.bNiceHash;
             bStall = from.bStall;
-            iPoolId = from.iPoolId;
 
             assert(iWorkSize <= sizeof(bWorkBlob));
             memcpy(sJobID, from.sJobID, sizeof(sJobID));
@@ -64,8 +64,8 @@ public:
             return *this;
         }
 
-        miner_work(miner_work&& from) : iWorkSize(from.iWorkSize), iTarget(from.iTarget),
-            bStall(from.bStall), iPoolId(from.iPoolId)
+        miner_work(miner_work&& from) : iTarget(from.iTarget), iPoolId(from.iPoolId),
+            iWorkSize(from.iWorkSize), bStall(from.bStall)
         {
             assert(iWorkSize <= sizeof(bWorkBlob));
             memcpy(sJobID, from.sJobID, sizeof(sJobID));
@@ -79,9 +79,9 @@ public:
             iWorkSize = from.iWorkSize;
             iResumeCnt = from.iResumeCnt;
             iTarget = from.iTarget;
+            iPoolId = from.iPoolId;
             bNiceHash = from.bNiceHash;
             bStall = from.bStall;
-            iPoolId = from.iPoolId;
 
             assert(iWorkSize <= sizeof(bWorkBlob));
             memcpy(sJobID, from.sJobID, sizeof(sJobID));
@@ -121,25 +121,25 @@ private:
     void work_main();
     void double_work_main();
     void consume_work();
+    void pin_thd_affinity();
     uint32_t* prep_double_work(uint8_t bDoubleWorkBlob[sizeof(miner_work::bWorkBlob) * 2]);
 
     static std::atomic<uint64_t> iGlobalJobNo;
     static std::atomic<uint64_t> iConsumeCnt;
     static uint64_t iThreadCount;
-    uint64_t iJobNo;
 
-    static miner_work oGlobalWork;
-    miner_work oWork;
-
-    void pin_thd_affinity();
+    std::thread oWorkThd;
     // Held by the creating context to prevent a race cond with oWorkThd = std::thread(...)
     std::mutex work_thd_mtx;
 
-    std::thread oWorkThd;
-    uint8_t iThreadNo;
+    uint64_t iJobNo;
     int64_t affinity;
+    uint8_t iThreadNo;
 
     bool bQuit;
     bool bNoPrefetch;
+
+    miner_work oWork;
+    static miner_work oGlobalWork;
 };
 

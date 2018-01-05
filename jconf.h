@@ -14,9 +14,9 @@ public:
     bool parse_config(const char* sFilename);
 
     struct thd_cfg {
+        long long iCpuAff;
         bool bDoubleMode;
         bool bNoPrefetch;
-        long long iCpuAff;
     };
 
     enum slow_mem_cfg {

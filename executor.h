@@ -33,87 +33,48 @@ public:
 private:
     struct timed_event
     {
-        ex_event event;
         size_t ticks_left;
+        ex_event event;
 
-        timed_event(ex_event&& ev, size_t ticks) : event(std::move(ev)), ticks_left(ticks) {}
+        timed_event(ex_event&& ev, size_t ticks) : ticks_left(ticks), event(std::move(ev)) {}
     };
-
-    // In miliseconds, has to divide a second (1000ms) into an integer number
-    constexpr static size_t iTickTime = 500;
-
-    // Dev donation time period in seconds. 100 minutes by default.
-    // We will divide up this period according to the config setting
-    constexpr static size_t iDevDonatePeriod = 100 * 60;
-
     std::list<timed_event> lTimedEvents;
     std::mutex timed_event_mutex;
-    thdq<ex_event> oEventQ;
 
+    thdq<ex_event> oEventQ;
     telemetry* telem;
     std::vector<minethd*>* pvThreads;
-
     size_t current_pool_id;
 
     jpsock* usr_pool;
     jpsock* dev_pool;
+    size_t iReconnectAttempts = 0;
 
-    jpsock* pick_pool_by_id(size_t pool_id);
+    std::chrono::system_clock::time_point tPoolConnTime;
+    size_t iPoolHashes = 0;
+    uint64_t iPoolDiff = 0;
+    double fHighestHps = 0.0;
 
     bool is_dev_time;
 
-    executor();
-    static executor* oInst;
-
-    void ex_main();
-
-    void ex_clock_thd();
-    void pool_connect(jpsock* pool);
-
-    void hashrate_report(std::string& out);
-    void result_report(std::string& out);
-    void connection_report(std::string& out);
-
-    void http_hashrate_report(std::string& out);
-    void http_result_report(std::string& out);
-    void http_connection_report(std::string& out);
-    void http_json_report(std::string& out);
-
-    void http_report(ex_event_name ev);
-    void print_report(ex_event_name ev);
-
-    std::string* pHttpString = nullptr;
-    std::promise<void> httpReady;
-    std::mutex httpMutex;
-
-    size_t iReconnectAttempts = 0;
-
-    struct sck_error_log
-    {
-        std::chrono::system_clock::time_point time;
-        std::string msg;
-
-        sck_error_log(std::string&& err) : msg(std::move(err))
-        {
-            time = std::chrono::system_clock::now();
-        }
-    };
-    std::vector<sck_error_log> vSocketLog;
+    // Set it to 16 bit so that we can just let it grow
+    // Maximum realistic growth rate - 5MB / month
+    std::vector<uint16_t> iPoolCallTimes;
 
     // Element zero is always the success element.
     // Keep in mind that this is a tally and not a log like above
     struct result_tally
     {
+        size_t count;
         std::chrono::system_clock::time_point time;
         std::string msg;
-        size_t count;
 
-        result_tally() : msg("[OK]"), count(0)
+        result_tally() : count(0), msg("[OK]")
         {
             time = std::chrono::system_clock::now();
         }
 
-        result_tally(std::string&& err) : msg(std::move(err)), count(1)
+        result_tally(std::string&& err) : count(1), msg(std::move(err))
         {
             time = std::chrono::system_clock::now();
         }
@@ -137,13 +98,49 @@ private:
     //More result statistics
     std::array<size_t, 10> iTopDiff { { } }; //Initialize to zero
 
-    std::chrono::system_clock::time_point tPoolConnTime;
-    size_t iPoolHashes = 0;
-    uint64_t iPoolDiff = 0;
+    struct sck_error_log
+    {
+        std::chrono::system_clock::time_point time;
+        std::string msg;
 
-    // Set it to 16 bit so that we can just let it grow
-    // Maximum realistic growth rate - 5MB / month
-    std::vector<uint16_t> iPoolCallTimes;
+        sck_error_log(std::string&& err) : msg(std::move(err))
+        {
+            time = std::chrono::system_clock::now();
+        }
+    };
+    std::vector<sck_error_log> vSocketLog;
+
+    std::string* pHttpString = nullptr;
+    std::promise<void> httpReady;
+    std::mutex httpMutex;
+
+    // In miliseconds, has to divide a second (1000ms) into an integer number
+    constexpr static size_t iTickTime = 500;
+
+    // Dev donation time period in seconds. 100 minutes by default.
+    // We will divide up this period according to the config setting
+    constexpr static size_t iDevDonatePeriod = 100 * 60;
+
+    jpsock* pick_pool_by_id(size_t pool_id);
+    executor();
+    static executor* oInst;
+
+    void ex_main();
+
+    void ex_clock_thd();
+    void pool_connect(jpsock* pool);
+
+    void hashrate_report(std::string& out);
+    void result_report(std::string& out);
+    void connection_report(std::string& out);
+
+    void http_hashrate_report(std::string& out);
+    void http_result_report(std::string& out);
+    void http_connection_report(std::string& out);
+    void http_json_report(std::string& out);
+
+    void http_report(ex_event_name ev);
+    void print_report(ex_event_name ev);
 
     //Those stats are reset if we disconnect
     inline void reset_stats()
@@ -153,8 +150,6 @@ private:
         iPoolHashes = 0;
         iPoolDiff = 0;
     }
-
-    double fHighestHps = 0.0;
 
     void log_socket_error(std::string&& sError);
     void log_result_error(std::string&& sError);

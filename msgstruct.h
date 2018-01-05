@@ -26,8 +26,8 @@ struct pool_job
 
 struct job_result
 {
-    uint8_t     bResult[32];
     char        sJobID[64];
+    uint8_t     bResult[32];
     uint32_t    iNonce;
 
     job_result() {}

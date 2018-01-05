@@ -40,10 +40,10 @@ using namespace rapidjson;
 
 struct jpsock::call_rsp
 {
-    bool bHaveResponse;
     uint64_t iCallId;
     Value* pCallData;
     std::string sCallErr;
+    bool bHaveResponse;
 
     call_rsp(Value* val) : pCallData(val)
     {

@@ -36,13 +36,13 @@ typedef crypto_uint64 uint64_t;
 
 /* NIST API begin */
 typedef struct {
-  uint32_t chaining[SIZE512/sizeof(uint32_t)];            /* actual state */
-  uint32_t block_counter1,
-  block_counter2;         /* message block counter(s) */
   BitSequence buffer[SIZE512];      /* data buffer */
-  int buf_ptr;              /* data buffer pointer */
-  int bits_in_last_byte;    /* no. of message bits in last byte of
-                   data buffer */
+  uint32_t chaining[SIZE512/sizeof(uint32_t)]; /* actual state */
+  uint32_t block_counter1;
+  uint32_t block_counter2;          /* message block counter(s) */
+  int buf_ptr;                      /* data buffer pointer */
+  int bits_in_last_byte;            /* no. of message bits in last byte of
+                                       data buffer */
 } groestlHashState;
 
 /*void Init(hashState*);

@@ -24,6 +24,9 @@ class base_socket;
 class jpsock
 {
 public:
+    size_t pool_id;
+    char hostname[120];
+
     jpsock(size_t id, bool tls);
     ~jpsock();
 
@@ -50,10 +53,6 @@ public:
 
     bool get_current_job(pool_job& job);
 
-    size_t pool_id;
-
-    char hostname[120];
-
     bool set_socket_error(const char* a);
     bool set_socket_error(const char* a, const char* b);
     bool set_socket_error(const char* a, size_t len);
@@ -61,18 +60,33 @@ public:
     bool set_socket_error_strerr(const char* a, int res);
 
 private:
-    std::atomic<bool> bRunning;
-    std::atomic<bool> bLoggedIn;
-
     uint8_t* bJsonRecvMem;
     uint8_t* bJsonParseMem;
     uint8_t* bJsonCallMem;
+    std::mutex call_mutex;
+
+    std::thread* oRecvThd;
+    std::atomic<uint64_t> iJobDiff;
+    std::atomic<bool> bHaveSocketError;
+    std::atomic<bool> bRunning;
+    std::atomic<bool> bLoggedIn;
+    std::mutex job_mutex;
+
+    pool_job oCurrentJob;
+
+    std::condition_variable call_cond;
+
+    std::string sSocketError;
+    char sMinerId[64];
+
+    struct opaque_private;
+    opaque_private* prv;
+    base_socket* sck;
 
     static constexpr size_t iJsonMemSize = 4096;
     static constexpr size_t iSockBufferSize = 4096;
 
     struct call_rsp;
-    struct opaque_private;
     struct opq_json_val;
 
     void jpsock_thread();
@@ -81,20 +95,5 @@ private:
     bool process_pool_job(const opq_json_val* params);
     bool cmd_ret_wait(const char* sPacket, opq_json_val& poResult);
 
-    char sMinerId[64];
-    std::atomic<uint64_t> iJobDiff;
-
-    std::string sSocketError;
-    std::atomic<bool> bHaveSocketError;
-
-    std::mutex call_mutex;
-    std::condition_variable call_cond;
-    std::thread* oRecvThd;
-
-    std::mutex job_mutex;
-    pool_job oCurrentJob;
-
-    opaque_private* prv;
-    base_socket* sck;
 };
 
