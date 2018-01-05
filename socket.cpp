@@ -122,19 +122,19 @@ bool plain_socket::set_hostname(const char* sAddr)
 
 bool plain_socket::connect()
 {
-    char tmphostname[NI_MAXHOST];
-    char tmpip[NI_MAXHOST];
+    char tmphostname[MAXHOSTLEN];
+    char tmpip[MAXHOSTLEN];
     int ret = ::connect(hSocket, pSockAddr->ai_addr, (int)pSockAddr->ai_addrlen);
+
+    getnameinfo((struct sockaddr *)pSockAddr->ai_addr, pSockAddr->ai_addrlen, tmphostname, MAXHOSTLEN, NULL, 0, 0);
+    getnameinfo((struct sockaddr *)pSockAddr->ai_addr, pSockAddr->ai_addrlen, tmpip, MAXHOSTLEN, NULL, 0, NI_NUMERICHOST);
+    snprintf(hostname, sizeof(hostname), "%s (%s)", tmpip, tmphostname);
 
     freeaddrinfo(pAddrRoot);
     pAddrRoot = nullptr;
 
     if (ret != 0)
         return pCallback->set_socket_error_strerr("CONNECT error: ");
-
-    getnameinfo((struct sockaddr *)pSockAddr->ai_addr, pSockAddr->ai_addrlen, tmphostname, NI_MAXHOST, NULL, 0, 0);
-    getnameinfo((struct sockaddr *)pSockAddr->ai_addr, pSockAddr->ai_addrlen, tmpip, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
-    snprintf(hostname, sizeof(hostname), "%s (%s)", tmpip, tmphostname);
 
     return true;
 }
@@ -267,9 +267,9 @@ bool tls_socket::connect()
     // Get IP and reverse hostname
     struct sockaddr_in addr;
     socklen_t addr_size = sizeof(struct sockaddr_in);
-    char tmphostname[NI_MAXHOST];
+    char tmphostname[MAXHOSTLEN];
     getpeername(BIO_get_fd(bio,NULL), (struct sockaddr *)&addr, &addr_size);
-    getnameinfo((struct sockaddr *)&addr, addr_size, tmphostname, NI_MAXHOST, NULL, 0, 0);
+    getnameinfo((struct sockaddr *)&addr, addr_size, tmphostname, MAXHOSTLEN, NULL, 0, 0);
     snprintf(hostname, sizeof(hostname), "%s (%s)", inet_ntoa(addr.sin_addr), tmphostname);
 
     if(BIO_do_handshake(bio) != 1)

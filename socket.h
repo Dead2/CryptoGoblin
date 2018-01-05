@@ -1,5 +1,8 @@
 #pragma once
 #include "socks.h"
+
+#define MAXHOSTLEN 120
+
 class jpsock;
 
 class base_socket
@@ -10,7 +13,7 @@ public:
     virtual int recv(char* buf, unsigned int len) = 0;
     virtual bool send(const char* buf) = 0;
     virtual void close(bool free) = 0;
-    char hostname[NI_MAXHOST];
+    char hostname[MAXHOSTLEN];
 };
 
 class plain_socket : public base_socket
