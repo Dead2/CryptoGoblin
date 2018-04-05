@@ -72,7 +72,8 @@ void thd_setaffinity(std::thread::native_handle_type h, uint64_t cpu_id)
 #include "executor.h"
 #include "minethd.h"
 #include "jconf.h"
-#include "crypto/cryptonight_aesni.h"
+//#include "crypto/cryptonight_common.cpp"
+#include "crypto/cryptonight_main_p.hpp"
 #include "hwlocMemory.hpp"
 
 telemetry::telemetry(size_t iThd)

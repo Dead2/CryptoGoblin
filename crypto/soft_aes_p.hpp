@@ -39,14 +39,6 @@
 
 #define TABLE_ALIGN     64
 
-#if defined(_MSC_VER)
-#define ALIGN __declspec(align(TABLE_ALIGN))
-#elif defined(__GNUC__)
-#define ALIGN __attribute__ ((aligned(TABLE_ALIGN)))
-#else
-#define ALIGN
-#endif
-
 #define sb_data(w) {\
     w(0x63), w(0x7c), w(0x77), w(0x7b), w(0xf2), w(0x6b), w(0x6f), w(0xc5),\
     w(0x30), w(0x01), w(0x67), w(0x2b), w(0xfe), w(0xd7), w(0xab), w(0x76),\

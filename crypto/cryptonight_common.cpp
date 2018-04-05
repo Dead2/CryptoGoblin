@@ -43,34 +43,8 @@
 #include <string.h>
 #endif // _WIN32
 
-extern "C"
-{
-#include "c_groestl.h"
-#include "c_blake256.h"
-#include "c_skein.h"
-}
-#include "jh.hpp"
 #include "../common.h"
 #include "cryptonight.h"
-#include "cryptonight_aesni.h"
-
-void do_blake_hash(const void* input, char* output) {
-    blake256_hash((uint8_t*)output, (const uint8_t*)input, 200);
-}
-
-void do_groestl_hash(const void* input, char* output) {
-    groestl((const uint8_t*)input, 200 * 8, (uint8_t*)output);
-}
-
-void do_jh_hash(const void* input, char* output) {
-    xmr_jh256((const uint8_t*)input, (uint8_t*)output);
-}
-
-void do_skein_hash(const void* input, char* output) {
-    xmr_skein((const uint8_t*)input, (uint8_t*)output);
-}
-
-void (* const extra_hashes[4])(const void *, char *) = {do_blake_hash, do_groestl_hash, do_jh_hash, do_skein_hash};
 
 #ifdef _WIN32
 BOOL bRebootDesirable = FALSE; //If VirtualAlloc fails, suggest a reboot
