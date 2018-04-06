@@ -745,23 +745,23 @@ set(LIBRARY_OUTPUT_PATH "bin")
 # do not install the binary if the project and install are equal
 if( NOT CMAKE_INSTALL_PREFIX STREQUAL PROJECT_BINARY_DIR )
     install(TARGETS CryptoGoblin
-            RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
+            RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}/${LIBRARY_OUTPUT_PATH}")
     if(CUDA_FOUND)
         if(WIN32)
             install(TARGETS CryptoGoblin_cuda
-                RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
+                RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}/${LIBRARY_OUTPUT_PATH}")
         else()
             install(TARGETS CryptoGoblin_cuda
-                LIBRARY DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
+                LIBRARY DESTINATION "${CMAKE_INSTALL_PREFIX}/${LIBRARY_OUTPUT_PATH}")
         endif()
     endif()
     if(OpenCL_FOUND)
         if(WIN32)
             install(TARGETS CryptoGoblin_opencl
-                RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
+                RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}/${LIBRARY_OUTPUT_PATH}")
         else()
             install(TARGETS CryptoGoblin_opencl
-                LIBRARY DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
+                LIBRARY DESTINATION "${CMAKE_INSTALL_PREFIX}/${LIBRARY_OUTPUT_PATH}")
         endif()
     endif()
 else()
