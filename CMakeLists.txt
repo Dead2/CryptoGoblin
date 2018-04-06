@@ -739,8 +739,8 @@ endif()
 # Install
 ################################################################################
 
-set(EXECUTABLE_OUTPUT_PATH "bin")
-set(LIBRARY_OUTPUT_PATH "bin")
+set(EXECUTABLE_OUTPUT_PATH "bin" CACHE STRING "Path to place executables relative to ${CMAKE_INSTALL_PREFIX}")
+set(LIBRARY_OUTPUT_PATH "bin" CACHE STRING "Path to place libraries relative to ${CMAKE_INSTALL_PREFIX}")
 
 # do not install the binary if the project and install are equal
 if( NOT CMAKE_INSTALL_PREFIX STREQUAL PROJECT_BINARY_DIR )
