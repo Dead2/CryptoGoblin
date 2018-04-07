@@ -13,6 +13,9 @@ cuda="ON"
 # Enable OpenCL GPU support? Defaults to ON
 opencl="ON"
 
+# Enable LTO optimized compilation? Defaults to ON
+lto="ON"
+
 # Verbose compilation? Defaults to OFF
 verbose="OFF"
 
@@ -57,7 +60,7 @@ arch=native
 
 # Enable static linking if arch is not native
 static="OFF"
-if [ "$arch" == "native" ]
+if [ "$arch" != "native" ]
 then
     static="ON"
 fi
@@ -73,6 +76,6 @@ fi
 
 set -x
 
-cmake . -DCMAKE_VERBOSE_MAKEFILE="$verbose" -DCMAKE_LINK_STATIC="$static" -DARCH="$arch" -DHWLOC_ENABLE="$hwloc" -DMICROHTTPD_ENABLE="$microhttpd" -DCUDA_ENABLE="$cuda" -DOpenCL_ENABLE="$opencl"
+cmake . -DCMAKE_VERBOSE_MAKEFILE="$verbose" -DCMAKE_LINK_STATIC="$static" -DARCH="$arch" -DCG_LTO="$lto" -DHWLOC_ENABLE="$hwloc" -DMICROHTTPD_ENABLE="$microhttpd" -DCUDA_ENABLE="$cuda" -DOpenCL_ENABLE="$opencl"
 
 make -j3

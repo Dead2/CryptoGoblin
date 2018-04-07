@@ -57,12 +57,24 @@ option(CMAKE_LINK_STATIC "link as much as possible libraries static" OFF)
 ################################################################################
 # CryptoGoblin tuning settings
 ################################################################################
-option(CG_LTO "Enable Link-time optimizations (Recommended)" OFF)
+if(NOT WIN32)
+  string(ASCII 27 Esc)
+  set(RST "${Esc}[m")
+  set(RED         "${Esc}[31m")
+  set(GREEN       "${Esc}[32m")
+  set(YELLOW      "${Esc}[33m")
+  set(BLUE        "${Esc}[34m")
+  set(MAGENTA     "${Esc}[35m")
+  set(CYAN        "${Esc}[36m")
+  set(WHITE       "${Esc}[37m")
+endif()
+
+option(CG_LTO "Enable Link-time optimizations (Recommended)" ON)
 
 option(CG_TUNING_ENABLE "Enable or disable CryptoGoblin Tuning" ON)
 if(CG_TUNING_ENABLE)
     # General options
-    set(CG_CFLAGS "${CG_CFLAGS} -O2 -pipe -Wall -fdiagnostics-color=always -fuse-linker-plugin")
+    set(CG_CFLAGS "${CG_CFLAGS} -O2 -pipe -fdiagnostics-color=always -fuse-linker-plugin")
     # Protect
     set(CG_CFLAGS "${CG_CFLAGS} ") # -fstack-protector
     # Codegen
@@ -87,6 +99,10 @@ if(CG_TUNING_ENABLE)
     set(CG_CFLAGS "${CG_CFLAGS} -falign-loops=16 -falign-functions=16") # -falign-jumps=16 -falign-labels=16
     # Testing
     set(CG_CFLAGS "${CG_CFLAGS} -fbranch-target-load-optimize2")
+
+    if(CMAKE_VERBOSE_MAKEFILE STREQUAL "ON")
+        set(CG_CFLAGS "${CG_CFLAGS} -Wall")
+    endif()
 
     if (CG_LTO)
         # LTO
@@ -269,7 +285,7 @@ if(CUDA_ENABLE)
         endif()
     else()
         #message(FATAL_ERROR "CUDA NOT found: use `-DCUDA_ENABLE=OFF` to build without NVIDIA GPU support")
-        message(WARNING "CUDA NOT found, DISABLING")
+        message(WARNING "${RED}CUDA NOT found, DISABLING${RST}")
         add_definitions("-DCONF_NO_CUDA")
     endif()
 else()
@@ -329,7 +345,7 @@ if(OpenCL_ENABLE)
         link_directories(${OpenCL_LIBRARY})
     else()
         #message(FATAL_ERROR "OpenCL NOT found: use `-DOpenCL_ENABLE=OFF` to build without OpenCL support for AMD gpu's")
-        message(WARNING "OpenCL NOT found, DISABLING")
+        message(WARNING "${RED}OpenCL NOT found, DISABLING${RST}")
         add_definitions("-DCONF_NO_OPENCL")
     endif()
 else()
@@ -605,8 +621,6 @@ if(CMAKE_LINK_STATIC)
     endif()
 endif()
 
-# compile C files
-
 # compile generic backend files
 file(GLOB BACKEND_CPP
     "xmrstak/*.cpp"
@@ -618,13 +632,14 @@ file(GLOB BACKEND_CPP
     "xmrstak/misc/*.cpp"
     "xmrstak/net/*.cpp")
 
-add_library(CryptoGoblin-backend
-    STATIC
-    ${BACKEND_CPP}
-)
+if(NOT CG_LTO)
+    add_library(CryptoGoblin-backend
+        STATIC
+        ${BACKEND_CPP}
+    )
 
-target_link_libraries(CryptoGoblin-backend ${CMAKE_DL_LIBS} ${LIBS})
-#target_compile_options(CryptoGoblin-backend PRIVATE "-flto" "-flto-partition=one" "-fdevirtualize-at-ltrans")
+    target_link_libraries(CryptoGoblin-backend ${CMAKE_DL_LIBS} ${LIBS})
+endif()
 
 # compile CUDA backend
 if(CUDA_FOUND)
@@ -674,14 +689,21 @@ set_source_files_properties(${SRCFILES_CPP} PROPERTIES LANGUAGE CXX)
 if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
     add_executable(CryptoGoblin ${SRCFILES_CPP} xmrstak/cli/xmr-stak.manifest)
 else()
-    add_executable(CryptoGoblin ${SRCFILES_CPP})
+    if(CG_LTO)
+        add_executable(CryptoGoblin ${SRCFILES_CPP} ${BACKEND_CPP})
+    else(CG_LTO)
+        add_executable(CryptoGoblin ${SRCFILES_CPP})
+    endif(CG_LTO)
 endif()
 
 set(EXECUTABLE_OUTPUT_PATH "bin")
 set(LIBRARY_OUTPUT_PATH "bin")
 
-target_link_libraries(CryptoGoblin ${LIBS} CryptoGoblin-backend)
-
+if(CG_LTO)
+    target_link_libraries(CryptoGoblin ${LIBS})
+else()
+    target_link_libraries(CryptoGoblin ${LIBS} CryptoGoblin-backend)
+endif()
 ################################################################################
 # Install
 ################################################################################
