@@ -1,11 +1,12 @@
 # CryptoGoblin - CryptoNight CPU mining tool
-** for coins based on cryptonight-classic, cryptonight-light or cryptonight-heavy.
-** Support for Monero, Electroneum, Aeon, Sumokoin, Edollar and more.
+** for coins based on cryptonight-classic, cryptonight-light or cryptonight-heavy. **
+** Support for Monero, Electroneum, Aeon, Sumokoin, Edollar and more. **
 CryptoGoblin is a greedy mining goblin that will push the cpu to get as many hashes as possible,
 if you believe in cpu-rights, then this might not be the mining tool for you.
 
-CryptoGoblin was forked from xmr-stak, but it utilizes several GCC compiler-specific tweaks and
+CryptoGoblin was forked from xmr-stak in early 2017, it utilizes several GCC compiler-specific tweaks and
 many other (medium, small, minor and micro) optimizations to get the most speed out of your cpu.
+CryptoGoblin can also be compiled using, but several of the optimizations will not be activated.
 
 Dev fee mining is set to 1.5%, and part of it goes to xmr-stak authors.
 
@@ -15,6 +16,7 @@ Dev fee mining is set to 1.5%, and part of it goes to xmr-stak authors.
 * [CPU Tuning](doc/tuning-cpu.md)
 * [GPU Tuning](doc/tuning-gpu.md)
 * [Compilation](#compile)
+* [Documentation](https://github.com/Dead2/CryptoGoblin/tree/master/doc)
 
 ## Configuration
 Run the miner with the default config file unchanged, and it will suggest a thread config for you.
@@ -30,55 +32,17 @@ Detailed tuning information can be found in the TUNING.txt file
 ## Windows
 Download the pre-compiled release here https://github.com/Dead2/CryptoGoblin/releases
 
-## compile
-Linux compilation using build.sh
-This will build with LTO enabled, and some really aggressive optimization flags.
-
-If you are lucky, this might give you anything from 0% to 60% improvement, if you are not lucky
-it could be a couple percent slower. Soft-aes will see the really huge improvements.
+## Compilation
+CryptoGoblin includes a script `build.sh` that can be edited to easily change important settings
+and then run to start the compilation.
 
 To compile, run:
 `./build.sh`
 
-microhttpd server is disabled by default, since it has a small impact on the performance
-and don't really bring much to the table. Just toggle it from OFF to ON in the bottom of
-build.sh if you want to use it.
+For more information about compiling and dependencies, please have a look at the documentation
+targeting your OS/distro [here](https://github.com/Dead2/CryptoGoblin/tree/master/doc).
 
-You can easily modify build.sh yourself to experiment with adding or removing flags.
-
-
-## Linux compilation and dependencies
-- GCC 6.0 or higher is recommended, but 5.1 should also work.
-  (GCC 5.x will cause an error, but you can remove the erroring flag from build.sh)
-- gcc-c++ version 5.1 or higher is required for full C++11 support.
-- (Optional) openssl devel package for encrypted ssl pool connections.
-- (Optional) libmicrohttpd devel package for running the integrated http server.
-- (Optional) hwloc devel package for improved autoconf in dual and quad-cpu (not core) systems.
-
-```bash
-    # Ubuntu 17.04 GCC 7.x installation
-    sudo add-apt-repository ppa:ubuntu-toolchain-r/test
-    sudo apt-get update
-    sudo apt-get install gcc-7 g++-7
-
-    # Ubuntu / Debian
-    sudo apt-get install libmicrohttpd-dev libssl-dev cmake build-essential libhwloc-dev
-    build.sh
-
-    # Fedora
-    sudo dnf install gcc gcc-c++ hwloc-devel libmicrohttpd-devel openssl-devel cmake
-    build.sh
-
-    # CentOS
-    sudo yum install centos-release-scl cmake3 hwloc-devel libmicrohttpd-devel openssl-devel
-    sudo yum install devtoolset-7-gcc*
-    scl enable devtoolset-7 bash
-    build.sh
-
-    make install (Or just copy/run the executable from the bin folder manually)
-```
-
-
+## Donation
 If you want to make a little donation directly to me (Dead2), transfers or donation mining (at pool.supportxmr.com:3333), my XMR address is:
 ```
 45obtQLBPgyZL8Xb4qFFdZQLZugJzkHUo7oHeKd2zZSmfjxRg6WKhAjD4o1eb6LjK1RY2V4sp1nmDAity9Ks9NvZHw8z1EL

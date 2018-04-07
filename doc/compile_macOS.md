@@ -1,37 +1,26 @@
 # Compile **CryptoGoblin** for macOS
 
-## Dependencies
+## Installing dependencies
 
-Assuming you already have [Homebrew](https://brew.sh) installed, the installation of dependencies is pretty straightforward and will generate the `CryptoGoblin` binary in the `bin/` directory.
+Assuming you already have [Homebrew](https://brew.sh) installed, the installation of dependencies is pretty straightforward and will generate the `CryptoGoblin` binary in the `build/bin/` directory.
+
+
+### Common
+```bash
+brew install hwloc libmicrohttpd gcc openssl cmake
+```
 
 ### For NVIDIA GPUs
-
-```shell
+```bash
 brew tap caskroom/drivers
 brew cask install nvidia-cuda
-brew install hwloc libmicrohttpd gcc openssl cmake
-cmake . -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl -DOpenCL_ENABLE=OFF
-make install
 ```
 
-[All available CMake options](compile.md#nvidia-build-options)
-
-### For AMD GPUs
-
-OpenCL is bundled with Xcode, so no other depedency then the basic ones needed. Just enable OpenCL via the `-DOpenCL_ENABLE=ON` CMake option.
-
-```shell
-brew install hwloc libmicrohttpd gcc openssl cmake
-cmake . -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl -DCUDA_ENABLE=OFF -DOpenCL_ENABLE=ON
-make install
+## Compiling
+```bash
+    git clone https://github.com/Dead2/CryptoGoblin.git
+    cd CryptoGoblin
+    # Edit build.sh
+    ./build.sh
+    # (Optional:) make install
 ```
-
-### For CPU-only mining
-
-```shell
-brew install hwloc libmicrohttpd gcc openssl cmake
-cmake . -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl -DCUDA_ENABLE=OFF -DOpenCL_ENABLE=OFF
-make install
-```
-
-[All available CMake options](compile.md#cpu-build-options)

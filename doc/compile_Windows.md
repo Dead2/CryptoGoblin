@@ -8,7 +8,7 @@
 - Execute `mkdir C:\xmr-stak-dep`
 
 ### Visual Studio Community 2017
-
+- PS: note that CryptoGoblin is optimized for GCC, compiling with MSVC should work but will disable some optimizations.
 - Download and install [Visual Studio Community 2017](https://www.visualstudio.com/downloads/)
 - During install choose following components:
   - `Desktop development with C++` (left side)
@@ -47,12 +47,12 @@
 
 - Open a command line (Windows key + r) and enter `cmd`
 - Execute
-   ```
+   ```bash
    cd c:\xmr-stak-dep
    tree .
    ```
 - You should see something like this:
-  ```
+  ```bash
     C:\xmr-stak-dep>tree .
     Folder PATH listing for volume Windows
     Volume serial number is XX02-XXXX
@@ -81,14 +81,14 @@
 - Open a command line (Windows key + r) and enter `cmd`
 - Go to extracted source code directory (e.g. `cd C:\Users\USERNAME\CryptoGoblin-<version>`)
 - Execute the following commands (NOTE: path to Visual Studio Community 2017 can be different)
-  ```
+  ```bash
   # Execute next line only if compiling for Cuda 9.1 and using Visual Studio 2017 >= 15.5 (released 12/04/17)
   "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" x64 -vcvars_ver=14.11  
   
   "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\Tools\VsMSBuildCmd.bat"
   ```
 - Sometimes Windows will change the directory to `C:\Users\USERNAME\source\` instead of `C:\Users\USERNAME\CryptoGoblin-<version>\`. If that's the case execute `cd C:\Users\USERNAME\CryptoGoblin-<version>` followed by:
-  ```
+  ```bash
   mkdir build
   
   cd build
@@ -102,7 +102,7 @@
 - For CUDA 8* execute: `cmake -G "Visual Studio 15 2017 Win64" -T v140,host=x64 ..`
 - For CUDA 9* **and/or** AMD GPUs, CPU execute: `cmake -G "Visual Studio 15 2017 Win64" -T v141,host=x64 ..`
 - Then execute
-  ```
+  ```bash
   cmake --build . --config Release --target install
   
   cd bin\Release

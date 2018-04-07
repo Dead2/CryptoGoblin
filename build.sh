@@ -1,5 +1,4 @@
 #!/bin/sh
-rm -rf CMakeFiles/ CMakeCache.txt
 
 # Enable HWLOC library support? Defaults to ON
 hwloc="ON"
@@ -7,17 +6,29 @@ hwloc="ON"
 # Enable webserver support? Defaults to ON
 microhttpd="ON"
 
-# Enable CUDA GPU support? Defaults to ON
+# Enable OpenSSL encryption support? Defaults to ON
+openssl="ON"
+
+# Enable CPU mining support? Defaults to ON
+cpu="ON"
+
+# Enable Nvidia CUDA GPU mining support? Defaults to ON
 cuda="ON"
 
-# Enable OpenCL GPU support? Defaults to ON
+# Enable OpenCL mining support? Defaults to ON
 opencl="ON"
 
-# Enable LTO optimized compilation? Defaults to ON
+# Enable GCC's LTO optimized compilation mode? Defaults to ON
 lto="ON"
 
 # Verbose compilation? Defaults to OFF
 verbose="OFF"
+
+# Install path
+installprefix="/opt/CryptoGoblin/"
+
+# Advanced cmake options, space delimited.
+cmakeopt=""
 
 #
 # What is the oldest cpu the compiled binary needs to work with?
@@ -70,12 +81,23 @@ fi
 
 
 
+
+
+
 #########################
 # Usually no need to change anything below this point
 ##########
 
-set -x
+rm -rf CMakeFiles/ CMakeCache.txt
+mkdir -p build
+cd build
+rm -rf CMakeFiles/ CMakeCache.txt
 
-cmake . -DCMAKE_VERBOSE_MAKEFILE="$verbose" -DCMAKE_LINK_STATIC="$static" -DARCH="$arch" -DCG_LTO="$lto" -DHWLOC_ENABLE="$hwloc" -DMICROHTTPD_ENABLE="$microhttpd" -DCUDA_ENABLE="$cuda" -DOpenCL_ENABLE="$opencl"
+set -x
+cmake .. -L -DCMAKE_VERBOSE_MAKEFILE="$verbose" -DCMAKE_LINK_STATIC="$static" -DCMAKE_INSTALL_PREFIX="$installprefix" -DARCH="$arch" -DCG_LTO="$lto" -DHWLOC_ENABLE="$hwloc" -DMICROHTTPD_ENABLE="$microhttpd" -DOpenSSL_ENABLE="$openssl" -DCPU_ENABLE="$cpu" -DCUDA_ENABLE="$cuda" -DOpenCL_ENABLE="$opencl" $cmakeopt
 
 make -j3
+set +x
+
+cd ..
+echo "If compilation succeeded, you can now run 'make install', or run/copy the executable directly in/from the build/bin/ folder"
