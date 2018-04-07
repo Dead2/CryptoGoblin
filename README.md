@@ -1,17 +1,20 @@
-# CryptoGoblin - CryptoNight CPU mining tool for XMR(Monero), ETN(electroneum) and similar.
+# CryptoGoblin - CryptoNight CPU mining tool
+** for coins based on cryptonight-classic, cryptonight-light or cryptonight-heavy.
+** Support for Monero, Electroneum, Aeon, Sumokoin, Edollar and more.
 CryptoGoblin is a greedy mining goblin that will push the cpu to get as many hashes as possible,
 if you believe in cpu-rights, then this might not be the mining tool for you.
 
-CryptoGoblin was forked from xmr-stak-cpu, but it utilizes several GCC compiler-specific tweaks and
+CryptoGoblin was forked from xmr-stak, but it utilizes several GCC compiler-specific tweaks and
 many other (medium, small, minor and micro) optimizations to get the most speed out of your cpu.
 
-Dev fee mining is set to 1.5%, and part of it goes to xmr-stak-cpu authors.
+Dev fee mining is set to 1.5%, and part of it goes to xmr-stak authors.
 
-If you want to make a little donation directly to me (Dead2), transfers or donation mining (at pool.supportxmr.com:3333), my XMR address is:
-```
-45obtQLBPgyZL8Xb4qFFdZQLZugJzkHUo7oHeKd2zZSmfjxRg6WKhAjD4o1eb6LjK1RY2V4sp1nmDAity9Ks9NvZHw8z1EL
-```
-Any donation is much appreciated.
+## Overview
+* [Configuration](#configuration)
+* [Download](https://github.com/Dead2/CryptoGoblin/releases)
+* [CPU Tuning](doc/tuning-cpu.md)
+* [GPU Tuning](doc/tuning-gpu.md)
+* [Compilation](#compile)
 
 ## Configuration
 Run the miner with the default config file unchanged, and it will suggest a thread config for you.
@@ -24,12 +27,11 @@ If you use a release compiled using Microsoft Visual Studio, then prefetch shoul
 
 Detailed tuning information can be found in the TUNING.txt file
 
-
 ## Windows
 Download the pre-compiled release here https://github.com/Dead2/CryptoGoblin/releases
 
-
-## Linux compilation using build.sh
+## compile
+Linux compilation using build.sh
 This will build with LTO enabled, and some really aggressive optimization flags.
 
 If you are lucky, this might give you anything from 0% to 60% improvement, if you are not lucky
@@ -76,4 +78,10 @@ You can easily modify build.sh yourself to experiment with adding or removing fl
     make install (Or just copy/run the executable from the bin folder manually)
 ```
 
+
+If you want to make a little donation directly to me (Dead2), transfers or donation mining (at pool.supportxmr.com:3333), my XMR address is:
+```
+45obtQLBPgyZL8Xb4qFFdZQLZugJzkHUo7oHeKd2zZSmfjxRg6WKhAjD4o1eb6LjK1RY2V4sp1nmDAity9Ks9NvZHw8z1EL
+```
+Any donation is much appreciated.
 

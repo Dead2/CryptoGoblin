@@ -1,36 +1,78 @@
+#!/bin/sh
 rm -rf CMakeFiles/ CMakeCache.txt
 
-# CFLAGS
-general="-O2 -pipe -Wall -fdiagnostics-color=always -fuse-linker-plugin"
-protect=""   # -fstack-protector
-codegen="-fomit-frame-pointer -momit-leaf-frame-pointer -fvisibility-inlines-hidden -fvisibility=internal -mlong-double-64 -fno-signed-zeros"
-params=" --param max-cse-path-length=20 --param max-cse-insns=2000 --param max-cselib-memory-locations=1000 --param max-reload-search-insns=200 --param max-sched-ready-insns=200 --param max-sched-region-insns=150 \
---param selsched-max-lookahead=75 --param max-delay-slot-insn-search=150 --param max-delay-slot-live-search=400 --param max-gcse-memory=268435456  --param max-partial-antic-length=150 --param max-tail-merge-iterations=3 \
---param max-tail-merge-comparisons=15 --param max-tracked-strlens=25000 --param inline-min-speedup=6 --param prefetch-latency=225 --param simultaneous-prefetches=4"
-sched="-fmodulo-sched -fmodulo-sched-allow-regmoves -fsched2-use-superblocks -fsched-pressure -fsched-spec-load -fsched-spec-load-dangerous -fsched-stalled-insns=3 -fsched-stalled-insns-dep=100"
-optim="-fpredictive-commoning -fmerge-all-constants -fdevirtualize-speculatively -fipa-cp-clone -minline-all-stringops -fivopts -ftracer -fipa-pta -fweb -frename-registers -fgcse-after-reload -fgcse-sm -fgcse-las -fno-semantic-interposition -fwrapv"
-loops="-fprefetch-loop-arrays -funswitch-loops -fpeel-loops -funroll-loops -floop-nest-optimize -fvariable-expansion-in-unroller"
-ftree="-ftree-vectorize -ftree-partial-pre -ftree-loop-linear -ftree-loop-im -ftree-loop-distribute-patterns -ftree-loop-if-convert-stores -ftree-loop-ivcanon -ftree-loop-distribution"
-align="-falign-loops=16 -falign-functions=16" # -falign-jumps=16 -falign-labels=16"
-lto="-flto -flto-partition=one -fdevirtualize-at-ltrans"
+# Enable HWLOC library support? Defaults to ON
+hwloc="ON"
 
-testing="-fbranch-target-load-optimize2"
-# -maccumulate-outgoing-args -mno-push-args  .. one or the other
+# Enable webserver support? Defaults to ON
+microhttpd="ON"
+
+# Enable CUDA GPU support? Defaults to ON
+cuda="ON"
+
+# Enable OpenCL GPU support? Defaults to ON
+opencl="ON"
+
+# Verbose compilation? Defaults to OFF
+verbose="OFF"
+
+#
+# What is the oldest cpu the compiled binary needs to work with?
+# Choose "native" if you only need to support the local machine.
+# If you need to support other computers, choosing an older cpu is safer.
+# Supported parameters depend on your gcc version.
+# See: https://gcc.gnu.org/onlinedocs/gcc-6.4.0/gcc/x86-Options.html
+#
+## Default to native ##
+arch=native
+
+## AMD cpus ##
+#arch="athlon64"
+#arch="athlon64-sse3"
+#arch="barcelona"
+#arch="bdver1"
+#arch="bdver2"
+#arch="bdver3"
+#arch="bdver4"
+#arch="znver1"
+#arch="btver1"
+#arch="btver2"
+
+## Intel cpus ##
+#arch="pentium4"
+#arch="prescott"
+#arch="core2"
+#arch="nehalem"
+#arch="westmere"
+#arch="sandybridge"
+#arch="ivybridge"
+#arch="haswell"
+#arch="broadwell"
+#arch="skylake"
+#arch="bonnell"
+#arch="silvermont"
+#arch="knl"
+#arch="skylake-avx512"
 
 
-# Arch / cross-compiling specific
-arch="-march=native -mtune=native"
-#arch="-march=sandybridge -mtune=sandybridge"
-
-# Defines
+# Enable static linking if arch is not native
 static="OFF"
+if [ "$arch" == "native" ]
+then
+    static="ON"
+fi
 
-# Most cpus like FLATTEN and FLATTEN2 enabled, and FLATTEN3 disabled, but you
-# can experiment with enabling/disabling these at will.
-flatten="-DDO_FLATTEN -DDO_FLATTEN2"  # -DDO_FLATTEN3
+# Optionally override static linking here if needed
+# static="OFF"
 
 
-export CFLAGS="$general $protect $codegen $params $sched $optim $loops $ftree $align $arch $lto $testing $flatten"
-cmake . -DCMAKE_LINK_STATIC="$static" -DHWLOC_ENABLE=ON -DMICROHTTPD_ENABLE=OFF -DCMAKE_C_FLAGS="$CFLAGS" -DCMAKE_CXX_FLAGS="$CFLAGS" -DCMAKE_EXE_LINKER_FLAGS="$CFLAGS" -DCMAKE_C_FLAGS_RELEASE="-DNDEBUG" -DCMAKE_CXX_FLAGS_RELEASE="-DNDEBUG"
 
-make -j2
+#########################
+# Usually no need to change anything below this point
+##########
+
+set -x
+
+cmake . -DCMAKE_VERBOSE_MAKEFILE="$verbose" -DCMAKE_LINK_STATIC="$static" -DARCH="$arch" -DHWLOC_ENABLE="$hwloc" -DMICROHTTPD_ENABLE="$microhttpd" -DCUDA_ENABLE="$cuda" -DOpenCL_ENABLE="$opencl"
+
+make -j3

@@ -13,3 +13,12 @@ config-debug.txt
 
 # merge original backup files
 *.orig
+
+# KDevelop files
+.kdev4/
+xmr-stak.kdev4
+
+# Idea/Clion project files
+cmake-build-release/
+cmake-build-debug/
+\.idea/
