@@ -12,10 +12,10 @@
 namespace xmrstak
 {
 
-	struct BackendConnector
-	{
-		static std::vector<iBackend*>* thread_starter(miner_work& pWork);
-		static bool self_test();
-	};
+    struct BackendConnector
+    {
+        static std::vector<iBackend*>* thread_starter(miner_work& pWork);
+        static bool self_test();
+    };
 
 } // namepsace xmrstak

@@ -51,211 +51,211 @@ using namespace rapidjson;
 enum configEnum { aCpuThreadsConf, sUseSlowMem };
 
 struct configVal {
-	configEnum iName;
-	const char* sName;
-	Type iType;
+    configEnum iName;
+    const char* sName;
+    Type iType;
 };
 
 // Same order as in configEnum, as per comment above
 // kNullType means any type
 configVal oConfigValues[] = {
-	{ aCpuThreadsConf, "cpu_threads_conf", kNullType }
+    { aCpuThreadsConf, "cpu_threads_conf", kNullType }
 };
 
 constexpr size_t iConfigCnt = (sizeof(oConfigValues)/sizeof(oConfigValues[0]));
 
 inline bool checkType(Type have, Type want)
 {
-	if(want == have)
-		return true;
-	else if(want == kNullType)
-		return true;
-	else if(want == kTrueType && have == kFalseType)
-		return true;
-	else if(want == kFalseType && have == kTrueType)
-		return true;
-	else
-		return false;
+    if(want == have)
+        return true;
+    else if(want == kNullType)
+        return true;
+    else if(want == kTrueType && have == kFalseType)
+        return true;
+    else if(want == kFalseType && have == kTrueType)
+        return true;
+    else
+        return false;
 }
 
 struct jconf::opaque_private
 {
-	Document jsonDoc;
-	const Value* configValues[iConfigCnt]; //Compile time constant
+    Document jsonDoc;
+    const Value* configValues[iConfigCnt]; //Compile time constant
 
-	opaque_private()
-	{
-	}
+    opaque_private()
+    {
+    }
 };
 
 jconf* jconf::oInst = nullptr;
 
 jconf::jconf()
 {
-	prv = new opaque_private();
+    prv = new opaque_private();
 }
 
 bool jconf::GetThreadConfig(size_t id, thd_cfg &cfg)
 {
-	if(!prv->configValues[aCpuThreadsConf]->IsArray())
-		return false;
+    if(!prv->configValues[aCpuThreadsConf]->IsArray())
+        return false;
 
-	if(id >= prv->configValues[aCpuThreadsConf]->Size())
-		return false;
+    if(id >= prv->configValues[aCpuThreadsConf]->Size())
+        return false;
 
-	const Value& oThdConf = prv->configValues[aCpuThreadsConf]->GetArray()[id];
+    const Value& oThdConf = prv->configValues[aCpuThreadsConf]->GetArray()[id];
 
-	if(!oThdConf.IsObject())
-		return false;
+    if(!oThdConf.IsObject())
+        return false;
 
-	const Value *mode, *prefetch, *aff;
-	mode = GetObjectMember(oThdConf, "thread_mode");
-	prefetch = GetObjectMember(oThdConf, "prefetch");
-	aff = GetObjectMember(oThdConf, "affine_to_cpu");
+    const Value *mode, *prefetch, *aff;
+    mode = GetObjectMember(oThdConf, "thread_mode");
+    prefetch = GetObjectMember(oThdConf, "prefetch");
+    aff = GetObjectMember(oThdConf, "affine_to_cpu");
 
-	if(mode == nullptr || prefetch == nullptr || aff == nullptr)
-		return false;
+    if(mode == nullptr || prefetch == nullptr || aff == nullptr)
+        return false;
 
-	if(!mode->IsBool() && !mode->IsNumber())
-		return false;
+    if(!mode->IsBool() && !mode->IsNumber())
+        return false;
 
-	if(!prefetch->IsBool())
-		return false;
+    if(!prefetch->IsBool())
+        return false;
 
-	if(!aff->IsNumber() && !aff->IsBool())
-		return false;
+    if(!aff->IsNumber() && !aff->IsBool())
+        return false;
 
-	if(aff->IsNumber() && aff->GetInt64() < 0)
-		return false;
+    if(aff->IsNumber() && aff->GetInt64() < 0)
+        return false;
 
-	if(mode->IsNumber())
-		cfg.iMultiway = (int)mode->GetInt64();
-	else
-		cfg.iMultiway = mode->GetBool() ? 2 : 1;
+    if(mode->IsNumber())
+        cfg.iMultiway = (int)mode->GetInt64();
+    else
+        cfg.iMultiway = mode->GetBool() ? 2 : 1;
 
-	cfg.bPrefetch = prefetch->GetBool();
+    cfg.bPrefetch = prefetch->GetBool();
 
-	if(aff->IsNumber())
-		cfg.iCpuAff = aff->GetInt64();
-	else
-		cfg.iCpuAff = -1;
+    if(aff->IsNumber())
+        cfg.iCpuAff = aff->GetInt64();
+    else
+        cfg.iCpuAff = -1;
 
-	return true;
+    return true;
 }
 
 
 size_t jconf::GetThreadCount()
 {
-	if(prv->configValues[aCpuThreadsConf]->IsArray())
-		return prv->configValues[aCpuThreadsConf]->Size();
-	else
-		return 0;
+    if(prv->configValues[aCpuThreadsConf]->IsArray())
+        return prv->configValues[aCpuThreadsConf]->Size();
+    else
+        return 0;
 }
 
 bool jconf::parse_config(const char* sFilename)
 {
-	FILE * pFile;
-	char * buffer;
-	size_t flen;
+    FILE * pFile;
+    char * buffer;
+    size_t flen;
 
-	pFile = fopen(sFilename, "rb");
-	if (pFile == NULL)
-	{
-		printer::inst()->print_msg(L0, "Failed to open config file %s.", sFilename);
-		return false;
-	}
+    pFile = fopen(sFilename, "rb");
+    if (pFile == NULL)
+    {
+        printer::inst()->print_msg(L0, "Failed to open config file %s.", sFilename);
+        return false;
+    }
 
-	fseek(pFile,0,SEEK_END);
-	flen = ftell(pFile);
-	rewind(pFile);
+    fseek(pFile,0,SEEK_END);
+    flen = ftell(pFile);
+    rewind(pFile);
 
-	if(flen >= 64*1024)
-	{
-		fclose(pFile);
-		printer::inst()->print_msg(L0, "Oversized config file - %s.", sFilename);
-		return false;
-	}
+    if(flen >= 64*1024)
+    {
+        fclose(pFile);
+        printer::inst()->print_msg(L0, "Oversized config file - %s.", sFilename);
+        return false;
+    }
 
-	if(flen <= 16)
-	{
-		fclose(pFile);
-		printer::inst()->print_msg(L0, "File is empty or too short - %s.", sFilename);
-		return false;
-	}
+    if(flen <= 16)
+    {
+        fclose(pFile);
+        printer::inst()->print_msg(L0, "File is empty or too short - %s.", sFilename);
+        return false;
+    }
 
-	buffer = (char*)malloc(flen + 3);
-	if(fread(buffer+1, flen, 1, pFile) != 1)
-	{
-		free(buffer);
-		fclose(pFile);
-		printer::inst()->print_msg(L0, "Read error while reading %s.", sFilename);
-		return false;
-	}
-	fclose(pFile);
+    buffer = (char*)malloc(flen + 3);
+    if(fread(buffer+1, flen, 1, pFile) != 1)
+    {
+        free(buffer);
+        fclose(pFile);
+        printer::inst()->print_msg(L0, "Read error while reading %s.", sFilename);
+        return false;
+    }
+    fclose(pFile);
 
-	//Replace Unicode BOM with spaces - we always use UTF-8
-	unsigned char* ubuffer = (unsigned char*)buffer;
-	if(ubuffer[1] == 0xEF && ubuffer[2] == 0xBB && ubuffer[3] == 0xBF)
-	{
-		buffer[1] = ' ';
-		buffer[2] = ' ';
-		buffer[3] = ' ';
-	}
+    //Replace Unicode BOM with spaces - we always use UTF-8
+    unsigned char* ubuffer = (unsigned char*)buffer;
+    if(ubuffer[1] == 0xEF && ubuffer[2] == 0xBB && ubuffer[3] == 0xBF)
+    {
+        buffer[1] = ' ';
+        buffer[2] = ' ';
+        buffer[3] = ' ';
+    }
 
-	buffer[0] = '{';
-	buffer[flen] = '}';
-	buffer[flen + 1] = '\0';
+    buffer[0] = '{';
+    buffer[flen] = '}';
+    buffer[flen + 1] = '\0';
 
-	prv->jsonDoc.Parse<kParseCommentsFlag|kParseTrailingCommasFlag>(buffer, flen+2);
-	free(buffer);
+    prv->jsonDoc.Parse<kParseCommentsFlag|kParseTrailingCommasFlag>(buffer, flen+2);
+    free(buffer);
 
-	if(prv->jsonDoc.HasParseError())
-	{
-		printer::inst()->print_msg(L0, "JSON config parse error in '%s' (offset %llu): %s",
-			sFilename, int_port(prv->jsonDoc.GetErrorOffset()), GetParseError_En(prv->jsonDoc.GetParseError()));
-		return false;
-	}
+    if(prv->jsonDoc.HasParseError())
+    {
+        printer::inst()->print_msg(L0, "JSON config parse error in '%s' (offset %llu): %s",
+            sFilename, int_port(prv->jsonDoc.GetErrorOffset()), GetParseError_En(prv->jsonDoc.GetParseError()));
+        return false;
+    }
 
-	if(!prv->jsonDoc.IsObject())
-	{ //This should never happen as we created the root ourselves
-		printer::inst()->print_msg(L0, "Invalid config file '%s'. No root?", sFilename);
-		return false;
-	}
+    if(!prv->jsonDoc.IsObject())
+    { //This should never happen as we created the root ourselves
+        printer::inst()->print_msg(L0, "Invalid config file '%s'. No root?", sFilename);
+        return false;
+    }
 
-	for(size_t i = 0; i < iConfigCnt; i++)
-	{
-		if(oConfigValues[i].iName != i)
-		{
-			printer::inst()->print_msg(L0, "Code error. oConfigValues are not in order.");
-			return false;
-		}
+    for(size_t i = 0; i < iConfigCnt; i++)
+    {
+        if(oConfigValues[i].iName != i)
+        {
+            printer::inst()->print_msg(L0, "Code error. oConfigValues are not in order.");
+            return false;
+        }
 
-		prv->configValues[i] = GetObjectMember(prv->jsonDoc, oConfigValues[i].sName);
+        prv->configValues[i] = GetObjectMember(prv->jsonDoc, oConfigValues[i].sName);
 
-		if(prv->configValues[i] == nullptr)
-		{
-			printer::inst()->print_msg(L0, "Invalid config file '%s'. Missing value \"%s\".", sFilename, oConfigValues[i].sName);
-			return false;
-		}
+        if(prv->configValues[i] == nullptr)
+        {
+            printer::inst()->print_msg(L0, "Invalid config file '%s'. Missing value \"%s\".", sFilename, oConfigValues[i].sName);
+            return false;
+        }
 
-		if(!checkType(prv->configValues[i]->GetType(), oConfigValues[i].iType))
-		{
-			printer::inst()->print_msg(L0, "Invalid config file '%s'. Value \"%s\" has unexpected type.", sFilename, oConfigValues[i].sName);
-			return false;
-		}
-	}
+        if(!checkType(prv->configValues[i]->GetType(), oConfigValues[i].iType))
+        {
+            printer::inst()->print_msg(L0, "Invalid config file '%s'. Value \"%s\" has unexpected type.", sFilename, oConfigValues[i].sName);
+            return false;
+        }
+    }
 
-	thd_cfg c;
-	for(size_t i=0; i < GetThreadCount(); i++)
-	{
-		if(!GetThreadConfig(i, c))
-		{
-			printer::inst()->print_msg(L0, "Thread %llu has invalid config.", int_port(i));
-			return false;
-		}
-	}
+    thd_cfg c;
+    for(size_t i=0; i < GetThreadCount(); i++)
+    {
+        if(!GetThreadConfig(i, c))
+        {
+            printer::inst()->print_msg(L0, "Thread %llu has invalid config.", int_port(i));
+            return false;
+        }
+    }
 
-	return true;
+    return true;
 }
 
 } // namespace cpu

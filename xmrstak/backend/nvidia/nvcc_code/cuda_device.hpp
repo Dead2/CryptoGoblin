@@ -13,12 +13,12 @@
  * @param ... CUDA api command
  */
 #define CUDA_CHECK_MSG(id, msg, ...) { \
-	cudaError_t error = __VA_ARGS__; \
-	if(error!=cudaSuccess){	\
-		std::cerr << "[CUDA] Error gpu " << id << ": <" << __FILE__ << ">:" << __LINE__; \
-		std::cerr << msg << std::endl;                                         \
-		throw std::runtime_error(std::string("[CUDA] Error: ") + std::string(cudaGetErrorString(error))); \
-	} \
+    cudaError_t error = __VA_ARGS__; \
+    if(error!=cudaSuccess){	\
+        std::cerr << "[CUDA] Error gpu " << id << ": <" << __FILE__ << ">:" << __LINE__; \
+        std::cerr << msg << std::endl;                                         \
+        throw std::runtime_error(std::string("[CUDA] Error: ") + std::string(cudaGetErrorString(error))); \
+    } \
 } \
 ( (void) 0 )
 
@@ -35,8 +35,8 @@
  * @param ... CUDA kernel call
  */
 #define CUDA_CHECK_KERNEL(id, ...) \
-	__VA_ARGS__; \
-	CUDA_CHECK(id, cudaGetLastError())
+    __VA_ARGS__; \
+    CUDA_CHECK(id, cudaGetLastError())
 
 /** execute and check a CUDA kernel
  *
@@ -45,5 +45,5 @@
  * @param ... CUDA kernel call
  */
 #define CUDA_CHECK_MSG_KERNEL(id, msg, ...) \
-	__VA_ARGS__; \
-	CUDA_CHECK_MSG(id, msg, cudaGetLastError())
+    __VA_ARGS__; \
+    CUDA_CHECK_MSG(id, msg, cudaGetLastError())

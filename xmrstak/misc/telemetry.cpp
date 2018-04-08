@@ -33,76 +33,76 @@ namespace xmrstak
 
 telemetry::telemetry(size_t iThd)
 {
-	ppHashCounts = new uint64_t*[iThd];
-	ppTimestamps = new uint64_t*[iThd];
-	iBucketTop = new uint32_t[iThd];
+    ppHashCounts = new uint64_t*[iThd];
+    ppTimestamps = new uint64_t*[iThd];
+    iBucketTop = new uint32_t[iThd];
 
-	for (size_t i = 0; i < iThd; i++)
-	{
-		ppHashCounts[i] = new uint64_t[iBucketSize];
-		ppTimestamps[i] = new uint64_t[iBucketSize];
-		iBucketTop[i] = 0;
-		memset(ppHashCounts[i], 0, sizeof(uint64_t) * iBucketSize);
-		memset(ppTimestamps[i], 0, sizeof(uint64_t) * iBucketSize);
-	}
+    for (size_t i = 0; i < iThd; i++)
+    {
+        ppHashCounts[i] = new uint64_t[iBucketSize];
+        ppTimestamps[i] = new uint64_t[iBucketSize];
+        iBucketTop[i] = 0;
+        memset(ppHashCounts[i], 0, sizeof(uint64_t) * iBucketSize);
+        memset(ppTimestamps[i], 0, sizeof(uint64_t) * iBucketSize);
+    }
 }
 
 double telemetry::calc_telemetry_data(size_t iLastMilisec, size_t iThread)
 {
-	uint64_t iTimeNow = get_timestamp_ms();
+    uint64_t iTimeNow = get_timestamp_ms();
 
-	uint64_t iEarliestHashCnt = 0;
-	uint64_t iEarliestStamp = 0;
-	uint64_t iLastestStamp = 0;
-	uint64_t iLastestHashCnt = 0;
-	bool bHaveFullSet = false;
+    uint64_t iEarliestHashCnt = 0;
+    uint64_t iEarliestStamp = 0;
+    uint64_t iLastestStamp = 0;
+    uint64_t iLastestHashCnt = 0;
+    bool bHaveFullSet = false;
 
-	//Start at 1, buckettop points to next empty
-	for (size_t i = 1; i < iBucketSize; i++)
-	{
-		size_t idx = (iBucketTop[iThread] - i) & iBucketMask; //overflow expected here
+    //Start at 1, buckettop points to next empty
+    for (size_t i = 1; i < iBucketSize; i++)
+    {
+        size_t idx = (iBucketTop[iThread] - i) & iBucketMask; //overflow expected here
 
-		if (ppTimestamps[iThread][idx] == 0)
-			break; //That means we don't have the data yet
+        if (ppTimestamps[iThread][idx] == 0)
+            break; //That means we don't have the data yet
 
-		if (iLastestStamp == 0)
-		{
-			iLastestStamp = ppTimestamps[iThread][idx];
-			iLastestHashCnt = ppHashCounts[iThread][idx];
-		}
+        if (iLastestStamp == 0)
+        {
+            iLastestStamp = ppTimestamps[iThread][idx];
+            iLastestHashCnt = ppHashCounts[iThread][idx];
+        }
 
-		if (iTimeNow - ppTimestamps[iThread][idx] > iLastMilisec)
-		{
-			bHaveFullSet = true;
-			break; //We are out of the requested time period
-		}
+        if (iTimeNow - ppTimestamps[iThread][idx] > iLastMilisec)
+        {
+            bHaveFullSet = true;
+            break; //We are out of the requested time period
+        }
 
-		iEarliestStamp = ppTimestamps[iThread][idx];
-		iEarliestHashCnt = ppHashCounts[iThread][idx];
-	}
+        iEarliestStamp = ppTimestamps[iThread][idx];
+        iEarliestHashCnt = ppHashCounts[iThread][idx];
+    }
 
-	if (!bHaveFullSet || iEarliestStamp == 0 || iLastestStamp == 0)
-		return nan("");
+    if (!bHaveFullSet || iEarliestStamp == 0 || iLastestStamp == 0)
+        return nan("");
 
-	//Don't think that can happen, but just in case
-	if (iLastestStamp - iEarliestStamp == 0)
-		return nan("");
+    //Don't think that can happen, but just in case
+    if (iLastestStamp - iEarliestStamp == 0)
+        return nan("");
 
-	double fHashes, fTime;
-	fHashes = iLastestHashCnt - iEarliestHashCnt;
-	fTime = iLastestStamp - iEarliestStamp;
-	fTime /= 1000.0;
+    double fHashes, fTime;
+    fHashes = iLastestHashCnt - iEarliestHashCnt;
+    fTime = iLastestStamp - iEarliestStamp;
+    fTime /= 1000.0;
 
-	return fHashes / fTime;
+    return fHashes / fTime;
 }
 
 void telemetry::push_perf_value(size_t iThd, uint64_t iHashCount, uint64_t iTimestamp)
 {
-	size_t iTop = iBucketTop[iThd];
-	ppHashCounts[iThd][iTop] = iHashCount;
-	ppTimestamps[iThd][iTop] = iTimestamp;
+    size_t iTop = iBucketTop[iThd];
+    ppHashCounts[iThd][iTop] = iHashCount;
+    ppTimestamps[iThd][iTop] = iTimestamp;
 
-	iBucketTop[iThd] = (iTop + 1) & iBucketMask;
+    iBucketTop[iThd] = (iTop + 1) & iBucketMask;
 }
 
 } // namepsace xmrstak

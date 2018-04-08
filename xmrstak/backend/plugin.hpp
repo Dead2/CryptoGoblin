@@ -27,84 +27,84 @@ namespace xmrstak
 struct plugin
 {
 
-	plugin(const std::string backendName, const std::string libName) : fn_starterBackend(nullptr), m_backendName(backendName)
-	{
+    plugin(const std::string backendName, const std::string libName) : fn_starterBackend(nullptr), m_backendName(backendName)
+    {
 #ifdef _WIN32
-		libBackend = LoadLibrary(TEXT((libName + ".dll").c_str()));
-		if(!libBackend)
-		{
-			std::cerr << "WARNING: "<< m_backendName <<" cannot load backend library: " << (libName + ".dll") << std::endl;
-			return;
-		}
+        libBackend = LoadLibrary(TEXT((libName + ".dll").c_str()));
+        if(!libBackend)
+        {
+            std::cerr << "WARNING: "<< m_backendName <<" cannot load backend library: " << (libName + ".dll") << std::endl;
+            return;
+        }
 #else
-		// `.so` linux file extention for dynamic libraries
-		std::string fileExtension = ".so";
+        // `.so` linux file extention for dynamic libraries
+        std::string fileExtension = ".so";
 #	if defined(__APPLE__)
-		// `.dylib` Mac OS X file extention for dynamic libraries
-		fileExtension = ".dylib";
+        // `.dylib` Mac OS X file extention for dynamic libraries
+        fileExtension = ".dylib";
 #	endif
-		// search library in working directory
-		libBackend = dlopen(("./lib" + libName + fileExtension).c_str(), RTLD_LAZY);
-		// fallback to binary directory
-		if(!libBackend)
-			libBackend = dlopen((params::inst().executablePrefix + "lib" + libName + fileExtension).c_str(), RTLD_LAZY);
-		// try use LD_LIBRARY_PATH
-		if(!libBackend)
-			libBackend = dlopen(("lib" + libName + fileExtension).c_str(), RTLD_LAZY);
-		if(!libBackend)
-		{
-			std::cerr << "WARNING: "<< m_backendName <<" cannot load backend library: " << dlerror() << std::endl;
-			return;
-		}
+        // search library in working directory
+        libBackend = dlopen(("./lib" + libName + fileExtension).c_str(), RTLD_LAZY);
+        // fallback to binary directory
+        if(!libBackend)
+            libBackend = dlopen((params::inst().executablePrefix + "lib" + libName + fileExtension).c_str(), RTLD_LAZY);
+        // try use LD_LIBRARY_PATH
+        if(!libBackend)
+            libBackend = dlopen(("lib" + libName + fileExtension).c_str(), RTLD_LAZY);
+        if(!libBackend)
+        {
+            std::cerr << "WARNING: "<< m_backendName <<" cannot load backend library: " << dlerror() << std::endl;
+            return;
+        }
 #endif
 
 #ifdef _WIN32
-		fn_starterBackend = (starterBackend_t) GetProcAddress(libBackend, "xmrstak_start_backend");
-		if (!fn_starterBackend)
-		{
-			std::cerr << "WARNING: backend plugin " << libName << " contains no entry 'xmrstak_start_backend': " <<GetLastError()<< std::endl;
-		}
+        fn_starterBackend = (starterBackend_t) GetProcAddress(libBackend, "xmrstak_start_backend");
+        if (!fn_starterBackend)
+        {
+            std::cerr << "WARNING: backend plugin " << libName << " contains no entry 'xmrstak_start_backend': " <<GetLastError()<< std::endl;
+        }
 #else
-		// reset last error
-		dlerror();
-		fn_starterBackend = (starterBackend_t) dlsym(libBackend, "xmrstak_start_backend");
-		const char* dlsym_error = dlerror();
-		if(dlsym_error)
-		{
-			std::cerr << "WARNING: backend plugin " << libName << " contains no entry 'xmrstak_start_backend': " << dlsym_error << std::endl;
-		}
+        // reset last error
+        dlerror();
+        fn_starterBackend = (starterBackend_t) dlsym(libBackend, "xmrstak_start_backend");
+        const char* dlsym_error = dlerror();
+        if(dlsym_error)
+        {
+            std::cerr << "WARNING: backend plugin " << libName << " contains no entry 'xmrstak_start_backend': " << dlsym_error << std::endl;
+        }
 #endif
-	}
+    }
 
-	std::vector<iBackend*>* startBackend(uint32_t threadOffset, miner_work& pWork, environment& env)
-	{
-		if(fn_starterBackend == nullptr)
-		{
-			std::vector<iBackend*>* pvThreads = new std::vector<iBackend*>();
-			std::cerr << "WARNING: " << m_backendName << " Backend disabled"<< std::endl;
-			return pvThreads;
-		}
+    std::vector<iBackend*>* startBackend(uint32_t threadOffset, miner_work& pWork, environment& env)
+    {
+        if(fn_starterBackend == nullptr)
+        {
+            std::vector<iBackend*>* pvThreads = new std::vector<iBackend*>();
+            std::cerr << "WARNING: " << m_backendName << " Backend disabled"<< std::endl;
+            return pvThreads;
+        }
 
-		return fn_starterBackend(threadOffset, pWork, env);
-	}
+        return fn_starterBackend(threadOffset, pWork, env);
+    }
 
-	typedef std::vector<iBackend*>* (*starterBackend_t)(uint32_t threadOffset, miner_work& pWork, environment& env);
+    typedef std::vector<iBackend*>* (*starterBackend_t)(uint32_t threadOffset, miner_work& pWork, environment& env);
 
-	starterBackend_t fn_starterBackend;
-	std::string m_backendName;
+    starterBackend_t fn_starterBackend;
+    std::string m_backendName;
 
 
 #ifdef _WIN32
-	HINSTANCE libBackend;
+    HINSTANCE libBackend;
 #else
-	void *libBackend;
+    void *libBackend;
 #endif
 
 /* \todo add unload to destructor and change usage of plugin that libs keeped open until the miner endss
 #ifdef _WIN32
-	FreeLibrary(libBackend);
+    FreeLibrary(libBackend);
 #else
-	dlclose(libBackend);
+    dlclose(libBackend);
 #endif
  * */
 };

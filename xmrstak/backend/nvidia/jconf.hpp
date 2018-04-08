@@ -11,40 +11,40 @@ namespace nvidia
 class jconf
 {
 public:
-	static jconf* inst()
-	{
-		if (oInst == nullptr) oInst = new jconf;
-		return oInst;
-	};
+    static jconf* inst()
+    {
+        if (oInst == nullptr) oInst = new jconf;
+        return oInst;
+    };
 
-	bool parse_config(const char* sFilename = params::inst().configFileNVIDIA.c_str());
+    bool parse_config(const char* sFilename = params::inst().configFileNVIDIA.c_str());
 
-	struct thd_cfg {
-		uint32_t id;
-		uint32_t blocks;
-		uint32_t threads;
-		uint32_t bfactor;
-		uint32_t bsleep;
-		bool bDoubleMode;
-		bool bNoPrefetch;
-		int32_t cpu_aff;
-		int syncMode;
+    struct thd_cfg {
+        uint32_t id;
+        uint32_t blocks;
+        uint32_t threads;
+        uint32_t bfactor;
+        uint32_t bsleep;
+        bool bDoubleMode;
+        bool bNoPrefetch;
+        int32_t cpu_aff;
+        int syncMode;
 
-		long long iCpuAff;
-	};
+        long long iCpuAff;
+    };
 
-	size_t GetGPUThreadCount();
+    size_t GetGPUThreadCount();
 
-	bool GetGPUThreadConfig(size_t id, thd_cfg &cfg);
+    bool GetGPUThreadConfig(size_t id, thd_cfg &cfg);
 
-	bool NeedsAutoconf();
+    bool NeedsAutoconf();
 
 private:
-	jconf();
-	static jconf* oInst;
+    jconf();
+    static jconf* oInst;
 
-	struct opaque_private;
-	opaque_private* prv;
+    struct opaque_private;
+    opaque_private* prv;
 
 };
 

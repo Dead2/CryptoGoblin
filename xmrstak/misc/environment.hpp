@@ -12,30 +12,30 @@ struct params;
 
 struct environment
 {
-	static inline environment& inst(environment* init = nullptr)
-	{
-		static environment* env = nullptr;
+    static inline environment& inst(environment* init = nullptr)
+    {
+        static environment* env = nullptr;
 
-		if(env == nullptr)
-		{
-			if(init == nullptr)
-				env = new environment;
-			else
-				env = init;
-		}
+        if(env == nullptr)
+        {
+            if(init == nullptr)
+                env = new environment;
+            else
+                env = init;
+        }
 
-		return *env;
-	}
+        return *env;
+    }
 
-	environment()
-	{
-	}
+    environment()
+    {
+    }
 
-	printer* pPrinter = nullptr;
-	globalStates* pglobalStates = nullptr;
-	jconf* pJconfConfig = nullptr;
-	executor* pExecutor = nullptr;
-	params* pParams = nullptr;
+    printer* pPrinter = nullptr;
+    globalStates* pglobalStates = nullptr;
+    jconf* pJconfConfig = nullptr;
+    executor* pExecutor = nullptr;
+    params* pParams = nullptr;
 };
 
 } // namepsace xmrstak

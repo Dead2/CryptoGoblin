@@ -51,588 +51,588 @@ using namespace rapidjson;
  * This enum needs to match index in oConfigValues, otherwise we will get a runtime error
  */
 enum configEnum {
-	aPoolList, sCurrency, bTlsSecureAlgo, iCallTimeout, iNetRetry, iGiveUpLimit, iVerboseLevel, bPrintMotd, iAutohashTime, 
-	bFlushStdout, bDaemonMode, sOutputFile, iHttpdPort, sHttpLogin, sHttpPass, bPreferIpv4, bAesOverride, sUseSlowMem 
+    aPoolList, sCurrency, bTlsSecureAlgo, iCallTimeout, iNetRetry, iGiveUpLimit, iVerboseLevel, bPrintMotd, iAutohashTime,
+    bFlushStdout, bDaemonMode, sOutputFile, iHttpdPort, sHttpLogin, sHttpPass, bPreferIpv4, bAesOverride, sUseSlowMem
 };
 
 struct configVal {
-	configEnum iName;
-	const char* sName;
-	Type iType;
+    configEnum iName;
+    const char* sName;
+    Type iType;
 };
 
 // Same order as in configEnum, as per comment above
 // kNullType means any type
 configVal oConfigValues[] = {
-	{ aPoolList, "pool_list", kArrayType },
-	{ sCurrency, "currency", kStringType },
-	{ bTlsSecureAlgo, "tls_secure_algo", kTrueType },
-	{ iCallTimeout, "call_timeout", kNumberType },
-	{ iNetRetry, "retry_time", kNumberType },
-	{ iGiveUpLimit, "giveup_limit", kNumberType },
-	{ iVerboseLevel, "verbose_level", kNumberType },
-	{ bPrintMotd, "print_motd", kTrueType },
-	{ iAutohashTime, "h_print_time", kNumberType },
-	{ bFlushStdout, "flush_stdout", kTrueType},
-	{ bDaemonMode, "daemon_mode", kTrueType },
-	{ sOutputFile, "output_file", kStringType },
-	{ iHttpdPort, "httpd_port", kNumberType },
-	{ sHttpLogin, "http_login", kStringType },
-	{ sHttpPass, "http_pass", kStringType },
-	{ bPreferIpv4, "prefer_ipv4", kTrueType },
-	{ bAesOverride, "aes_override", kNullType },
-	{ sUseSlowMem, "use_slow_memory", kStringType }
+    { aPoolList, "pool_list", kArrayType },
+    { sCurrency, "currency", kStringType },
+    { bTlsSecureAlgo, "tls_secure_algo", kTrueType },
+    { iCallTimeout, "call_timeout", kNumberType },
+    { iNetRetry, "retry_time", kNumberType },
+    { iGiveUpLimit, "giveup_limit", kNumberType },
+    { iVerboseLevel, "verbose_level", kNumberType },
+    { bPrintMotd, "print_motd", kTrueType },
+    { iAutohashTime, "h_print_time", kNumberType },
+    { bFlushStdout, "flush_stdout", kTrueType},
+    { bDaemonMode, "daemon_mode", kTrueType },
+    { sOutputFile, "output_file", kStringType },
+    { iHttpdPort, "httpd_port", kNumberType },
+    { sHttpLogin, "http_login", kStringType },
+    { sHttpPass, "http_pass", kStringType },
+    { bPreferIpv4, "prefer_ipv4", kTrueType },
+    { bAesOverride, "aes_override", kNullType },
+    { sUseSlowMem, "use_slow_memory", kStringType }
 };
 
 constexpr size_t iConfigCnt = (sizeof(oConfigValues)/sizeof(oConfigValues[0]));
 
 struct xmrstak_coin_algo
 {
-	const char* coin_name;
-	xmrstak_algo algo;
-	xmrstak_algo algo_root;
-	uint8_t fork_version;
-	const char* default_pool;
+    const char* coin_name;
+    xmrstak_algo algo;
+    xmrstak_algo algo_root;
+    uint8_t fork_version;
+    const char* default_pool;
 };
 
 xmrstak_coin_algo coin_algos[] = {
-	{ "aeon", cryptonight_aeon, cryptonight_lite, 7u, "mine.aeon-pool.com:5555" },
-	{ "cryptonight", cryptonight, cryptonight, 0u, nullptr },
-	{ "cryptonight_lite", cryptonight_lite, cryptonight_lite, 0u, nullptr },
-	{ "cryptonight_heavy", cryptonight_heavy, cryptonight_heavy, 0u, nullptr },
-	{ "edollar", cryptonight, cryptonight, 0u, nullptr },
-	{ "electroneum", cryptonight, cryptonight, 0u, nullptr },
-	{ "graft", cryptonight, cryptonight, 0u, nullptr },
-	{ "intense", cryptonight, cryptonight, 0u, nullptr },
-	{ "karbo", cryptonight, cryptonight, 0u, nullptr },
-	{ "monero", cryptonight_monero, cryptonight, 7u, "pool.usxmrpool.com:3333" },
-	{ "stellite", cryptonight_monero, cryptonight, 3u, nullptr },
-	{ "sumokoin", cryptonight_heavy, cryptonight, 3u, nullptr }
+    { "aeon", cryptonight_aeon, cryptonight_lite, 7u, "mine.aeon-pool.com:5555" },
+    { "cryptonight", cryptonight, cryptonight, 0u, nullptr },
+    { "cryptonight_lite", cryptonight_lite, cryptonight_lite, 0u, nullptr },
+    { "cryptonight_heavy", cryptonight_heavy, cryptonight_heavy, 0u, nullptr },
+    { "edollar", cryptonight, cryptonight, 0u, nullptr },
+    { "electroneum", cryptonight, cryptonight, 0u, nullptr },
+    { "graft", cryptonight, cryptonight, 0u, nullptr },
+    { "intense", cryptonight, cryptonight, 0u, nullptr },
+    { "karbo", cryptonight, cryptonight, 0u, nullptr },
+    { "monero", cryptonight_monero, cryptonight, 7u, "pool.usxmrpool.com:3333" },
+    { "stellite", cryptonight_monero, cryptonight, 3u, nullptr },
+    { "sumokoin", cryptonight_heavy, cryptonight, 3u, nullptr }
 };
 
 constexpr size_t coin_alogo_size = (sizeof(coin_algos)/sizeof(coin_algos[0]));
 
 inline bool checkType(Type have, Type want)
 {
-	if(want == have)
-		return true;
-	else if(want == kNullType)
-		return true;
-	else if(want == kTrueType && have == kFalseType)
-		return true;
-	else if(want == kFalseType && have == kTrueType)
-		return true;
-	else
-		return false;
+    if(want == have)
+        return true;
+    else if(want == kNullType)
+        return true;
+    else if(want == kTrueType && have == kFalseType)
+        return true;
+    else if(want == kFalseType && have == kTrueType)
+        return true;
+    else
+        return false;
 }
 
 struct jconf::opaque_private
 {
-	Document jsonDoc;
-	Document jsonDocPools;
-	const Value* configValues[iConfigCnt]; //Compile time constant
+    Document jsonDoc;
+    Document jsonDocPools;
+    const Value* configValues[iConfigCnt]; //Compile time constant
 
-	opaque_private()
-	{
-	}
+    opaque_private()
+    {
+    }
 };
 
 jconf::jconf()
 {
-	prv = new opaque_private();
+    prv = new opaque_private();
 }
 
 uint64_t jconf::GetPoolCount()
 {
-	if(prv->configValues[aPoolList]->IsArray())
-		return prv->configValues[aPoolList]->Size();
-	else
-		return 0;
+    if(prv->configValues[aPoolList]->IsArray())
+        return prv->configValues[aPoolList]->Size();
+    else
+        return 0;
 }
 
 bool jconf::GetPoolConfig(size_t id, pool_cfg& cfg)
 {
-	if(id >= GetPoolCount())
-		return false;
+    if(id >= GetPoolCount())
+        return false;
 
-	typedef const Value* cval;
-	cval jaddr, jlogin, jrigid, jpasswd, jnicehash, jtls, jtlsfp, jwt;
-	const Value& oThdConf = prv->configValues[aPoolList]->GetArray()[id];
+    typedef const Value* cval;
+    cval jaddr, jlogin, jrigid, jpasswd, jnicehash, jtls, jtlsfp, jwt;
+    const Value& oThdConf = prv->configValues[aPoolList]->GetArray()[id];
 
-	/* We already checked presence and types */
-	jaddr = GetObjectMember(oThdConf, "pool_address");
-	jlogin = GetObjectMember(oThdConf, "wallet_address");
-	jrigid = GetObjectMember(oThdConf, "rig_id");
-	jpasswd = GetObjectMember(oThdConf, "pool_password");
-	jnicehash = GetObjectMember(oThdConf, "use_nicehash");
-	jtls = GetObjectMember(oThdConf, "use_tls");
-	jtlsfp = GetObjectMember(oThdConf, "tls_fingerprint");
-	jwt = GetObjectMember(oThdConf, "pool_weight");
+    /* We already checked presence and types */
+    jaddr = GetObjectMember(oThdConf, "pool_address");
+    jlogin = GetObjectMember(oThdConf, "wallet_address");
+    jrigid = GetObjectMember(oThdConf, "rig_id");
+    jpasswd = GetObjectMember(oThdConf, "pool_password");
+    jnicehash = GetObjectMember(oThdConf, "use_nicehash");
+    jtls = GetObjectMember(oThdConf, "use_tls");
+    jtlsfp = GetObjectMember(oThdConf, "tls_fingerprint");
+    jwt = GetObjectMember(oThdConf, "pool_weight");
 
-	cfg.sPoolAddr = jaddr->GetString();
-	cfg.sWalletAddr = jlogin->GetString();
-	cfg.sRigId = jrigid->GetString();
-	cfg.sPasswd = jpasswd->GetString();
-	cfg.nicehash = jnicehash->GetBool();
-	cfg.tls = jtls->GetBool();
-	cfg.tls_fingerprint = jtlsfp->GetString();
-	cfg.raw_weight = jwt->GetUint64();
+    cfg.sPoolAddr = jaddr->GetString();
+    cfg.sWalletAddr = jlogin->GetString();
+    cfg.sRigId = jrigid->GetString();
+    cfg.sPasswd = jpasswd->GetString();
+    cfg.nicehash = jnicehash->GetBool();
+    cfg.tls = jtls->GetBool();
+    cfg.tls_fingerprint = jtlsfp->GetString();
+    cfg.raw_weight = jwt->GetUint64();
 
-	size_t dlt = wt_max - wt_min;
-	if(dlt != 0)
-	{
-		/* Normalise weights between 0 and 9.8 */
-		cfg.weight = double(cfg.raw_weight - wt_min) * 9.8;
-		cfg.weight /= dlt;
-	}
-	else /* Special case - user selected same weights for everything */
-		cfg.weight = 0.0;
-	return true;
+    size_t dlt = wt_max - wt_min;
+    if(dlt != 0)
+    {
+        /* Normalise weights between 0 and 9.8 */
+        cfg.weight = double(cfg.raw_weight - wt_min) * 9.8;
+        cfg.weight /= dlt;
+    }
+    else /* Special case - user selected same weights for everything */
+        cfg.weight = 0.0;
+    return true;
 }
 
 bool jconf::TlsSecureAlgos()
 {
-	return prv->configValues[bTlsSecureAlgo]->GetBool();
+    return prv->configValues[bTlsSecureAlgo]->GetBool();
 }
 
 bool jconf::PreferIpv4()
 {
-	return prv->configValues[bPreferIpv4]->GetBool();
+    return prv->configValues[bPreferIpv4]->GetBool();
 }
 
 uint64_t jconf::GetCallTimeout()
 {
-	return prv->configValues[iCallTimeout]->GetUint64();
+    return prv->configValues[iCallTimeout]->GetUint64();
 }
 
 uint64_t jconf::GetNetRetry()
 {
-	return prv->configValues[iNetRetry]->GetUint64();
+    return prv->configValues[iNetRetry]->GetUint64();
 }
 
 uint64_t jconf::GetGiveUpLimit()
 {
-	return prv->configValues[iGiveUpLimit]->GetUint64();
+    return prv->configValues[iGiveUpLimit]->GetUint64();
 }
 
 uint64_t jconf::GetVerboseLevel()
 {
-	return prv->configValues[iVerboseLevel]->GetUint64();
+    return prv->configValues[iVerboseLevel]->GetUint64();
 }
 
 bool jconf::PrintMotd()
 {
-	return prv->configValues[bPrintMotd]->GetBool();
+    return prv->configValues[bPrintMotd]->GetBool();
 }
 
 uint64_t jconf::GetAutohashTime()
 {
-	return prv->configValues[iAutohashTime]->GetUint64();
+    return prv->configValues[iAutohashTime]->GetUint64();
 }
 
 uint16_t jconf::GetHttpdPort()
 {
-	if(xmrstak::params::inst().httpd_port == xmrstak::params::httpd_port_unset)
-		return prv->configValues[iHttpdPort]->GetUint();
-	else
-		return uint16_t(xmrstak::params::inst().httpd_port);
+    if(xmrstak::params::inst().httpd_port == xmrstak::params::httpd_port_unset)
+        return prv->configValues[iHttpdPort]->GetUint();
+    else
+        return uint16_t(xmrstak::params::inst().httpd_port);
 }
 
 const char* jconf::GetHttpUsername()
 {
-	return prv->configValues[sHttpLogin]->GetString();
+    return prv->configValues[sHttpLogin]->GetString();
 }
 
 const char* jconf::GetHttpPassword()
 {
-	return prv->configValues[sHttpPass]->GetString();
+    return prv->configValues[sHttpPass]->GetString();
 }
 
 bool jconf::DaemonMode()
 {
-	return prv->configValues[bDaemonMode]->GetBool();
+    return prv->configValues[bDaemonMode]->GetBool();
 }
 
 const char* jconf::GetOutputFile()
 {
-	return prv->configValues[sOutputFile]->GetString();
+    return prv->configValues[sOutputFile]->GetString();
 }
 
 void jconf::cpuid(uint32_t eax, int32_t ecx, int32_t val[4])
 {
-	memset(val, 0, sizeof(int32_t)*4);
+    memset(val, 0, sizeof(int32_t)*4);
 
 #ifdef _WIN32
-	__cpuidex(val, eax, ecx);
+    __cpuidex(val, eax, ecx);
 #else
-	__cpuid_count(eax, ecx, val[0], val[1], val[2], val[3]);
+    __cpuid_count(eax, ecx, val[0], val[1], val[2], val[3]);
 #endif
 }
 
 bool jconf::check_cpu_features()
 {
-	constexpr int AESNI_BIT = 1 << 25;
-	constexpr int SSE2_BIT = 1 << 26;
-	int32_t cpu_info[4];
-	bool bHaveSse2;
+    constexpr int AESNI_BIT = 1 << 25;
+    constexpr int SSE2_BIT = 1 << 26;
+    int32_t cpu_info[4];
+    bool bHaveSse2;
 
-	cpuid(1, 0, cpu_info);
+    cpuid(1, 0, cpu_info);
 
-	bHaveAes = (cpu_info[2] & AESNI_BIT) != 0;
-	bHaveSse2 = (cpu_info[3] & SSE2_BIT) != 0;
+    bHaveAes = (cpu_info[2] & AESNI_BIT) != 0;
+    bHaveSse2 = (cpu_info[3] & SSE2_BIT) != 0;
 
-	return bHaveSse2;
+    return bHaveSse2;
 }
 
 jconf::slow_mem_cfg jconf::GetSlowMemSetting()
 {
-	const char* opt = prv->configValues[sUseSlowMem]->GetString();
+    const char* opt = prv->configValues[sUseSlowMem]->GetString();
 
-	if(strcasecmp(opt, "always") == 0)
-		return always_use;
-	else if(strcasecmp(opt, "no_mlck") == 0)
-		return no_mlck;
-	else if(strcasecmp(opt, "warn") == 0)
-		return print_warning;
-	else if(strcasecmp(opt, "never") == 0)
-		return never_use;
-	else
-		return unknown_value;
+    if(strcasecmp(opt, "always") == 0)
+        return always_use;
+    else if(strcasecmp(opt, "no_mlck") == 0)
+        return no_mlck;
+    else if(strcasecmp(opt, "warn") == 0)
+        return print_warning;
+    else if(strcasecmp(opt, "never") == 0)
+        return never_use;
+    else
+        return unknown_value;
 }
 
 std::string jconf::GetMiningCoin()
 {
-	if(xmrstak::params::inst().currency.length() > 0)
-		return xmrstak::params::inst().currency;
-	else
-		return prv->configValues[sCurrency]->GetString();
+    if(xmrstak::params::inst().currency.length() > 0)
+        return xmrstak::params::inst().currency;
+    else
+        return prv->configValues[sCurrency]->GetString();
 }
 
 void jconf::GetAlgoList(std::string& list)
 {
-	list.reserve(256);
-	for(size_t i=0; i < coin_alogo_size; i++)
-	{
-		list += "\t- ";
-		list += coin_algos[i].coin_name;
-		list += "\n";
-	}
+    list.reserve(256);
+    for(size_t i=0; i < coin_alogo_size; i++)
+    {
+        list += "\t- ";
+        list += coin_algos[i].coin_name;
+        list += "\n";
+    }
 }
 
 bool jconf::IsOnAlgoList(std::string& needle)
 {
-	std::transform(needle.begin(), needle.end(), needle.begin(), ::tolower);
+    std::transform(needle.begin(), needle.end(), needle.begin(), ::tolower);
 
-	for(size_t i=0; i < coin_alogo_size; i++)
-	{
-		if(needle == coin_algos[i].coin_name)
-			return true;
-	}
-	return false;
+    for(size_t i=0; i < coin_alogo_size; i++)
+    {
+        if(needle == coin_algos[i].coin_name)
+            return true;
+    }
+    return false;
 }
 
 const char* jconf::GetDefaultPool(const char* needle)
 {
-	const char* default_example = "pool.example.com:3333";
+    const char* default_example = "pool.example.com:3333";
 
-	for(size_t i=0; i < coin_alogo_size; i++)
-	{
-		if(strcmp(needle, coin_algos[i].coin_name) == 0)
-		{
-			if(coin_algos[i].default_pool != nullptr)
-				return coin_algos[i].default_pool;
-			else
-				return default_example;
-		}
-	}
+    for(size_t i=0; i < coin_alogo_size; i++)
+    {
+        if(strcmp(needle, coin_algos[i].coin_name) == 0)
+        {
+            if(coin_algos[i].default_pool != nullptr)
+                return coin_algos[i].default_pool;
+            else
+                return default_example;
+        }
+    }
 
-	return default_example;
+    return default_example;
 }
 
 bool jconf::parse_file(const char* sFilename, bool main_conf)
 {
-	FILE * pFile;
-	char * buffer;
-	size_t flen;
+    FILE * pFile;
+    char * buffer;
+    size_t flen;
 
-	pFile = fopen(sFilename, "rb");
-	if (pFile == NULL)
-	{
-		printer::inst()->print_msg(L0, "Failed to open config file %s.", sFilename);
-		return false;
-	}
+    pFile = fopen(sFilename, "rb");
+    if (pFile == NULL)
+    {
+        printer::inst()->print_msg(L0, "Failed to open config file %s.", sFilename);
+        return false;
+    }
 
-	fseek(pFile,0,SEEK_END);
-	flen = ftell(pFile);
-	rewind(pFile);
+    fseek(pFile,0,SEEK_END);
+    flen = ftell(pFile);
+    rewind(pFile);
 
-	if(flen >= 64*1024)
-	{
-		fclose(pFile);
-		printer::inst()->print_msg(L0, "Oversized config file - %s.", sFilename);
-		return false;
-	}
+    if(flen >= 64*1024)
+    {
+        fclose(pFile);
+        printer::inst()->print_msg(L0, "Oversized config file - %s.", sFilename);
+        return false;
+    }
 
-	if(flen <= 16)
-	{
-		fclose(pFile);
-		printer::inst()->print_msg(L0, "File is empty or too short - %s.", sFilename);
-		return false;
-	}
+    if(flen <= 16)
+    {
+        fclose(pFile);
+        printer::inst()->print_msg(L0, "File is empty or too short - %s.", sFilename);
+        return false;
+    }
 
-	buffer = (char*)malloc(flen + 3);
-	if(fread(buffer+1, flen, 1, pFile) != 1)
-	{
-		free(buffer);
-		fclose(pFile);
-		printer::inst()->print_msg(L0, "Read error while reading %s.", sFilename);
-		return false;
-	}
-	fclose(pFile);
+    buffer = (char*)malloc(flen + 3);
+    if(fread(buffer+1, flen, 1, pFile) != 1)
+    {
+        free(buffer);
+        fclose(pFile);
+        printer::inst()->print_msg(L0, "Read error while reading %s.", sFilename);
+        return false;
+    }
+    fclose(pFile);
 
-	//Replace Unicode BOM with spaces - we always use UTF-8
-	unsigned char* ubuffer = (unsigned char*)buffer;
-	if(ubuffer[1] == 0xEF && ubuffer[2] == 0xBB && ubuffer[3] == 0xBF)
-	{
-		buffer[1] = ' ';
-		buffer[2] = ' ';
-		buffer[3] = ' ';
-	}
+    //Replace Unicode BOM with spaces - we always use UTF-8
+    unsigned char* ubuffer = (unsigned char*)buffer;
+    if(ubuffer[1] == 0xEF && ubuffer[2] == 0xBB && ubuffer[3] == 0xBF)
+    {
+        buffer[1] = ' ';
+        buffer[2] = ' ';
+        buffer[3] = ' ';
+    }
 
-	buffer[0] = '{';
-	buffer[flen] = '}';
-	buffer[flen + 1] = '\0';
+    buffer[0] = '{';
+    buffer[flen] = '}';
+    buffer[flen + 1] = '\0';
 
-	Document& root = main_conf ? prv->jsonDoc : prv->jsonDocPools;
+    Document& root = main_conf ? prv->jsonDoc : prv->jsonDocPools;
 
-	root.Parse<kParseCommentsFlag|kParseTrailingCommasFlag>(buffer, flen+2);
-	free(buffer);
+    root.Parse<kParseCommentsFlag|kParseTrailingCommasFlag>(buffer, flen+2);
+    free(buffer);
 
-	if(root.HasParseError())
-	{
-		printer::inst()->print_msg(L0, "JSON config parse error in '%s' (offset %llu): %s",
-			sFilename, int_port(root.GetErrorOffset()), GetParseError_En(root.GetParseError()));
-		return false;
-	}
+    if(root.HasParseError())
+    {
+        printer::inst()->print_msg(L0, "JSON config parse error in '%s' (offset %llu): %s",
+            sFilename, int_port(root.GetErrorOffset()), GetParseError_En(root.GetParseError()));
+        return false;
+    }
 
-	if(!root.IsObject())
-	{ //This should never happen as we created the root ourselves
-		printer::inst()->print_msg(L0, "Invalid config file '%s'. No root?", sFilename);
-		return false;
-	}
+    if(!root.IsObject())
+    { //This should never happen as we created the root ourselves
+        printer::inst()->print_msg(L0, "Invalid config file '%s'. No root?", sFilename);
+        return false;
+    }
 
-	if(main_conf)
-	{
-		for(size_t i = 2; i < iConfigCnt; i++)
-		{
-			if(oConfigValues[i].iName != i)
-			{
-				printer::inst()->print_msg(L0, "Code error. oConfigValues are not in order.");
-				return false;
-			}
+    if(main_conf)
+    {
+        for(size_t i = 2; i < iConfigCnt; i++)
+        {
+            if(oConfigValues[i].iName != i)
+            {
+                printer::inst()->print_msg(L0, "Code error. oConfigValues are not in order.");
+                return false;
+            }
 
-			prv->configValues[i] = GetObjectMember(root, oConfigValues[i].sName);
+            prv->configValues[i] = GetObjectMember(root, oConfigValues[i].sName);
 
-			if(prv->configValues[i] == nullptr)
-			{
-				printer::inst()->print_msg(L0, "Invalid config file '%s'. Missing value \"%s\".", sFilename, oConfigValues[i].sName);
-				return false;
-			}
+            if(prv->configValues[i] == nullptr)
+            {
+                printer::inst()->print_msg(L0, "Invalid config file '%s'. Missing value \"%s\".", sFilename, oConfigValues[i].sName);
+                return false;
+            }
 
-			if(!checkType(prv->configValues[i]->GetType(), oConfigValues[i].iType))
-			{
-				printer::inst()->print_msg(L0, "Invalid config file '%s'. Value \"%s\" has unexpected type.", sFilename, oConfigValues[i].sName);
-				return false;
-			}
-		}
-	}
-	else
-	{
-		for(size_t i = 0; i < 2; i++)
-		{
-			if(oConfigValues[i].iName != i)
-			{
-				printer::inst()->print_msg(L0, "Code error. oConfigValues are not in order.");
-				return false;
-			}
+            if(!checkType(prv->configValues[i]->GetType(), oConfigValues[i].iType))
+            {
+                printer::inst()->print_msg(L0, "Invalid config file '%s'. Value \"%s\" has unexpected type.", sFilename, oConfigValues[i].sName);
+                return false;
+            }
+        }
+    }
+    else
+    {
+        for(size_t i = 0; i < 2; i++)
+        {
+            if(oConfigValues[i].iName != i)
+            {
+                printer::inst()->print_msg(L0, "Code error. oConfigValues are not in order.");
+                return false;
+            }
 
-			prv->configValues[i] = GetObjectMember(root, oConfigValues[i].sName);
+            prv->configValues[i] = GetObjectMember(root, oConfigValues[i].sName);
 
-			if(prv->configValues[i] == nullptr)
-			{
-				printer::inst()->print_msg(L0, "Invalid config file '%s'. Missing value \"%s\".", sFilename, oConfigValues[i].sName);
-				return false;
-			}
+            if(prv->configValues[i] == nullptr)
+            {
+                printer::inst()->print_msg(L0, "Invalid config file '%s'. Missing value \"%s\".", sFilename, oConfigValues[i].sName);
+                return false;
+            }
 
-			if(!checkType(prv->configValues[i]->GetType(), oConfigValues[i].iType))
-			{
-				printer::inst()->print_msg(L0, "Invalid config file '%s'. Value \"%s\" has unexpected type.", sFilename, oConfigValues[i].sName);
-				return false;
-			}
-		}
-	}
+            if(!checkType(prv->configValues[i]->GetType(), oConfigValues[i].iType))
+            {
+                printer::inst()->print_msg(L0, "Invalid config file '%s'. Value \"%s\" has unexpected type.", sFilename, oConfigValues[i].sName);
+                return false;
+            }
+        }
+    }
 
-	return true;
+    return true;
 }
 
 bool jconf::parse_config(const char* sFilename, const char* sFilenamePools)
 {
-	if(!check_cpu_features())
-	{
-		printer::inst()->print_msg(L0, "CPU support of SSE2 is required.");
-		return false;
-	}
+    if(!check_cpu_features())
+    {
+        printer::inst()->print_msg(L0, "CPU support of SSE2 is required.");
+        return false;
+    }
 
-	if(!parse_file(sFilename, true))
-		return false;
+    if(!parse_file(sFilename, true))
+        return false;
 
-	if(!parse_file(sFilenamePools, false))
-		return false;
+    if(!parse_file(sFilenamePools, false))
+        return false;
 
-	size_t pool_cnt = prv->configValues[aPoolList]->Size();
-	if(pool_cnt == 0)
-	{
-		printer::inst()->print_msg(L0, "Invalid config file. pool_list must not be empty.");
-		return false;
-	}
+    size_t pool_cnt = prv->configValues[aPoolList]->Size();
+    if(pool_cnt == 0)
+    {
+        printer::inst()->print_msg(L0, "Invalid config file. pool_list must not be empty.");
+        return false;
+    }
 
-	std::vector<size_t> pool_weights;
-	pool_weights.reserve(pool_cnt);
+    std::vector<size_t> pool_weights;
+    pool_weights.reserve(pool_cnt);
 
-	const char* aPoolValues[] = { "pool_address", "wallet_address", "rig_id", "pool_password", "use_nicehash", "use_tls", "tls_fingerprint", "pool_weight" };
-	Type poolValTypes[] = { kStringType, kStringType, kStringType, kStringType, kTrueType, kTrueType, kStringType, kNumberType };
+    const char* aPoolValues[] = { "pool_address", "wallet_address", "rig_id", "pool_password", "use_nicehash", "use_tls", "tls_fingerprint", "pool_weight" };
+    Type poolValTypes[] = { kStringType, kStringType, kStringType, kStringType, kTrueType, kTrueType, kStringType, kNumberType };
 
-	constexpr size_t pvcnt = sizeof(aPoolValues)/sizeof(aPoolValues[0]);
-	for(uint32_t i=0; i < pool_cnt; i++)
-	{
-		const Value& oThdConf = prv->configValues[aPoolList]->GetArray()[i];
-		
-		if(!oThdConf.IsObject())
-		{
-			printer::inst()->print_msg(L0, "Invalid config file. pool_list must contain objects.");
-			return false;
-		}
+    constexpr size_t pvcnt = sizeof(aPoolValues)/sizeof(aPoolValues[0]);
+    for(uint32_t i=0; i < pool_cnt; i++)
+    {
+        const Value& oThdConf = prv->configValues[aPoolList]->GetArray()[i];
 
-		for(uint32_t j=0; j < pvcnt; j++)
-		{
-			const Value* v;
-			if((v = GetObjectMember(oThdConf, aPoolValues[j])) == nullptr)
-			{
-				printer::inst()->print_msg(L0, "Invalid config file. Pool %u does not have the value %s.", i, aPoolValues[j]);
-				return false;
-			}
+        if(!oThdConf.IsObject())
+        {
+            printer::inst()->print_msg(L0, "Invalid config file. pool_list must contain objects.");
+            return false;
+        }
 
-			if(!checkType(v->GetType(), poolValTypes[j]))
-			{
-				printer::inst()->print_msg(L0, "Invalid config file. Value %s for pool %u has unexpected type.", aPoolValues[j], i);
-				return false;
-			}
-		}
+        for(uint32_t j=0; j < pvcnt; j++)
+        {
+            const Value* v;
+            if((v = GetObjectMember(oThdConf, aPoolValues[j])) == nullptr)
+            {
+                printer::inst()->print_msg(L0, "Invalid config file. Pool %u does not have the value %s.", i, aPoolValues[j]);
+                return false;
+            }
 
-		const Value* jwt = GetObjectMember(oThdConf, "pool_weight");
-		size_t wt;
-		if(!jwt->IsUint64() || (wt = jwt->GetUint64()) == 0)
-		{
-			printer::inst()->print_msg(L0, "Invalid pool list for pool %u. Pool weight needs to be an integer larger than zero.", i);
-			return false;
-		}
+            if(!checkType(v->GetType(), poolValTypes[j]))
+            {
+                printer::inst()->print_msg(L0, "Invalid config file. Value %s for pool %u has unexpected type.", aPoolValues[j], i);
+                return false;
+            }
+        }
 
-		pool_weights.emplace_back(wt);
-	}
+        const Value* jwt = GetObjectMember(oThdConf, "pool_weight");
+        size_t wt;
+        if(!jwt->IsUint64() || (wt = jwt->GetUint64()) == 0)
+        {
+            printer::inst()->print_msg(L0, "Invalid pool list for pool %u. Pool weight needs to be an integer larger than zero.", i);
+            return false;
+        }
 
-	wt_max = *std::max_element(pool_weights.begin(), pool_weights.end());
-	wt_min = *std::min_element(pool_weights.begin(), pool_weights.end());
+        pool_weights.emplace_back(wt);
+    }
 
-	if(!prv->configValues[iCallTimeout]->IsUint64() ||
-		!prv->configValues[iNetRetry]->IsUint64() ||
-		!prv->configValues[iGiveUpLimit]->IsUint64())
-	{
-		printer::inst()->print_msg(L0,
-			"Invalid config file. call_timeout, retry_time and giveup_limit need to be positive integers.");
-		return false;
-	}
+    wt_max = *std::max_element(pool_weights.begin(), pool_weights.end());
+    wt_min = *std::min_element(pool_weights.begin(), pool_weights.end());
 
-	if(prv->configValues[iCallTimeout]->GetUint64() < 2 || prv->configValues[iNetRetry]->GetUint64() < 2)
-	{
-		printer::inst()->print_msg(L0,
-			"Invalid config file. call_timeout and retry_time need to be larger than 1 second.");
-		return false;
-	}
+    if(!prv->configValues[iCallTimeout]->IsUint64() ||
+        !prv->configValues[iNetRetry]->IsUint64() ||
+        !prv->configValues[iGiveUpLimit]->IsUint64())
+    {
+        printer::inst()->print_msg(L0,
+            "Invalid config file. call_timeout, retry_time and giveup_limit need to be positive integers.");
+        return false;
+    }
 
-	if(!prv->configValues[iVerboseLevel]->IsUint64() || !prv->configValues[iAutohashTime]->IsUint64())
-	{
-		printer::inst()->print_msg(L0,
-			"Invalid config file. verbose_level and h_print_time need to be positive integers.");
-		return false;
-	}
+    if(prv->configValues[iCallTimeout]->GetUint64() < 2 || prv->configValues[iNetRetry]->GetUint64() < 2)
+    {
+        printer::inst()->print_msg(L0,
+            "Invalid config file. call_timeout and retry_time need to be larger than 1 second.");
+        return false;
+    }
 
-	if(!prv->configValues[iHttpdPort]->IsUint() || prv->configValues[iHttpdPort]->GetUint() > 0xFFFF)
-	{
-		printer::inst()->print_msg(L0,
-			"Invalid config file. httpd_port has to be in the range 0 to 65535.");
-		return false;
-	}
+    if(!prv->configValues[iVerboseLevel]->IsUint64() || !prv->configValues[iAutohashTime]->IsUint64())
+    {
+        printer::inst()->print_msg(L0,
+            "Invalid config file. verbose_level and h_print_time need to be positive integers.");
+        return false;
+    }
 
-	if(prv->configValues[bAesOverride]->IsBool())
-		bHaveAes = prv->configValues[bAesOverride]->GetBool();
+    if(!prv->configValues[iHttpdPort]->IsUint() || prv->configValues[iHttpdPort]->GetUint() > 0xFFFF)
+    {
+        printer::inst()->print_msg(L0,
+            "Invalid config file. httpd_port has to be in the range 0 to 65535.");
+        return false;
+    }
 
-	if(!bHaveAes)
-		printer::inst()->print_msg(L0, "Your CPU doesn't support hardware AES. Don't expect high hashrates.");
+    if(prv->configValues[bAesOverride]->IsBool())
+        bHaveAes = prv->configValues[bAesOverride]->GetBool();
 
-	printer::inst()->set_verbose_level(prv->configValues[iVerboseLevel]->GetUint64());
+    if(!bHaveAes)
+        printer::inst()->print_msg(L0, "Your CPU doesn't support hardware AES. Don't expect high hashrates.");
 
-	if(GetSlowMemSetting() == unknown_value)
-	{
-		printer::inst()->print_msg(L0,
-			"Invalid config file. use_slow_memory must be \"always\", \"no_mlck\", \"warn\" or \"never\"");
-		return false;
-	}
+    printer::inst()->set_verbose_level(prv->configValues[iVerboseLevel]->GetUint64());
+
+    if(GetSlowMemSetting() == unknown_value)
+    {
+        printer::inst()->print_msg(L0,
+            "Invalid config file. use_slow_memory must be \"always\", \"no_mlck\", \"warn\" or \"never\"");
+        return false;
+    }
 
 #ifdef _WIN32
-	if(GetSlowMemSetting() == no_mlck)
-	{
-		printer::inst()->print_msg(L0, "On Windows large pages need mlock. Please use another option.");
-		return false;
-	}
+    if(GetSlowMemSetting() == no_mlck)
+    {
+        printer::inst()->print_msg(L0, "On Windows large pages need mlock. Please use another option.");
+        return false;
+    }
 #endif // _WIN32
 
-	if (prv->configValues[bFlushStdout]->IsBool())
-	{
-		bool bflush = prv->configValues[bFlushStdout]->GetBool();
-		printer::inst()->set_flush_stdout(bflush);
-		if (bflush)
-		{
-			printer::inst()->print_msg(L0, "Flush stdout forced.");
-		}
-	}
+    if (prv->configValues[bFlushStdout]->IsBool())
+    {
+        bool bflush = prv->configValues[bFlushStdout]->GetBool();
+        printer::inst()->set_flush_stdout(bflush);
+        if (bflush)
+        {
+            printer::inst()->print_msg(L0, "Flush stdout forced.");
+        }
+    }
 
-	std::string ctmp = GetMiningCoin();
-	std::transform(ctmp.begin(), ctmp.end(), ctmp.begin(), ::tolower);
+    std::string ctmp = GetMiningCoin();
+    std::transform(ctmp.begin(), ctmp.end(), ctmp.begin(), ::tolower);
 
-	if(ctmp.length() == 0)
-	{
-		printer::inst()->print_msg(L0, "You need to specify the coin that you want to mine.");
-		return false;
-	}
+    if(ctmp.length() == 0)
+    {
+        printer::inst()->print_msg(L0, "You need to specify the coin that you want to mine.");
+        return false;
+    }
 
-	for(size_t i=0; i < coin_alogo_size; i++)
-	{
-		if(ctmp == coin_algos[i].coin_name)
-		{
-			mining_algo = coin_algos[i].algo;
-			mining_algo_root = coin_algos[i].algo_root;
-			mining_fork_version = coin_algos[i].fork_version;
-			break;
-		}
-	}
+    for(size_t i=0; i < coin_alogo_size; i++)
+    {
+        if(ctmp == coin_algos[i].coin_name)
+        {
+            mining_algo = coin_algos[i].algo;
+            mining_algo_root = coin_algos[i].algo_root;
+            mining_fork_version = coin_algos[i].fork_version;
+            break;
+        }
+    }
 
-	if(mining_algo == invalid_algo)
-	{
-		std::string cl;
-		GetAlgoList(cl);
-		printer::inst()->print_msg(L0, "Unrecognised coin '%s', your options are:\n%s", ctmp.c_str(), cl.c_str());
-		return false;
-	}
+    if(mining_algo == invalid_algo)
+    {
+        std::string cl;
+        GetAlgoList(cl);
+        printer::inst()->print_msg(L0, "Unrecognised coin '%s', your options are:\n%s", ctmp.c_str(), cl.c_str());
+        return false;
+    }
 
-	return true;
+    return true;
 }

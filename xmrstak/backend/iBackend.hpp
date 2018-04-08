@@ -11,40 +11,40 @@
 template <typename T, std::size_t N>
 constexpr std::size_t countof(T const (&)[N]) noexcept
 {
-	return N;
+    return N;
 }
 
 namespace xmrstak
 {
-	struct iBackend
-	{
+    struct iBackend
+    {
 
-		enum BackendType : uint32_t { UNKNOWN = 0u, CPU = 1u, AMD = 2u, NVIDIA = 3u };
-		
-		static const char* getName(const BackendType type)
-		{
-			const char* backendNames[] = {
-				"unknown",
-				"cpu",
-				"amd",
-				"nvidia"
-			};
+        enum BackendType : uint32_t { UNKNOWN = 0u, CPU = 1u, AMD = 2u, NVIDIA = 3u };
 
-			uint32_t i = static_cast<uint32_t>(type);
-			if(i >= countof(backendNames))
-				i = 0;
+        static const char* getName(const BackendType type)
+        {
+            const char* backendNames[] = {
+                "unknown",
+                "cpu",
+                "amd",
+                "nvidia"
+            };
 
-			return backendNames[i];
-		}
+            uint32_t i = static_cast<uint32_t>(type);
+            if(i >= countof(backendNames))
+                i = 0;
 
-		std::atomic<uint64_t> iHashCount;
-		std::atomic<uint64_t> iTimestamp;
-		uint32_t iThreadNo;
-		BackendType backendType = UNKNOWN;
+            return backendNames[i];
+        }
 
-		iBackend() : iHashCount(0), iTimestamp(0)
-		{
-		}
-	};
+        std::atomic<uint64_t> iHashCount;
+        std::atomic<uint64_t> iTimestamp;
+        uint32_t iThreadNo;
+        BackendType backendType = UNKNOWN;
+
+        iBackend() : iHashCount(0), iTimestamp(0)
+        {
+        }
+    };
 
 } // namepsace xmrstak

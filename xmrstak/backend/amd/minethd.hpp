@@ -20,38 +20,38 @@ class minethd  : public iBackend
 {
 public:
 
-	static void switch_work(miner_work& pWork);
-	static std::vector<iBackend*>* thread_starter(uint32_t threadOffset, miner_work& pWork);
-	static bool init_gpus();
+    static void switch_work(miner_work& pWork);
+    static std::vector<iBackend*>* thread_starter(uint32_t threadOffset, miner_work& pWork);
+    static bool init_gpus();
 
 private:
-	typedef void (*cn_hash_fun)(const void*, size_t, void*, cryptonight_ctx*);
+    typedef void (*cn_hash_fun)(const void*, size_t, void*, cryptonight_ctx*);
 
-	minethd(miner_work& pWork, size_t iNo, GpuContext* ctx, const jconf::thd_cfg cfg);
+    minethd(miner_work& pWork, size_t iNo, GpuContext* ctx, const jconf::thd_cfg cfg);
 
-	void work_main();
-	void consume_work();
+    void work_main();
+    void consume_work();
 
-	uint64_t iJobNo;
+    uint64_t iJobNo;
 
-	static miner_work oGlobalWork;
-	miner_work oWork;
+    static miner_work oGlobalWork;
+    miner_work oWork;
 
-	std::promise<void> order_fix;
-	std::mutex thd_aff_set;
+    std::promise<void> order_fix;
+    std::mutex thd_aff_set;
 
-	std::thread oWorkThd;
-	int64_t affinity;
+    std::thread oWorkThd;
+    int64_t affinity;
 
-	bool bQuit;
-	bool bNoPrefetch;
+    bool bQuit;
+    bool bNoPrefetch;
 
-	//Mutable ptr to vector below, different for each thread
-	GpuContext* pGpuCtx;
+    //Mutable ptr to vector below, different for each thread
+    GpuContext* pGpuCtx;
 
-	// WARNING - this vector (but not its contents) must be immutable
-	// once the threads are started
-	static std::vector<GpuContext> vGpuData;
+    // WARNING - this vector (but not its contents) must be immutable
+    // once the threads are started
+    static std::vector<GpuContext> vGpuData;
 };
 
 } // namespace amd
