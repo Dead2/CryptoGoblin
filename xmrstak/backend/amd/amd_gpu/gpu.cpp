@@ -26,7 +26,7 @@
 #include <algorithm>
 #include <regex>
 #include <cassert>
-#include <algorithm> 
+#include <algorithm>
 
 #include <fstream>
 #include <sstream>
@@ -311,9 +311,10 @@ size_t InitOpenCLGpu(cl_context opencl_ctx, GpuContext* ctx, const char* source_
         return ERR_OCL_API;
     }
 
-	size_t scratchPadSize = cn_select_memory(::jconf::inst()->GetMiningAlgo());
-    int threadMemMask = cn_select_mask(::jconf::inst()->GetMiningAlgo());
-    int hashIterations = cn_select_iter(::jconf::inst()->GetMiningAlgo());
+	size_t scratchPadSize = std::max(
+		cn_select_memory(::jconf::inst()->GetMiningAlgo()),
+		cn_select_memory(::jconf::inst()->GetMiningAlgoRoot())
+	);
 
     size_t g_thd = ctx->rawIntensity;
 	ctx->ExtraBuffers[0] = clCreateBuffer(opencl_ctx, CL_MEM_READ_WRITE, scratchPadSize * g_thd, NULL, &ret);
@@ -385,6 +386,7 @@ size_t InitOpenCLGpu(cl_context opencl_ctx, GpuContext* ctx, const char* source_
 
 	for(int ii = 0; ii < num_algos; ++ii)
 	{
+		// scratchpad size for the selected mining algorithm
 		size_t hashMemSize = cn_select_memory(miner_algo[ii]);
 		int threadMemMask = cn_select_mask(miner_algo[ii]);
 		int hashIterations = cn_select_iter(miner_algo[ii]);
@@ -922,7 +924,7 @@ size_t InitOpenCL(GpuContext* ctx, size_t num_gpus, size_t platform_idx)
 
 size_t XMRSetJob(GpuContext* ctx, uint8_t* input, size_t input_len, uint64_t target, xmrstak_algo miner_algo)
 {
-	// switch to the kernel storage 
+	// switch to the kernel storage
 	int kernel_storage = miner_algo == ::jconf::inst()->GetMiningAlgo() ? 0 : 1;
 
     cl_int ret;
@@ -1089,7 +1091,7 @@ size_t XMRRunJob(GpuContext* ctx, cl_uint* HashOutput, xmrstak_algo miner_algo)
 {
 	// switch to the kernel storage
 	int kernel_storage = miner_algo == ::jconf::inst()->GetMiningAlgo() ? 0 : 1;
-	
+
     cl_int ret;
     cl_uint zero = 0;
     size_t BranchNonces[4];

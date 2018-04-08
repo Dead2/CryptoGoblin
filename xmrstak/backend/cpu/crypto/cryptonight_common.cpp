@@ -23,6 +23,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <algorithm>
 
 #if defined(__GNUC__)
 #include <mm_malloc.h>
@@ -179,7 +180,11 @@ size_t cryptonight_init(size_t use_fast_mem, size_t use_mlock, alloc_msg* msg)
 
 cryptonight_ctx* cryptonight_alloc_ctx(size_t use_fast_mem, size_t use_mlock, alloc_msg* msg)
 {
-    size_t hashMemSize = cn_select_memory(::jconf::inst()->GetMiningAlgo());
+	size_t hashMemSize = std::max(
+		cn_select_memory(::jconf::inst()->GetMiningAlgo()),
+		cn_select_memory(::jconf::inst()->GetMiningAlgoRoot())
+	);
+
     cryptonight_ctx* ptr = (cryptonight_ctx*)_mm_malloc(sizeof(cryptonight_ctx), 4096);
 
     if(use_fast_mem == 0)
@@ -258,8 +263,13 @@ cryptonight_ctx* cryptonight_alloc_ctx(size_t use_fast_mem, size_t use_mlock, al
 #endif // _WIN32
 }
 
-void cryptonight_free_ctx(cryptonight_ctx* ctx) {
-    size_t hashMemSize = cn_select_memory(::jconf::inst()->GetMiningAlgo());
+void cryptonight_free_ctx(cryptonight_ctx* ctx)
+{
+	size_t hashMemSize = std::max(
+		cn_select_memory(::jconf::inst()->GetMiningAlgo()),
+		cn_select_memory(::jconf::inst()->GetMiningAlgoRoot())
+	);
+
     if(ctx->ctx_info[0] != 0)
     {
 #ifdef _WIN32
