@@ -10,11 +10,11 @@ if you believe in cpu-rights, then this might not be the mining tool for you.
 * [Documentation](https://github.com/Dead2/CryptoGoblin/tree/master/doc)
 
 CryptoGoblin was forked from xmr-stak in early 2017, it utilizes several GCC compiler-specific tweaks and
-many other (medium, small, minor and micro) optimizations to get the most speed out of your cpu.
-CryptoGoblin can also be compiled using, but several of the optimizations will not be activated.
+many other (medium, small, minor and micro) optimizations to get the most speed out of your cpu.<br>
+CryptoGoblin can also be compiled using MSVC, but several of the optimizations will not be activated.
 
 ## Installation and Configuration
-If you are using Windows, download the pre-compiled windows binaries, or compile them yourself.
+If you are using Windows, download the pre-compiled windows binaries, or compile them yourself.<br>
 If you are using Linux, MacOS, BSD or similar, you need to compile them yourself.
 
 After you have compiled or downloaded the executables, just run the miner without any configuration files,
