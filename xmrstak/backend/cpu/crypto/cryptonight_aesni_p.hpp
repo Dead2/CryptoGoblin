@@ -71,6 +71,7 @@ ALWAYS_INLINE FLATTEN static inline void aes_8round(__m128i key, __m128i* x0, __
 }
 
 template<xmrstak_algo ALGO, size_t MEM, bool PREFETCH>
+TARGETS("avx2,avx,bmi2,bmi,fma,default")
 ALIGN(64) FLATTEN2 void cn_explode_scratchpad(const __m128i* input, __m128i* output)
 {
     // This is more than we have registers, compiler will assign 2 keys on the stack
@@ -149,6 +150,7 @@ ALIGN(64) FLATTEN2 void cn_explode_scratchpad(const __m128i* input, __m128i* out
 }
 
 template<xmrstak_algo ALGO, size_t MEM, bool PREFETCH>
+TARGETS("avx2,avx,bmi2,bmi,fma,default")
 ALIGN(64) FLATTEN2 void cn_implode_scratchpad(const __m128i* input, __m128i* output)
 {
     // This is more than we have registers, compiler will assign 2 keys on the stack

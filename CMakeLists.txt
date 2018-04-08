@@ -69,6 +69,7 @@ if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
   set(WHITE       "${Esc}[37m")
 
   option(CG_LTO "Enable Link-time optimizations (Recommended)" ON)
+  option(CG_PORTABLE "Enable portable build" OFF)
 
   option(CG_TUNING_ENABLE "Enable or disable CryptoGoblin Tuning" ON)
   if(CG_TUNING_ENABLE)
@@ -87,7 +88,7 @@ if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
     set(CG_CFLAGS "${CG_CFLAGS} -fmodulo-sched -fmodulo-sched-allow-regmoves -fsched2-use-superblocks -fsched-pressure -fsched-spec-load -fsched-spec-load-dangerous")
     set(CG_CFLAGS "${CG_CFLAGS} -fsched-stalled-insns=3 -fsched-stalled-insns-dep=100")
     # Optimization
-    set(CG_CFLAGS "${CG_CFLAGS} -fpredictive-commoning -fmerge-all-constants -fdevirtualize-speculatively -fipa-cp-clone -minline-all-stringops -fivopts -ftracer -fipa-pta")
+    set(CG_CFLAGS "${CG_CFLAGS} -fpredictive-commoning -fmerge-all-constants -fdevirtualize-speculatively -fipa-cp-clone -minline-all-stringops -fivopts -ftracer")
     set(CG_CFLAGS "${CG_CFLAGS} -fweb -frename-registers -fgcse-after-reload -fgcse-sm -fgcse-las  -fno-semantic-interposition -fwrapv")
     # Loops
     set(CG_CFLAGS "${CG_CFLAGS} -fprefetch-loop-arrays -funswitch-loops -fpeel-loops -funroll-loops -floop-nest-optimize -fvariable-expansion-in-unroller")
@@ -97,7 +98,12 @@ if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
     # Alignment
     set(CG_CFLAGS "${CG_CFLAGS} -falign-loops=16 -falign-functions=16") # -falign-jumps=16 -falign-labels=16
     # Testing
-    set(CG_CFLAGS "${CG_CFLAGS} -fbranch-target-load-optimize2")
+    set(CG_CFLAGS "${CG_CFLAGS} -fbranch-target-load-optimize2") # -fipa-pta
+
+    # fipa-pta makes GCC ICE if LTO and stacked target_clones are enabled
+    if (NOT (CG_LTO AND CG_PORTABLE))
+        set(CG_CFLAGS "${CG_CFLAGS} -fipa-pta")
+    endif()
 
     if(CMAKE_VERBOSE_MAKEFILE STREQUAL "ON")
         set(CG_CFLAGS "${CG_CFLAGS} -Wall")
@@ -419,17 +425,19 @@ if (CPU_ENABLE)
     add_definitions(-DHAVE_OPTIMIZE)
   endif()
 
-  check_c_source_compiles(
-    "int __attribute__((target_clones(\"avx,default\"))) foo() {
-      return 0;
-    }
-    int main()
-    {
-      return foo();
-    }"
-    COMPILER_TARGETS FAIL_REGEX "not supported")
-  if(COMPILER_TARGETS)
-    add_definitions(-DHAVE_TARGET_CLONES)
+  if(CG_PORTABLE)
+      check_c_source_compiles(
+        "int __attribute__((target_clones(\"avx,default\"))) foo() {
+          return 0;
+        }
+        int main()
+        {
+          return foo();
+        }"
+        COMPILER_TARGETS FAIL_REGEX "not supported")
+      if(COMPILER_TARGETS)
+        add_definitions(-DHAVE_TARGET_CLONES)
+      endif()
   endif()
 endif()
 
@@ -643,7 +651,7 @@ if(NOT CG_LTO)
         ${BACKEND_CPP}
     )
 
-    target_link_libraries(CryptoGoblin-backend ${CMAKE_DL_LIBS} ${LIBS})
+    target_link_libraries(CryptoGoblin-backend ${LIBS})
 endif()
 
 # compile CUDA backend
@@ -671,7 +679,9 @@ if(CUDA_FOUND)
         )
     endif()
     target_link_libraries(xmrstak_cuda_backend ${CUDA_LIBRARIES})
-    target_link_libraries(xmrstak_cuda_backend CryptoGoblin-backend)
+    if(NOT CG_LTO)
+        target_link_libraries(xmrstak_cuda_backend CryptoGoblin-backend)
+    endif()
 endif()
 
 # compile AMD backend
@@ -684,7 +694,9 @@ if(OpenCL_FOUND)
         ${OPENCLSRCFILES}
     )
     target_link_libraries(xmrstak_opencl_backend ${OpenCL_LIBRARY} )
-    target_link_libraries(xmrstak_opencl_backend CryptoGoblin-backend)
+    if(NOT CG_LTO)
+        target_link_libraries(xmrstak_opencl_backend CryptoGoblin-backend)
+    endif()
 endif()
 
 # compile final binary
@@ -704,10 +716,18 @@ endif()
 set(EXECUTABLE_OUTPUT_PATH "bin")
 set(LIBRARY_OUTPUT_PATH "bin")
 
-if(CG_LTO)
-    target_link_libraries(CryptoGoblin ${LIBS})
-else()
-    target_link_libraries(CryptoGoblin ${LIBS} CryptoGoblin-backend)
+target_link_libraries(CryptoGoblin ${LIBS})
+
+if(NOT CG_LTO)
+    target_link_libraries(CryptoGoblin CryptoGoblin-backend)
+endif()
+
+if (CUDA_FOUND OR OpenCL_FOUND)
+    if(CG_LTO)
+        target_link_libraries(CryptoGoblin ${CMAKE_DL_LIBS})
+    else()
+        target_link_libraries(CryptoGoblin-backend ${CMAKE_DL_LIBS})
+    endif()
 endif()
 ################################################################################
 # Install

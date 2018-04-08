@@ -715,7 +715,7 @@ void executor::ex_main()
                 if(normal && fHighestHps < fHps)
                     fHighestHps = fHps;
 
-                snprintf(strbuf, sizeof(strbuf), "%sH/s %s", hps_format(fHps, num, sizeof(num)), XMR_STAK_NAME);
+                snprintf(strbuf, sizeof(strbuf), "%sH/s %s %s", hps_format(fHps, num, sizeof(num)), XMR_STAK_NAME, XMR_STAK_VERSION);
                 printer::inst()->set_title(strbuf);
             }
             break;

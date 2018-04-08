@@ -30,13 +30,21 @@ installprefix="/opt/CryptoGoblin/"
 # Advanced cmake options, space delimited.
 cmakeopt=""
 
-#
+# Make portable executable? This enables optimizations for cpus newer than "arch"
+# and enables static compilation of libgcc and libstdc++. Defaults to OFF
+# Not needed when using "arch=native" and using the executable on the local machine
+portable="OFF"
+
+# Optionally force enable/disable static build by uncommenting:
+# static="ON"
+
+
 # What is the oldest cpu the compiled binary needs to work with?
 # Choose "native" if you only need to support the local machine.
 # If you need to support other computers, choosing an older cpu is safer.
 # Supported parameters depend on your gcc version.
 # See: https://gcc.gnu.org/onlinedocs/gcc-6.4.0/gcc/x86-Options.html
-#
+
 ## Default to native ##
 arch=native
 
@@ -53,8 +61,7 @@ arch=native
 #arch="btver2"
 
 ## Intel cpus ##
-#arch="pentium4"
-#arch="prescott"
+#arch="nocona"
 #arch="core2"
 #arch="nehalem"
 #arch="westmere"
@@ -69,15 +76,6 @@ arch=native
 #arch="skylake-avx512"
 
 
-# Enable static linking if arch is not native
-static="OFF"
-if [ "$arch" != "native" ]
-then
-    static="ON"
-fi
-
-# Optionally override static linking here if needed
-# static="OFF"
 
 
 
@@ -88,16 +86,28 @@ fi
 # Usually no need to change anything below this point
 ##########
 
+# Enable static linking if portable is enabled
+if [ -z "$static" ]
+then
+  static="OFF"
+  if [ "$portable" == "ON" ]
+  then
+    static="ON"
+  fi
+fi
+
 rm -rf CMakeFiles/ CMakeCache.txt
 mkdir -p build
 cd build
 rm -rf CMakeFiles/ CMakeCache.txt
 
 set -x
-cmake .. -L -DCMAKE_VERBOSE_MAKEFILE="$verbose" -DCMAKE_LINK_STATIC="$static" -DCMAKE_INSTALL_PREFIX="$installprefix" -DARCH="$arch" -DCG_LTO="$lto" -DHWLOC_ENABLE="$hwloc" -DMICROHTTPD_ENABLE="$microhttpd" -DOpenSSL_ENABLE="$openssl" -DCPU_ENABLE="$cpu" -DCUDA_ENABLE="$cuda" -DOpenCL_ENABLE="$opencl" $cmakeopt
+cmake .. -L -DCMAKE_VERBOSE_MAKEFILE="$verbose" -DCMAKE_LINK_STATIC="$static" -DCMAKE_INSTALL_PREFIX="$installprefix" -DARCH="$arch" -DCG_LTO="$lto" -DCG_PORTABLE="$portable" -DHWLOC_ENABLE="$hwloc" -DMICROHTTPD_ENABLE="$microhttpd" -DOpenSSL_ENABLE="$openssl" -DCPU_ENABLE="$cpu" -DCUDA_ENABLE="$cuda" -DOpenCL_ENABLE="$opencl" $cmakeopt
 
 make -j3
 set +x
+
+strip --strip-all -R .comment build/bin/CryptoGoblin
 
 cd ..
 echo "If compilation succeeded, you can now run 'make install', or run/copy the executable directly in/from the build/bin/ folder"

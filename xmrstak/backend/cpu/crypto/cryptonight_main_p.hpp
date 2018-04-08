@@ -33,8 +33,12 @@
 
 extern void(*const extra_hashes[4])(const void *, char *);
 
+//TARGETS("arch=haswell,default")
+//TARGETS("arch=k8-sse3,arch=barcelona,arch=bdver1,arch=bdver2,arch=bdver4,arch=btver1,arch=btver2,arch=core2,arch=nehalem,arch=westmere,arch=sandybridge,arch=ivybridge,arch=haswell,arch=broadwell,arch=skylake,arch=bonnell,arch=silvermont,arch=knl,default")
+//OPTIMIZE("no-align-loops")
+//TARGETS("avx2,avx,popcnt,fma,fma4,bmi,bmi2,xop,sse4.2,sse4.1,sse4a,ssse3,sse3,default")
 template<xmrstak_algo ALGO, bool SOFT_AES, bool PREFETCH>
-TARGETS("avx2,avx,popcnt,fma,fma4,bmi,bmi2,xop,sse4.2,sse4.1,sse4a,ssse3,sse3,default")
+TARGETS("avx,fma,bmi,sse4.1,sse3,default")
 OPTIMIZE("no-align-loops")
 ALIGN(64) void cryptonight_hash(const void* input, size_t len, void* output, cryptonight_ctx* ctx){
     constexpr size_t MASK = cn_select_mask<ALGO>();
@@ -142,7 +146,7 @@ ALIGN(64) void cryptonight_hash(const void* input, size_t len, void* output, cry
 // to fit temporary vars for two contexts. Function will read len*2 from input and write 64 bytes to output
 // We are still limited by L3 cache, so doubling will only work with CPUs where we have more than 2MB to core (Xeons)
 template<xmrstak_algo ALGO, bool SOFT_AES, bool PREFETCH>
-TARGETS("avx2,avx,popcnt,fma,fma4,bmi,bmi2,xop,sse4.2,sse4.1,sse4a,ssse3,sse3,default")
+TARGETS("avx,fma,bmi,sse4.1,sse3,default")
 OPTIMIZE("no-align-loops")
 ALIGN(64) void cryptonight_double_hash(const void* input, size_t len, void* output, cryptonight_ctx** ctx){
     constexpr size_t MASK = cn_select_mask<ALGO>();
@@ -357,7 +361,8 @@ ALIGN(64) void cryptonight_double_hash(const void* input, size_t len, void* outp
 
 // This lovelier creation will do 3 cn hashes at a time.
 template<xmrstak_algo ALGO, bool SOFT_AES, bool PREFETCH>
-void cryptonight_triple_hash(const void* input, size_t len, void* output, cryptonight_ctx** ctx)
+OPTIMIZE("no-align-loops")
+ALIGN(64) void cryptonight_triple_hash(const void* input, size_t len, void* output, cryptonight_ctx** ctx)
 {
         constexpr size_t MASK = cn_select_mask<ALGO>();
         constexpr size_t ITERATIONS = cn_select_iter<ALGO>();
@@ -458,7 +463,8 @@ void cryptonight_triple_hash(const void* input, size_t len, void* output, crypto
 
 // This even lovelier creation will do 4 cn hashes at a time.
 template<xmrstak_algo ALGO, bool SOFT_AES, bool PREFETCH>
-void cryptonight_quad_hash(const void* input, size_t len, void* output, cryptonight_ctx** ctx)
+OPTIMIZE("no-align-loops")
+ALIGN(64) void cryptonight_quad_hash(const void* input, size_t len, void* output, cryptonight_ctx** ctx)
 {
         constexpr size_t MASK = cn_select_mask<ALGO>();
         constexpr size_t ITERATIONS = cn_select_iter<ALGO>();
@@ -574,7 +580,8 @@ void cryptonight_quad_hash(const void* input, size_t len, void* output, cryptoni
 
 // This most lovely creation will do 5 cn hashes at a time.
 template<xmrstak_algo ALGO, bool SOFT_AES, bool PREFETCH>
-void cryptonight_penta_hash(const void* input, size_t len, void* output, cryptonight_ctx** ctx)
+OPTIMIZE("no-align-loops")
+ALIGN(64) void cryptonight_penta_hash(const void* input, size_t len, void* output, cryptonight_ctx** ctx)
 {
         constexpr size_t MASK = cn_select_mask<ALGO>();
         constexpr size_t ITERATIONS = cn_select_iter<ALGO>();
