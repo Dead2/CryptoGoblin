@@ -96,16 +96,19 @@ struct xmrstak_coin_algo
 };
 
 xmrstak_coin_algo coin_algos[] = {
-    { "aeon", cryptonight_aeon, cryptonight_lite, 7u, "mine.aeon-pool.com:5555" },
     { "cryptonight", cryptonight, cryptonight, 0u, nullptr },
     { "cryptonight_lite", cryptonight_lite, cryptonight_lite, 0u, nullptr },
     { "cryptonight_heavy", cryptonight_heavy, cryptonight_heavy, 0u, nullptr },
+
+    { "aeon", cryptonight_aeon, cryptonight_lite, 7u, "mine.aeon-pool.com:5555" },
+    { "aeon7", cryptonight_aeon, cryptonight_lite, 7u, "mine.aeon-pool.com:5555" },
     { "edollar", cryptonight, cryptonight, 0u, nullptr },
     { "electroneum", cryptonight, cryptonight, 0u, nullptr },
     { "graft", cryptonight, cryptonight, 0u, nullptr },
     { "intense", cryptonight, cryptonight, 0u, nullptr },
     { "karbo", cryptonight, cryptonight, 0u, nullptr },
-    { "monero", cryptonight_monero, cryptonight, 7u, "pool.usxmrpool.com:3333" },
+    { "monero", cryptonight_monero, cryptonight, 7u, "pool.supportxmr.com:5555" },
+    { "monero7", cryptonight_monero, cryptonight, 7u, "pool.supportxmr.com:5555" },
     { "stellite", cryptonight_monero, cryptonight, 3u, nullptr },
     { "sumokoin", cryptonight_heavy, cryptonight, 3u, nullptr }
 };
