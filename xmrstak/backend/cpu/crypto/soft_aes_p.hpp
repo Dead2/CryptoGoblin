@@ -94,8 +94,63 @@
 alignas(TABLE_ALIGN) const uint32_t t_fn[4][256] = { sb_data(u0), sb_data(u1), sb_data(u2), sb_data(u3) };
 alignas(TABLE_ALIGN) const uint8_t aes_sbox[256] = sb_data(h0);
 
-__m128i soft_aesenc(__m128i in, __m128i key)
-{
+ALWAYS_INLINE FLATTEN static inline void soft_aes_4round(__m128i* __restrict__ key, __m128i* __restrict__ in1, __m128i* __restrict__ in2, __m128i* __restrict__ in3, __m128i* __restrict__ in4) {
+    uint32_t a0, a1, a2, a3, b0, b1, b2, b3, c0, c1, c2, c3, d0, d1, d2, d3;
+
+    a0 = _mm_cvtsi128_si32(*in1);
+    a1 = _mm_cvtsi128_si32(_mm_shuffle_epi32(*in1, 0x55));
+    a2 = _mm_cvtsi128_si32(_mm_shuffle_epi32(*in1, 0xAA));
+    a3 = _mm_cvtsi128_si32(_mm_shuffle_epi32(*in1, 0xFF));
+
+    b0 = _mm_cvtsi128_si32(*in2);
+    b1 = _mm_cvtsi128_si32(_mm_shuffle_epi32(*in2, 0x55));
+    b2 = _mm_cvtsi128_si32(_mm_shuffle_epi32(*in2, 0xAA));
+    b3 = _mm_cvtsi128_si32(_mm_shuffle_epi32(*in2, 0xFF));
+
+    __m128i out1 = _mm_set_epi32(
+        (t_fn[0][a3 & 0xff] ^ t_fn[1][(a0 >> 8) & 0xff] ^ t_fn[2][(a1 >> 16) & 0xff] ^ t_fn[3][a2 >> 24]),
+        (t_fn[0][a2 & 0xff] ^ t_fn[1][(a3 >> 8) & 0xff] ^ t_fn[2][(a0 >> 16) & 0xff] ^ t_fn[3][a1 >> 24]),
+        (t_fn[0][a1 & 0xff] ^ t_fn[1][(a2 >> 8) & 0xff] ^ t_fn[2][(a3 >> 16) & 0xff] ^ t_fn[3][a0 >> 24]),
+        (t_fn[0][a0 & 0xff] ^ t_fn[1][(a1 >> 8) & 0xff] ^ t_fn[2][(a2 >> 16) & 0xff] ^ t_fn[3][a3 >> 24]));
+
+    c0 = _mm_cvtsi128_si32(*in3);
+    c1 = _mm_cvtsi128_si32(_mm_shuffle_epi32(*in3, 0x55));
+    c2 = _mm_cvtsi128_si32(_mm_shuffle_epi32(*in3, 0xAA));
+    c3 = _mm_cvtsi128_si32(_mm_shuffle_epi32(*in3, 0xFF));
+
+    *in1 = _mm_xor_si128(out1, *key);
+
+    __m128i out2 = _mm_set_epi32(
+        (t_fn[0][b3 & 0xff] ^ t_fn[1][(b0 >> 8) & 0xff] ^ t_fn[2][(b1 >> 16) & 0xff] ^ t_fn[3][b2 >> 24]),
+        (t_fn[0][b2 & 0xff] ^ t_fn[1][(b3 >> 8) & 0xff] ^ t_fn[2][(b0 >> 16) & 0xff] ^ t_fn[3][b1 >> 24]),
+        (t_fn[0][b1 & 0xff] ^ t_fn[1][(b2 >> 8) & 0xff] ^ t_fn[2][(b3 >> 16) & 0xff] ^ t_fn[3][b0 >> 24]),
+        (t_fn[0][b0 & 0xff] ^ t_fn[1][(b1 >> 8) & 0xff] ^ t_fn[2][(b2 >> 16) & 0xff] ^ t_fn[3][b3 >> 24]));
+
+    d0 = _mm_cvtsi128_si32(*in4);
+    d1 = _mm_cvtsi128_si32(_mm_shuffle_epi32(*in4, 0x55));
+    d2 = _mm_cvtsi128_si32(_mm_shuffle_epi32(*in4, 0xAA));
+    d3 = _mm_cvtsi128_si32(_mm_shuffle_epi32(*in4, 0xFF));
+
+    *in2 = _mm_xor_si128(out2, *key);
+
+    __m128i out3 = _mm_set_epi32(
+        (t_fn[0][c3 & 0xff] ^ t_fn[1][(c0 >> 8) & 0xff] ^ t_fn[2][(c1 >> 16) & 0xff] ^ t_fn[3][c2 >> 24]),
+        (t_fn[0][c2 & 0xff] ^ t_fn[1][(c3 >> 8) & 0xff] ^ t_fn[2][(c0 >> 16) & 0xff] ^ t_fn[3][c1 >> 24]),
+        (t_fn[0][c1 & 0xff] ^ t_fn[1][(c2 >> 8) & 0xff] ^ t_fn[2][(c3 >> 16) & 0xff] ^ t_fn[3][c0 >> 24]),
+        (t_fn[0][c0 & 0xff] ^ t_fn[1][(c1 >> 8) & 0xff] ^ t_fn[2][(c2 >> 16) & 0xff] ^ t_fn[3][c3 >> 24]));
+
+    __m128i out4 = _mm_set_epi32(
+        (t_fn[0][d3 & 0xff] ^ t_fn[1][(d0 >> 8) & 0xff] ^ t_fn[2][(d1 >> 16) & 0xff] ^ t_fn[3][d2 >> 24]),
+        (t_fn[0][d2 & 0xff] ^ t_fn[1][(d3 >> 8) & 0xff] ^ t_fn[2][(d0 >> 16) & 0xff] ^ t_fn[3][d1 >> 24]),
+        (t_fn[0][d1 & 0xff] ^ t_fn[1][(d2 >> 8) & 0xff] ^ t_fn[2][(d3 >> 16) & 0xff] ^ t_fn[3][d0 >> 24]),
+        (t_fn[0][d0 & 0xff] ^ t_fn[1][(d1 >> 8) & 0xff] ^ t_fn[2][(d2 >> 16) & 0xff] ^ t_fn[3][d3 >> 24]));
+
+
+    *in3 = _mm_xor_si128(out3, *key);
+    *in4 = _mm_xor_si128(out4, *key);
+}
+
+ALWAYS_INLINE FLATTEN static inline __m128i soft_aesenc(__m128i in, __m128i key) {
     uint32_t x0, x1, x2, x3;
     x0 = _mm_cvtsi128_si32(in);
     x1 = _mm_cvtsi128_si32(_mm_shuffle_epi32(in, 0x55));
