@@ -226,8 +226,8 @@ void printer::print_str(const char* str)
 }
 
 //Do a press any key for the windows folk. *insert any key joke here*
-#if defined(_WIN32)
-void win_exit(size_t code)
+#ifdef _WIN32
+void win_exit(int code)
 {
     size_t envSize = 0;
     #if !defined(__MINGW32__)
@@ -242,7 +242,7 @@ void win_exit(size_t code)
 }
 
 #else
-void win_exit(size_t code)
+void win_exit(int code)
 {
     std::exit(code);
 }

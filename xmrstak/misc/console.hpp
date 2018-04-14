@@ -50,4 +50,4 @@ private:
     FILE* logfile;
 };
 
-void win_exit(size_t code = 1);
+void win_exit(int code = 1);
