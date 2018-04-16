@@ -423,7 +423,9 @@ void executor::on_miner_result(size_t pool_id, job_result& oResult)
     {
         //Ignore errors silently
         if(pool->is_running() && pool->is_logged_in())
-            pool->cmd_submit(oResult.sJobID, oResult.iNonce, oResult.bResult, backend_name, backend_hashcount, total_hashcount, jconf::inst()->GetMiningAlgo());
+            pool->cmd_submit(oResult.sJobID, oResult.iNonce, oResult.bResult, backend_name,
+            backend_hashcount, total_hashcount, jconf::inst()->GetCurrentCoinSelection().GetDescription(0).GetMiningAlgo()
+        );
         return;
     }
 
@@ -434,7 +436,9 @@ void executor::on_miner_result(size_t pool_id, job_result& oResult)
     }
 
     size_t t_start = get_timestamp_ms();
-    bool bResult = pool->cmd_submit(oResult.sJobID, oResult.iNonce, oResult.bResult, backend_name, backend_hashcount, total_hashcount, jconf::inst()->GetMiningAlgo());
+    bool bResult = pool->cmd_submit(oResult.sJobID, oResult.iNonce, oResult.bResult,
+        backend_name, backend_hashcount, total_hashcount, jconf::inst()->GetCurrentCoinSelection().GetDescription(1).GetMiningAlgo()
+    );
     size_t t_len = get_timestamp_ms() - t_start;
 
     if(t_len > 0xFFFF)
@@ -576,7 +580,7 @@ void executor::ex_main()
         if(dev_tls)
             tlsport = 1;
 
-        switch(jconf::inst()->GetMiningAlgo()) {
+        switch(jconf::inst()->GetCurrentCoinSelection().GetDescription(0).GetMiningAlgo()) {
         case cryptonight_lite:
             port = 6020 + tlsport;
             break;
@@ -607,7 +611,7 @@ void executor::ex_main()
         pools.emplace_front(0, domain, "", "", "", 0.0, true, dev_tls, "", true);
 
     } else {
-        switch(jconf::inst()->GetMiningAlgo()) {
+        switch(jconf::inst()->GetCurrentCoinSelection().GetDescription(0).GetMiningAlgo()) {
         case cryptonight_heavy:
             if(dev_tls)
                 pools.emplace_front(0, "donate.xmr-stak.net:8888", "", "", "", 0.0, true, true, "", true);
