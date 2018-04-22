@@ -29,10 +29,22 @@ POOLCONF],
  *    electroneum
  *    graft
  *    intense
+ *    ipbc
  *    karbo
  *    monero
  *    sumokoin
  *
+ * Native algorithms which not depends on any block versions:
+ *
+ *    # 1MiB scratchpad memory
+ *    cryptonight_lite
+ *    cryptonight_lite_v7
+ *    cryptonight_lite_v7_xor (algorithm used by ipbc)
+ *    # 2MiB scratchpad memory
+ *    cryptonight
+ *    cryptonight_v7
+ *    # 4MiB scratchpad memory
+ *    cryptonight_heavy
  */
 
 "currency" : "CURRENCY",
