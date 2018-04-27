@@ -731,7 +731,7 @@ int main(int argc, char *argv[])
     printer::inst()->print_str(CYAN("Based NVIDIA mining code by ") GREEN("KlausT") CYAN(" and ") GREEN("psychocrypt.\n"));
 #endif
 #ifndef CONF_NO_OPENCL
-    printer::inst()->print_str(CYAN("Based on OpenCL mining code by ") GREEN("wolf9466") CYAN(".\n");
+    printer::inst()->print_str(CYAN("Based on OpenCL mining code by ") GREEN("wolf9466") CYAN(".\n"));
 #endif
     if((fDevDonationLevel*100) > 0.99){
         char buffer[64];

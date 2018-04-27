@@ -87,7 +87,10 @@ ALIGN(64) void cryptonight_hash(const void* input, size_t len, void* output, cry
 
 
         if(ALGO == cryptonight_monero || ALGO == cryptonight_aeon)
-            cryptonight_monero_tweak((uint64_t*)&l0[idx0 & MASK], _mm_xor_si128(bx0, cx));
+            if(SOFT_AES)
+                soft_cryptonight_monero_tweak((uint64_t*)&l0[idx0 & MASK], _mm_xor_si128(bx0, cx));
+            else
+                cryptonight_monero_tweak((uint64_t*)&l0[idx0 & MASK], _mm_xor_si128(bx0, cx));
         else
             _mm_store_si128((__m128i *)&l0[idx0 & MASK], _mm_xor_si128(bx0, cx));
 
@@ -205,7 +208,10 @@ ALIGN(64) void cryptonight_double_hash(const void* input, size_t len, void* outp
             cx = _mm_aesenc_si128(cx, _mm_set_epi64x(axh0, axl0));
 
         if(ALGO == cryptonight_monero || ALGO == cryptonight_aeon)
-            cryptonight_monero_tweak((uint64_t*)&l0[idx0 & MASK], _mm_xor_si128(bx0, cx));
+            if(SOFT_AES)
+                soft_cryptonight_monero_tweak((uint64_t*)&l0[idx0 & MASK], _mm_xor_si128(bx0, cx));
+            else
+                cryptonight_monero_tweak((uint64_t*)&l0[idx0 & MASK], _mm_xor_si128(bx0, cx));
         else
             _mm_store_si128((__m128i *)&l0[idx0 & MASK], _mm_xor_si128(bx0, cx));
 
@@ -223,7 +229,10 @@ ALIGN(64) void cryptonight_double_hash(const void* input, size_t len, void* outp
             cx = _mm_aesenc_si128(cx, _mm_set_epi64x(axh1, axl1));
 
         if(ALGO == cryptonight_monero || ALGO == cryptonight_aeon)
-            cryptonight_monero_tweak((uint64_t*)&l1[idx1 & MASK], _mm_xor_si128(bx1, cx));
+            if(SOFT_AES)
+                soft_cryptonight_monero_tweak((uint64_t*)&l1[idx1 & MASK], _mm_xor_si128(bx1, cx));
+            else
+                cryptonight_monero_tweak((uint64_t*)&l1[idx1 & MASK], _mm_xor_si128(bx1, cx));
         else
             _mm_store_si128((__m128i *)&l1[idx1 & MASK], _mm_xor_si128(bx1, cx));
 
@@ -326,6 +335,9 @@ ALIGN(64) void cryptonight_double_hash(const void* input, size_t len, void* outp
                 c = _mm_aesenc_si128(c, a);                     \
         b = _mm_xor_si128(b, c);                                \
         if(ALGO == cryptonight_monero || ALGO == cryptonight_aeon) \
+            if(SOFT_AES) \
+                soft_cryptonight_monero_tweak((uint64_t*)ptr, b); \
+            else \
                 cryptonight_monero_tweak((uint64_t*)ptr, b); \
         else \
                 _mm_store_si128(ptr, b);\
