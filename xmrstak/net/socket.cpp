@@ -162,8 +162,8 @@ int plain_socket::recv(char* buf, unsigned int len)
 
 bool plain_socket::send(const char* buf)
 {
-	size_t pos = 0;
-	size_t slen = strlen(buf);
+    size_t pos = 0;
+    size_t slen = strlen(buf);
     while (pos != slen)
     {
         int ret = ::send(hSocket, buf + pos, slen - pos, 0);

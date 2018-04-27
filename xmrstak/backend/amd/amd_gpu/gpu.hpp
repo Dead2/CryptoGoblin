@@ -21,27 +21,27 @@
 
 struct GpuContext
 {
-	/*Input vars*/
-	size_t deviceIdx;
-	size_t rawIntensity;
-	size_t workSize;
-	int stridedIndex;
-	int memChunk;
-	int compMode;
+    /*Input vars*/
+    size_t deviceIdx;
+    size_t rawIntensity;
+    size_t workSize;
+    int stridedIndex;
+    int memChunk;
+    int compMode;
 
-	/*Output vars*/
-	cl_device_id DeviceID;
-	cl_command_queue CommandQueues;
-	cl_mem InputBuffer;
-	cl_mem OutputBuffer;
-	cl_mem ExtraBuffers[6];
-	cl_program Program[2];
-	cl_kernel Kernels[2][8];
-	size_t freeMem;
-	int computeUnits;
-	std::string name;
+    /*Output vars*/
+    cl_device_id DeviceID;
+    cl_command_queue CommandQueues;
+    cl_mem InputBuffer;
+    cl_mem OutputBuffer;
+    cl_mem ExtraBuffers[6];
+    cl_program Program[2];
+    cl_kernel Kernels[2][8];
+    size_t freeMem;
+    int computeUnits;
+    std::string name;
 
-	uint32_t Nonce;
+    uint32_t Nonce;
 
 };
 

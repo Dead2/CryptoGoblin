@@ -630,22 +630,22 @@ minethd::cn_hash_fun_multi minethd::func_multi_selector(size_t N, bool bHaveAes,
 
 void minethd::double_work_main()
 {
-	multiway_work_main<2u>();
+    multiway_work_main<2u>();
 }
 
 void minethd::triple_work_main()
 {
-	multiway_work_main<3u>();
+    multiway_work_main<3u>();
 }
 
 void minethd::quad_work_main()
 {
-	multiway_work_main<4u>();
+    multiway_work_main<4u>();
 }
 
 void minethd::penta_work_main()
 {
-	multiway_work_main<5u>();
+    multiway_work_main<5u>();
 }
 
 template<size_t N>
