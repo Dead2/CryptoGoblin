@@ -24,6 +24,7 @@
 #include "crypto/cryptonight_main_p.hpp"
 
 #include "xmrstak/misc/console.hpp"
+#include "xmrstak/cli/colors.hpp"
 #include "xmrstak/backend/iBackend.hpp"
 #include "xmrstak/backend//globalStates.hpp"
 #include "xmrstak/misc/configEditor.hpp"
@@ -221,11 +222,11 @@ bool minethd::self_test()
         return false;
 
     cryptonight_ctx *ctx[MAX_N] = {0};
-    for (int i = 0; i < MAX_N; i++)
+    for (size_t i = 0; i < MAX_N; i++)
     {
         if ((ctx[i] = minethd_alloc_ctx()) == nullptr)
         {
-            for (int j = 0; j < i; j++)
+            for (size_t j = 0; j < i; j++)
                 cryptonight_free_ctx(ctx[j]);
             return false;
         }
@@ -290,12 +291,11 @@ bool minethd::self_test()
     else if(::jconf::inst()->GetCurrentCoinSelection().GetDescription(1).GetMiningAlgo() == cryptonight_ipbc)
     {
     }
-    for (int i = 0; i < MAX_N; i++)
+    for (size_t i = 0; i < MAX_N; i++)
         cryptonight_free_ctx(ctx[i]);
 
     if(!bResult)
-        printer::inst()->print_msg(L0,
-            "Cryptonight hash self-test failed. This might be caused by bad compiler optimizations.");
+        printer::inst()->print_msg(L0, RED("Cryptonight hash self-test failed. This might be caused by bad compiler optimizations."));
 
     return bResult;
 }
@@ -716,7 +716,7 @@ void minethd::multiway_work_main()
     uint32_t *piNonce[MAX_N];
     uint8_t bHashOut[MAX_N * 32];
     uint8_t bWorkBlob[sizeof(miner_work::bWorkBlob) * MAX_N];
-    uint32_t iNonce;
+    uint32_t iNonce = 0;
     job_result res;
 
     for (size_t i = 0; i < N; i++)
@@ -815,7 +815,7 @@ void minethd::multiway_work_main()
         prep_multiway_work<N>(bWorkBlob, piNonce);
     }
 
-    for (int i = 0; i < N; i++)
+    for (uint32_t i = 0; i < N; i++)
         cryptonight_free_ctx(ctx[i]);
 }
 

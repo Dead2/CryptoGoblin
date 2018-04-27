@@ -68,7 +68,7 @@ struct gpu_res_err
 {
     size_t idx; // GPU index
     const char* error_str;
-    gpu_res_err(const char* error_str, size_t idx) : error_str(error_str), idx(idx) {}
+    gpu_res_err(const char* error_str, size_t idx) :  idx(idx), error_str(error_str) {}
 };
 
 enum ex_event_name { EV_INVALID_VAL, EV_SOCK_READY, EV_SOCK_ERROR, EV_GPU_RES_ERROR,

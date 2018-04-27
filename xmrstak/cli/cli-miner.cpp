@@ -114,9 +114,9 @@ void help()
 #endif
     std::string algos;
     jconf::GetAlgoList(algos);
-    cout<< "Supported coin opitons: " << endl << algos << endl;
+    cout<< "Supported coin options: " << endl << algos << endl;
     cout<< "Version: " << get_version_str_short() << endl;
-    cout<<"Brought to by fireice_uk and psychocrypt under GPLv3."<<endl;
+    cout<< "CryptoGoblin by Dead2 under GPLv3."<<endl;
 }
 
 bool read_yes_no(const char* str)
@@ -140,42 +140,42 @@ inline const char* bool_to_str(bool v)
 
 std::string get_multipool_entry(bool& final)
 {
-    std::cout<<std::endl<<"- Next Pool:"<<std::endl<<std::endl;
+    std::cout << std::endl << CYAN("- Next Pool:") << std::endl << std::endl;
 
     std::string pool;
-    std::cout<<"- Pool address: e.g. " << jconf::GetDefaultPool(xmrstak::params::inst().currency.c_str()) << std::endl;
+    std::cout << GREEN("- Pool address: e.g. ") << jconf::GetDefaultPool(xmrstak::params::inst().currency.c_str()) << std::endl;
     std::cin >> pool;
 
     std::string userName;
-    std::cout<<"- Username (wallet address or pool login):"<<std::endl;
+    std::cout << GREEN("- Username (wallet address or pool login):") << std::endl;
     std::cin >> userName;
 
     std::string passwd;
     std::cin.clear(); std::cin.ignore(INT_MAX,'\n');
-    std::cout<<"- Password (mostly empty or x):"<<std::endl;
+    std::cout << GREEN("- Password (mostly empty or x):") << std::endl;
     getline(std::cin, passwd);
 
     std::string rigid;
-    std::cout<<"- Rig identifier for pool-side statistics (needs pool support). Can be empty:"<<std::endl;
+    std::cout << GREEN("- Rig identifier (name) for pool-side statistics (needs pool support). Can be empty:") << std::endl;
     getline(std::cin, rigid);
 
 #ifdef CONF_NO_TLS
     bool tls = false;
 #else
-    bool tls = read_yes_no("- Does this pool port support TLS/SSL? Use no if unknown. (y/N)");
+    bool tls = read_yes_no(GREEN("- Does this pool port support TLS/SSL? Use no if unknown. (y/N)"));
 #endif
-    bool nicehash = read_yes_no("- Do you want to use nicehash on this pool? (y/n)");
+    bool nicehash = read_yes_no(GREEN("- Do you want to use nicehash on this pool? (y/n)"));
 
     int64_t pool_weight;
-    std::cout << "- Please enter a weight for this pool: "<<std::endl;
+    std::cout << GREEN("- Please enter a weight for this pool: ") << std::endl;
     while(!(std::cin >> pool_weight) || pool_weight <= 0)
     {
         std::cin.clear();
         std::cin.ignore(INT_MAX, '\n');
-        std::cout << "Invalid weight.  Try 1, 10, 100, etc:" << std::endl;
+        std::cout << RED("Invalid weight.  Try 1, 10, 100, etc:") << std::endl;
     }
 
-    final = !read_yes_no("- Do you want to add another pool? (y/n)");
+    final = !read_yes_no(GREEN("- Do you want to add another pool? (y/n)"));
 
     return "\t{\"pool_address\" : \"" + pool +"\", \"wallet_address\" : \"" + userName + "\", \"rig_id\" : \"" + rigid +
         "\", \"pool_password\" : \"" + passwd + "\", \"use_nicehash\" : " + bool_to_str(nicehash) + ", \"use_tls\" : " +
@@ -214,7 +214,7 @@ void do_guided_pool_config()
         {
             std::string list;
             jconf::GetAlgoList(list);
-            std::cout << "- Please enter the currency that you want to mine: "<<std::endl;
+            std::cout << GREEN("- Please enter the currency that you want to mine: ") << std::endl;
             std::cout << list << std::endl;
             std::cin >> tmp;
         }
@@ -228,7 +228,7 @@ void do_guided_pool_config()
         prompt_once(prompted);
 
         userSetPool = false;
-        std::cout<<"- Pool address: e.g. " << jconf::GetDefaultPool(xmrstak::params::inst().currency.c_str()) << std::endl;
+        std::cout << GREEN("- Pool address: e.g. ") << jconf::GetDefaultPool(xmrstak::params::inst().currency.c_str()) << std::endl;
         std::cin >> pool;
     }
 
@@ -237,7 +237,7 @@ void do_guided_pool_config()
     {
         prompt_once(prompted);
 
-        std::cout<<"- Username (wallet address or pool login):"<<std::endl;
+        std::cout << GREEN("- Username (wallet address or pool login):") << std::endl;
         std::cin >> userName;
     }
 
@@ -251,7 +251,7 @@ void do_guided_pool_config()
         std::cin.clear(); std::cin.ignore(INT_MAX,'\n');
         stdin_flushed = true;
 
-        std::cout<<"- Password (mostly empty or x):"<<std::endl;
+        std::cout << GREEN("- Password (mostly empty or x):") << std::endl;
         getline(std::cin, passwd);
     }
 
@@ -266,7 +266,7 @@ void do_guided_pool_config()
             std::cin.clear(); std::cin.ignore(INT_MAX,'\n');
         }
 
-        std::cout<<"- Rig identifier for pool-side statistics (needs pool support). Can be empty:"<<std::endl;
+        std::cout << GREEN("- Rig identifier (name) for pool-side statistics (needs pool support). Can be empty:") << std::endl;
         getline(std::cin, rigid);
     }
 
@@ -275,7 +275,7 @@ void do_guided_pool_config()
     if(!userSetPool)
     {
         prompt_once(prompted);
-        tls = read_yes_no("- Does this pool port support TLS/SSL? Use no if unknown. (y/N)");
+        tls = read_yes_no(GREEN("- Does this pool port support TLS/SSL? Use no if unknown. (y/N)"));
         params::inst().poolUseTls = tls;
     }
 #endif
@@ -284,29 +284,29 @@ void do_guided_pool_config()
     if(!userSetPool)
     {
         prompt_once(prompted);
-        nicehash = read_yes_no("- Do you want to use nicehash on this pool? (y/n)");
+        nicehash = read_yes_no(GREEN("- Do you want to use nicehash on this pool? (y/n)"));
         params::inst().nicehashMode = nicehash;
     }
 
     bool multipool;
     if(!userSetPool)
-        multipool = read_yes_no("- Do you want to use multiple pools? (y/n)");
+        multipool = read_yes_no(GREEN("- Do you want to use multiple pools? (y/n)"));
     else
         multipool = false;
 
     int64_t pool_weight;
     if(multipool)
     {
-        std::cout << "Pool weight is a number telling the miner how important the pool is." << std::endl;
-        std::cout << "Miner will mine mostly at the pool with the highest weight, unless the pool fails." << std::endl;
-        std::cout << "Weight must be an integer larger than 0." << std::endl;
-        std::cout << "- Please enter a weight for this pool: "<<std::endl;
+        std::cout << CYAN("Pool weight is a number telling the miner how important the pool is.") << std::endl;
+        std::cout << CYAN("Miner will mine mostly at the pool with the highest weight, unless the pool fails.") << std::endl;
+        std::cout << CYAN("Weight must be an integer larger than 0.") << std::endl;
+        std::cout << GREEN("- Please enter a weight for this pool: ") << std::endl;
 
         while(!(std::cin >> pool_weight) || pool_weight <= 0)
         {
             std::cin.clear();
             std::cin.ignore(INT_MAX, '\n');
-            std::cout << "Invalid weight.  Try 1, 10, 100, etc:" << std::endl;
+            std::cout << RED("Invalid weight.  Try 1, 10, 100, etc:") << std::endl;
         }
     }
     else
@@ -330,7 +330,7 @@ void do_guided_pool_config()
     configTpl.replace("CURRENCY", currency);
     configTpl.replace("POOLCONF", pool_table);
     configTpl.write(params::inst().configFilePools);
-    std::cout<<"Pool configuration stored in file '"<<params::inst().configFilePools<<"'"<<std::endl;
+    std::cout << CYAN("Pool configuration stored in file '") << params::inst().configFilePools << "'" << std::endl;
 }
 
 void do_guided_config()
@@ -356,16 +356,15 @@ void do_guided_config()
 #else
         prompt_once(prompted);
 
-        std::cout<<"- Do you want to use the HTTP interface?" <<std::endl;
-        std::cout<<"Unlike the screen display, browser interface is not affected by the GPU lag." <<std::endl;
-        std::cout<<"If you don't want to use it, please enter 0, otherwise enter port number that the miner should listen on" <<std::endl;
+        std::cout << GREEN("- Do you want to use the HTTP interface?") << std::endl;
+        std::cout << CYAN("If you don't want to use it, please enter 0, otherwise enter port number that the miner should listen on") << std::endl;
 
         int32_t port;
         while(!(std::cin >> port) || port < 0 || port > 65535)
         {
             std::cin.clear();
             std::cin.ignore(INT_MAX, '\n');
-            std::cout << "Invalid port number. Please enter a number between 0 and 65535." << std::endl;
+            std::cout << RED("Invalid port number. Please enter a number between 0 and 65535.") << std::endl;
         }
 
         http_port = port;
@@ -374,7 +373,7 @@ void do_guided_config()
 
     configTpl.replace("HTTP_PORT", std::to_string(http_port));
     configTpl.write(params::inst().configFile);
-    std::cout<<"Configuration stored in file '"<<params::inst().configFile<<"'"<<std::endl;
+    std::cout << CYAN("Configuration stored in file: ") << params::inst().configFile << std::endl;
 }
 
 int main(int argc, char *argv[])
@@ -770,7 +769,7 @@ int main(int argc, char *argv[])
     printer::inst()->print_str(CYAN(" '") RED("R") CYAN("' - results\n"));
     printer::inst()->print_str(CYAN(" '") RED("C") CYAN("' - connection\n"));
     printer::inst()->print_str(CYAN(" '") RED("Q") CYAN("' - quit\n"));
-    printer::inst()->print_str(CYAN("-------------------------------------------------------------------\n"));
+    printer::inst()->print_str(CYAN("-------------------------------------------------------------------)") "\n");
 
 
     if(params::inst().benchmark_block_version >= 0)

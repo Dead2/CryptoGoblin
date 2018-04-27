@@ -456,13 +456,13 @@ void executor::on_miner_result(size_t pool_id, job_result& oResult)
         if(!pool->have_sock_error())
         {
             printer::inst()->print_msg(L3, RED("Result rejected by the pool."));
-
             std::string error = pool->get_call_error();
 
-            if(strncasecmp(error.c_str(), "Unauthenticated", 15) == 0)
-            {
+            if(strncasecmp(error.c_str(), "Unauthenticated", 15) == 0) {
                 printer::inst()->print_msg(L2, RED("Your miner was unable to find a share in time. Either the pool difficulty is too high, or the pool timeout is too low."));
                 pool->disconnect();
+            } else {
+                printer::inst()->print_msg(L3, error.c_str());
             }
 
             log_result_error(std::move(error));

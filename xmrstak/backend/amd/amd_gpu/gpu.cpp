@@ -412,22 +412,23 @@ size_t InitOpenCLGpu(cl_context opencl_ctx, GpuContext* ctx, const char* source_
     std::ifstream clBinFile(cache_file, std::ofstream::in | std::ofstream::binary);
     if(xmrstak::params::inst().AMDCache == false || !clBinFile.good())
     {
-        if(xmrstak::params::inst().AMDCache)
+        if(xmrstak::params::inst().AMDCache){
             printer::inst()->print_msg(L1,"OpenCL device %u - Precompiled code %s not found. Compiling ...",ctx->deviceIdx, cache_file.c_str());
             ctx->Program[ii] = clCreateProgramWithSource(opencl_ctx, 1, (const char**)&source_code, NULL, &ret);
+        }
         if(ret != CL_SUCCESS)
         {
             printer::inst()->print_msg(L1,"Error %s when calling clCreateProgramWithSource on the OpenCL miner code", err_to_str(ret));
             return ERR_OCL_API;
         }
 
-            ret = clBuildProgram(ctx->Program[ii], 1, &ctx->DeviceID, options, NULL, NULL);
+        ret = clBuildProgram(ctx->Program[ii], 1, &ctx->DeviceID, options, NULL, NULL);
         if(ret != CL_SUCCESS)
         {
             size_t len;
             printer::inst()->print_msg(L1,"Error %s when calling clBuildProgram.", err_to_str(ret));
 
-                if((ret = clGetProgramBuildInfo(ctx->Program[ii], ctx->DeviceID, CL_PROGRAM_BUILD_LOG, 0, NULL, &len)) != CL_SUCCESS)
+            if((ret = clGetProgramBuildInfo(ctx->Program[ii], ctx->DeviceID, CL_PROGRAM_BUILD_LOG, 0, NULL, &len)) != CL_SUCCESS)
             {
                 printer::inst()->print_msg(L1,"Error %s when calling clGetProgramBuildInfo for length of build log output.", err_to_str(ret));
                 return ERR_OCL_API;
@@ -436,7 +437,7 @@ size_t InitOpenCLGpu(cl_context opencl_ctx, GpuContext* ctx, const char* source_
             char* BuildLog = (char*)malloc(len + 1);
             BuildLog[0] = '\0';
 
-                if((ret = clGetProgramBuildInfo(ctx->Program[ii], ctx->DeviceID, CL_PROGRAM_BUILD_LOG, len, BuildLog, NULL)) != CL_SUCCESS)
+            if((ret = clGetProgramBuildInfo(ctx->Program[ii], ctx->DeviceID, CL_PROGRAM_BUILD_LOG, len, BuildLog, NULL)) != CL_SUCCESS)
             {
                 free(BuildLog);
                 printer::inst()->print_msg(L1,"Error %s when calling clGetProgramBuildInfo for build log.", err_to_str(ret));
@@ -451,7 +452,7 @@ size_t InitOpenCLGpu(cl_context opencl_ctx, GpuContext* ctx, const char* source_
         }
 
         cl_uint num_devices;
-            clGetProgramInfo(ctx->Program[ii], CL_PROGRAM_NUM_DEVICES, sizeof(cl_uint), &num_devices,NULL);
+        clGetProgramInfo(ctx->Program[ii], CL_PROGRAM_NUM_DEVICES, sizeof(cl_uint), &num_devices,NULL);
 
 
         std::vector<cl_device_id> devices_ids(num_devices);
@@ -621,7 +622,6 @@ void PrintDeviceInfo(cl_device_id device)
 uint32_t getNumPlatforms()
 {
     cl_uint num_platforms = 0;
-    cl_platform_id * platforms = NULL;
     cl_int clStatus;
 
     // Get platform and device information
@@ -754,7 +754,7 @@ int getAMDPlatformIdx()
 
     if(clStatus == CL_SUCCESS)
     {
-        for (int i = 0; i < numPlatforms; i++) {
+        for (uint32_t i = 0; i < numPlatforms; i++) {
             size_t infoSize;
             clGetPlatformInfo(platforms[i], CL_PLATFORM_VENDOR, 0, NULL, &infoSize);
             std::vector<char> platformNameVec(infoSize);
@@ -847,7 +847,7 @@ size_t InitOpenCL(GpuContext* ctx, size_t num_gpus, size_t platform_idx)
     }
 
     // Same as the platform index sanity check, except we must check all requested device indexes
-    for(int i = 0; i < num_gpus; ++i)
+    for(size_t i = 0; i < num_gpus; ++i)
     {
         if(entries <= ctx[i].deviceIdx)
         {
@@ -873,7 +873,7 @@ size_t InitOpenCL(GpuContext* ctx, size_t num_gpus, size_t platform_idx)
 #else
     cl_device_id* TempDeviceList = (cl_device_id*)_alloca(entries * sizeof(cl_device_id));
 #endif
-    for(int i = 0; i < num_gpus; ++i)
+    for(size_t i = 0; i < num_gpus; ++i)
     {
         ctx[i].DeviceID = DeviceIDList[ctx[i].deviceIdx];
         TempDeviceList[i] = DeviceIDList[ctx[i].deviceIdx];
@@ -917,7 +917,7 @@ size_t InitOpenCL(GpuContext* ctx, size_t num_gpus, size_t platform_idx)
     // create a directory  for the OpenCL compile cache
     create_directory(get_home() + "/.openclcache");
 
-    for(int i = 0; i < num_gpus; ++i)
+    for(size_t i = 0; i < num_gpus; ++i)
     {
         if(ctx[i].stridedIndex == 2 && (ctx[i].rawIntensity % ctx[i].workSize) != 0)
         {
@@ -1104,7 +1104,7 @@ size_t XMRSetJob(GpuContext* ctx, uint8_t* input, size_t input_len, uint64_t tar
 size_t XMRRunJob(GpuContext* ctx, cl_uint* HashOutput, xmrstak_algo miner_algo)
 {
     // switch to the kernel storage
-    int kernel_storage = miner_algo = ::jconf::inst()->GetCurrentCoinSelection().GetDescription(1).GetMiningAlgo() ? 0 : 1;
+    int kernel_storage = ::jconf::inst()->GetCurrentCoinSelection().GetDescription(1).GetMiningAlgo() ? 0 : 1;
 
     cl_int ret;
     cl_uint zero = 0;
