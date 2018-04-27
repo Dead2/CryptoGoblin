@@ -33,6 +33,7 @@ FLATTEN void mix_and_propagate(__m128i& x0, __m128i& x1, __m128i& x2, __m128i& x
     x7 = _mm_xor_si128(x7, tmp0);
 }
 
+template<xmrstak_algo ALGO>
 static void cryptonight_monero_tweak(uint64_t* mem_out, __m128i tmp){
     mem_out[0] = _mm_cvtsi128_si64(tmp);
 
@@ -41,12 +42,18 @@ static void cryptonight_monero_tweak(uint64_t* mem_out, __m128i tmp){
 
     uint8_t x = vh >> 24;
     static const uint16_t table = 0x7531;
-    const uint8_t index = (((x >> 3) & 6) | (x & 1)) << 1;
-    vh ^= ((table >> index) & 0x3) << 28;
 
+    uint8_t index;
+    if(ALGO == cryptonight_monero || ALGO == cryptonight_aeon || ALGO == cryptonight_ipbc) {
+        index = (((x >> 3) & 6) | (x & 1)) << 1;
+    } else if(ALGO == cryptonight_stellite) {
+        index = (((x >> 4) & 6) | (x & 1)) << 1;
+    }
+    vh ^= ((table >> index) & 0x3) << 28;
     mem_out[1] = vh;
 }
 
+template<xmrstak_algo ALGO>
 ALWAYS_INLINE FLATTEN inline static void soft_cryptonight_monero_tweak(uint64_t* mem_out, __m128i tmp){
     mem_out[0] = _mm_cvtsi128_si64(tmp);
 
@@ -55,8 +62,13 @@ ALWAYS_INLINE FLATTEN inline static void soft_cryptonight_monero_tweak(uint64_t*
 
     uint8_t x = vh >> 24;
     static const uint16_t table = 0x7531;
-    const uint8_t index = (((x >> 3) & 6) | (x & 1)) << 1;
-    vh ^= ((table >> index) & 0x3) << 28;
 
+    uint8_t index;
+    if(ALGO == cryptonight_monero || ALGO == cryptonight_aeon || ALGO == cryptonight_ipbc) {
+        index = (((x >> 3) & 6) | (x & 1)) << 1;
+    } else if(ALGO == cryptonight_stellite) {
+        index = (((x >> 4) & 6) | (x & 1)) << 1;
+    }
+    vh ^= ((table >> index) & 0x3) << 28;
     mem_out[1] = vh;
 }
