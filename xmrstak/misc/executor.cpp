@@ -581,24 +581,23 @@ void executor::ex_main()
             tlsport = 1;
 
         switch(jconf::inst()->GetCurrentCoinSelection().GetDescription(0).GetMiningAlgo()) {
+
+        // 1MB
         case cryptonight_lite:
+        case cryptonight_ipbc:
+        case cryptonight_aeon:
             port = 6020 + tlsport;
             break;
 
-        case cryptonight:
-            port = 6010 + tlsport;
-            break;
-
+        // 4MB
         case cryptonight_heavy:
             port = 6030 + tlsport;
             break;
 
+        // 2MB
+        case cryptonight:
         case cryptonight_monero:
             port = 6040 + tlsport;
-            break;
-
-        case cryptonight_aeon:
-            port = 6050 + tlsport;
             break;
 
         default:
@@ -625,7 +624,7 @@ void executor::ex_main()
             else
                 pools.emplace_front(0, "donate.xmr-stak.net:5500", "", "", "", 0.0, true, false, "", false);
             break;
-    case cryptonight_ipbc:
+        case cryptonight_ipbc:
         case cryptonight_aeon:
         case cryptonight_lite:
             if(dev_tls)

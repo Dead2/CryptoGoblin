@@ -1,6 +1,6 @@
 # CryptoGoblin - CryptoNight CPU mining tool
-**For coins based on cryptonight-classic, cryptonight-light or cryptonight-heavy.**<br>
-**Support for Monero, Electroneum, Aeon, Sumokoin, Edollar and more.**
+**For coins based on cryptonight-classic, cryptonight-light, cryptonight-heavy and cryptonight-ipbc.**<br>
+**Support for Monero, Electroneum, Aeon, Sumokoin, Edollar and many more.**
 
 CryptoGoblin is a greedy mining goblin that will push the cpu to get as many hashes as possible,
 if you believe in cpu-rights, then this might not be the mining tool for you.
