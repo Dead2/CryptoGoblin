@@ -479,8 +479,8 @@ size_t InitOpenCLGpu(cl_context opencl_ctx, GpuContext* ctx, const char* source_
         }
         while(status == CL_BUILD_IN_PROGRESS);
 
-			if(xmrstak::params::inst().AMDCache)
-			{
+            if(xmrstak::params::inst().AMDCache)
+            {
         std::vector<size_t> binary_sizes(num_devices);
             clGetProgramInfo (ctx->Program[ii], CL_PROGRAM_BINARY_SIZES, sizeof(size_t) * binary_sizes.size(), binary_sizes.data(), NULL);
 
@@ -1007,7 +1007,7 @@ size_t XMRSetJob(GpuContext* ctx, uint8_t* input, size_t input_len, uint64_t tar
         return(ERR_OCL_API);
     }
 
-	if(miner_algo == cryptonight_monero || miner_algo == cryptonight_aeon || miner_algo == cryptonight_ipbc)
+    if(miner_algo == cryptonight_monero || miner_algo == cryptonight_aeon || miner_algo == cryptonight_ipbc)
     {
         // Input
         if ((ret = clSetKernelArg(ctx->Kernels[kernel_storage][1], 3, sizeof(cl_mem), &ctx->InputBuffer)) != CL_SUCCESS)

@@ -229,7 +229,7 @@ void jpsock::jpsock_thread()
     else
         disconnect_time = 0;
 
-	std::unique_lock<std::mutex> lck(job_mutex);
+    std::unique_lock<std::mutex> lck(job_mutex);
     memset(&oCurrentJob, 0, sizeof(oCurrentJob));
     bRunning = false;
 }
@@ -406,7 +406,7 @@ bool jpsock::process_pool_job(const opq_json_val* params)
 
     uint32_t iWorkLn = blob->GetStringLength() / 2;
     if (iWorkLn > sizeof(pool_job::bWorkBlob))
-		return set_socket_error("PARSE error: Invalid job length. Are you sure you are mining the correct coin?");
+        return set_socket_error("PARSE error: Invalid job length. Are you sure you are mining the correct coin?");
 
     pool_job oPoolJob;
     if (!hex2bin(blob->GetString(), iWorkLn * 2, oPoolJob.bWorkBlob))
@@ -441,7 +441,7 @@ bool jpsock::process_pool_job(const opq_json_val* params)
 
     if(motd != nullptr && motd->IsString() && (motd->GetStringLength() & 0x01) == 0)
     {
-		std::unique_lock<std::mutex> lck(motd_mutex);
+        std::unique_lock<std::mutex> lck(motd_mutex);
         if(motd->GetStringLength() > 0)
         {
             pool_motd.resize(motd->GetStringLength()/2 + 1);
@@ -456,7 +456,7 @@ bool jpsock::process_pool_job(const opq_json_val* params)
 
     executor::inst()->push_event(ex_event(oPoolJob, pool_id));
 
-	std::unique_lock<std::mutex> lck(job_mutex);
+    std::unique_lock<std::mutex> lck(job_mutex);
     oCurrentJob = oPoolJob;
     return true;
 }
@@ -647,19 +647,19 @@ bool jpsock::cmd_submit(const char* sJobId, uint32_t iNonce, const uint8_t* bRes
             algo_name = "cryptonight";
             break;
         case cryptonight_lite:
-			algo_name = "cryptonight_lite";
+            algo_name = "cryptonight_lite";
             break;
         case cryptonight_monero:
-			algo_name = "cryptonight_v7";
-			break;
-		case cryptonight_aeon:
-			algo_name = "cryptonight_lite_v7";
+            algo_name = "cryptonight_v7";
             break;
-		case cryptonight_ipbc:
-			algo_name = "cryptonight_lite_v7_xor";
-			break;
+        case cryptonight_aeon:
+            algo_name = "cryptonight_lite_v7";
+            break;
+        case cryptonight_ipbc:
+            algo_name = "cryptonight_lite_v7_xor";
+            break;
         case cryptonight_heavy:
-			algo_name = "cryptonight_heavy";
+            algo_name = "cryptonight_heavy";
             break;
         default:
             algo_name = "unknown";
@@ -684,13 +684,13 @@ bool jpsock::cmd_submit(const char* sJobId, uint32_t iNonce, const uint8_t* bRes
 
 void jpsock::save_nonce(uint32_t nonce)
 {
-	std::unique_lock<std::mutex> lck(job_mutex);
+    std::unique_lock<std::mutex> lck(job_mutex);
     oCurrentJob.iSavedNonce = nonce;
 }
 
 bool jpsock::get_current_job(pool_job& job)
 {
-	std::unique_lock<std::mutex> lck(job_mutex);
+    std::unique_lock<std::mutex> lck(job_mutex);
 
     if(oCurrentJob.iWorkLen == 0)
         return false;
@@ -704,7 +704,7 @@ bool jpsock::get_pool_motd(std::string& strin)
     if(!ext_motd)
         return false;
 
-	std::unique_lock<std::mutex> lck(motd_mutex);
+    std::unique_lock<std::mutex> lck(motd_mutex);
     if(pool_motd.size() > 0)
     {
         strin.assign(pool_motd);
