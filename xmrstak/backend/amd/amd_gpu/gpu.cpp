@@ -42,9 +42,12 @@
 
 
 
-#ifdef _WIN32
+#if defined(_WIN32)
+# if defined(__MINGW32__)
+#  include <direct.h>
+# endif
 #include <windows.h>
-#include <Shlobj.h>
+#include <shlobj.h>
 
 static inline void create_directory(std::string dirname)
 {

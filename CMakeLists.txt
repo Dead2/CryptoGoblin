@@ -68,8 +68,11 @@ if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
   set(CYAN        "${Esc}[36m")
   set(WHITE       "${Esc}[37m")
 
-  option(CG_LTO "Enable Link-time optimizations (Recommended)" ON)
+  option(CG_LTO "Link-time optimizations (Recommended)(PS: Compile requires much more ram)" ON)
   option(CG_PORTABLE "Enable portable build" OFF)
+  if(CG_PORTABLE)
+    add_definitions("-DCONF_ENFORCE_OpenCL_1_2=1")
+  endif()
 
   option(CG_TUNING_ENABLE "Enable or disable CryptoGoblin Tuning" ON)
   if(CG_TUNING_ENABLE)
@@ -98,7 +101,7 @@ if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
     # Alignment
     set(CG_CFLAGS "${CG_CFLAGS} -falign-loops=16 -falign-functions=16") # -falign-jumps=16 -falign-labels=16
     # Testing
-    set(CG_CFLAGS "${CG_CFLAGS} -fbranch-target-load-optimize2") # -fipa-pta
+    set(CG_CFLAGS "${CG_CFLAGS} -fbranch-target-load-optimize2")
 
     # fipa-pta makes GCC ICE if LTO and stacked target_clones are enabled
     if (NOT (CG_LTO AND CG_PORTABLE))
@@ -111,8 +114,7 @@ if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
 
     if (CG_LTO)
         # LTO
-        set(CG_CFLAGS "${CG_CFLAGS} -flto -flto-partition=one -fdevirtualize-at-ltrans")
-        set(CMAKE_EXE_LINKER_FLAGS "${CG_FLAGS} ${CMAKE_EXE_LINKER_FLAGS}")
+        set(CG_LTO_CFLAGS "-flto -flto-partition=one -fdevirtualize-at-ltrans")
     endif()
 
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CG_CFLAGS}")
@@ -125,7 +127,7 @@ if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
     add_definitions("-DNDEBUG")
   endif()
 
-  option(CG_FLATTEN1 "Enable flatten feature for leafs (Recommended)" ON)
+  option(CG_FLATTEN1 "Enable flatten feature for hot leafs (Recommended)" ON)
   option(CG_FLATTEN2 "Enable flatten feature for hot functions (Recommended)" ON)
   option(CG_FLATTEN3 "Enable flatten feature for even more functions (NOT Recommended)" OFF)
 
@@ -143,7 +145,6 @@ if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
     set(ARCH "native" CACHE STRING "Architecture to tell gcc to optimize for (-march/-mtune)")
   endif()
   if(NOT ARCH STREQUAL "native")
-    add_definitions("-DCONF_ENFORCE_OpenCL_1_2=1")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=${ARCH} -mtune=${ARCH}")
   else()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -mtune=native")
@@ -322,6 +323,7 @@ if(OpenCL_ENABLE)
             ENV ATISTREAMSDKROOT
             ENV "PROGRAMFILES(X86)"
             /usr
+            .
         PATH_SUFFIXES
             include
             OpenCL/common/inc
@@ -337,6 +339,7 @@ if(OpenCL_ENABLE)
             ENV AMDAPPSDKROOT
             ENV ATISTREAMSDKROOT
             ENV "PROGRAMFILES(X86)"
+            CL/
         PATH_SUFFIXES
             "AMD APP/lib/x86_64"
             lib/x86_64
@@ -348,10 +351,7 @@ if(OpenCL_ENABLE)
     if(OpenCL_FOUND)
         list(APPEND BACKEND_TYPES "amd")
         include_directories(SYSTEM ${OpenCL_INCLUDE_DIRS})
-        #set(LIBS ${LIBS} ${OpenCL_LIBRARY})
-        link_directories(${OpenCL_LIBRARY})
     else()
-        #message(FATAL_ERROR "OpenCL NOT found: use `-DOpenCL_ENABLE=OFF` to build without OpenCL support for AMD gpu's")
         message(WARNING "${RED}OpenCL NOT found, DISABLING${RST}")
         add_definitions("-DCONF_NO_OPENCL")
     endif()
@@ -449,6 +449,7 @@ if(NOT WIN32)
     find_package(Threads REQUIRED)
     set(LIBS ${LIBS} ${CMAKE_THREAD_LIBS_INIT})
 endif()
+
 ################################################################################
 # Find microhttpd
 ################################################################################
@@ -541,6 +542,7 @@ if(HWLOC_ENABLE)
         NAMES
             libhwloc.lib
             hwloc
+            libhwloc-5.dll
         PATHS
             ENV "HWLOC_ROOT"
         PATH_SUFFIXES
@@ -643,44 +645,44 @@ file(GLOB BACKEND_CPP
     "xmrstak/backend/cpu/crypto/*.c"
     "xmrstak/http/*.cpp"
     "xmrstak/misc/*.cpp"
-    "xmrstak/net/*.cpp")
+    "xmrstak/net/*.cpp"
+)
 
-if(NOT CG_LTO)
+#if(NOT CG_LTO)
     add_library(CryptoGoblin-backend
         STATIC
         ${BACKEND_CPP}
     )
-
     target_link_libraries(CryptoGoblin-backend ${LIBS})
-endif()
+#endif()
 
 # compile CUDA backend
 if(CUDA_FOUND)
     file(GLOB CUDASRCFILES
         "xmrstak/backend/nvidia/nvcc_code/*.cu"
-        "xmrstak/backend/nvidia/*.cpp")
-
+        "xmrstak/backend/nvidia/*.cpp"
+    )
     if(CUDA_COMPILER STREQUAL "clang")
         # build device code with clang
         add_library(
-            xmrstak_cuda_backend
+            CryptoGoblin_cuda
             SHARED
             ${CUDASRCFILES}
         )
-        set_target_properties(xmrstak_cuda_backend PROPERTIES COMPILE_FLAGS ${CLANG_BUILD_FLAGS})
-        set_target_properties(xmrstak_cuda_backend PROPERTIES LINKER_LANGUAGE CXX)
+        set_target_properties(CryptoGoblin_cuda PROPERTIES COMPILE_FLAGS ${CLANG_BUILD_FLAGS})
+        set_target_properties(CryptoGoblin_cuda PROPERTIES LINKER_LANGUAGE CXX)
         set_source_files_properties(${CUDASRCFILES} PROPERTIES LANGUAGE CXX)
     else()
         #  build device code with nvcc
         cuda_add_library(
-            xmrstak_cuda_backend
+            CryptoGoblin_cuda
             SHARED
             ${CUDASRCFILES}
         )
     endif()
-    target_link_libraries(xmrstak_cuda_backend ${CUDA_LIBRARIES})
-    if(NOT CG_LTO)
-        target_link_libraries(xmrstak_cuda_backend CryptoGoblin-backend)
+    target_link_libraries(CryptoGoblin_cuda CryptoGoblin-backend ${CUDA_LIBRARIES})
+    if(WIN32 AND NOT (CMAKE_CXX_COMPILER_ID MATCHES "MSVC"))
+        set_target_properties(CryptoGoblin_cuda PROPERTIES PREFIX "")
     endif()
 endif()
 
@@ -688,37 +690,40 @@ endif()
 if(OpenCL_FOUND)
     file(GLOB OPENCLSRCFILES
         "xmrstak/backend/amd/amd_gpu/*.cpp"
-        "xmrstak/backend/amd/*.cpp")
-    add_library(xmrstak_opencl_backend
+        "xmrstak/backend/amd/*.cpp"
+    )
+    add_library(CryptoGoblin_opencl
         SHARED
         ${OPENCLSRCFILES}
     )
-    target_link_libraries(xmrstak_opencl_backend ${OpenCL_LIBRARY} )
-    if(NOT CG_LTO)
-        target_link_libraries(xmrstak_opencl_backend CryptoGoblin-backend)
+    target_link_libraries(CryptoGoblin_opencl CryptoGoblin-backend ${OpenCL_LIBRARY})
+    if(WIN32 AND NOT (CMAKE_CXX_COMPILER_ID MATCHES "MSVC"))
+        set_target_properties(CryptoGoblin_opencl PROPERTIES PREFIX "")
     endif()
 endif()
 
 # compile final binary
-file(GLOB SRCFILES_CPP "xmrstak/cli/*.cpp")
+file(GLOB SRCFILES_CPP
+    "xmrstak/cli/*.cpp"
+)
 set_source_files_properties(${SRCFILES_CPP} PROPERTIES LANGUAGE CXX)
 
+if(CG_LTO)
+    set(SRCFILES_CPP ${SRCFILES_CPP} ${BACKEND_CPP})
+endif()
 if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-    add_executable(CryptoGoblin ${SRCFILES_CPP} xmrstak/cli/xmr-stak.manifest)
-else()
-    if(CG_LTO)
-        add_executable(CryptoGoblin ${SRCFILES_CPP} ${BACKEND_CPP})
-    else(CG_LTO)
-        add_executable(CryptoGoblin ${SRCFILES_CPP})
-    endif(CG_LTO)
+    set(SRCFILES_CPP ${SRCFILES_CPP} "xmrstak/cli/xmr-stak.manifest")
 endif()
 
-set(EXECUTABLE_OUTPUT_PATH "bin")
-set(LIBRARY_OUTPUT_PATH "bin")
-
+add_executable(CryptoGoblin
+    ${SRCFILES_CPP}
+)
 target_link_libraries(CryptoGoblin ${LIBS})
 
-if(NOT CG_LTO)
+if(CG_LTO)
+    set_target_properties(CryptoGoblin PROPERTIES COMPILE_FLAGS "${CG_LTO_CFLAGS}")
+    set_target_properties(CryptoGoblin PROPERTIES LINK_FLAGS "${CG_LTO_CFLAGS} ${CMAKE_EXE_LINKER_FLAGS}")
+else()
     target_link_libraries(CryptoGoblin CryptoGoblin-backend)
 endif()
 
@@ -729,10 +734,13 @@ if (CUDA_FOUND OR OpenCL_FOUND)
         target_link_libraries(CryptoGoblin-backend ${CMAKE_DL_LIBS})
     endif()
 endif()
+
 ################################################################################
 # Install
 ################################################################################
 
+set(EXECUTABLE_OUTPUT_PATH "bin")
+set(LIBRARY_OUTPUT_PATH "bin")
 
 # do not install the binary if the project and install are equal
 if( NOT CMAKE_INSTALL_PREFIX STREQUAL PROJECT_BINARY_DIR )
@@ -740,19 +748,19 @@ if( NOT CMAKE_INSTALL_PREFIX STREQUAL PROJECT_BINARY_DIR )
             RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
     if(CUDA_FOUND)
         if(WIN32)
-            install(TARGETS xmrstak_cuda_backend
+            install(TARGETS CryptoGoblin_cuda
                 RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
         else()
-            install(TARGETS xmrstak_cuda_backend
+            install(TARGETS CryptoGoblin_cuda
                 LIBRARY DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
         endif()
     endif()
     if(OpenCL_FOUND)
         if(WIN32)
-            install(TARGETS xmrstak_opencl_backend
+            install(TARGETS CryptoGoblin_opencl
                 RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
         else()
-            install(TARGETS xmrstak_opencl_backend
+            install(TARGETS CryptoGoblin_opencl
                 LIBRARY DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
         endif()
     endif()

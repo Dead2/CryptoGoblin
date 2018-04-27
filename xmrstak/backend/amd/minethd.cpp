@@ -25,8 +25,6 @@
 #include "autoAdjust.hpp"
 #include "amd_gpu/gpu.hpp"
 
-#include "xmrstak/backend/cpu/crypto/cryptonight_aesni.h"
-#include "xmrstak/backend/cpu/crypto/cryptonight.h"
 #include "xmrstak/misc/configEditor.hpp"
 #include "xmrstak/misc/console.hpp"
 #include "xmrstak/backend/cpu/minethd.hpp"

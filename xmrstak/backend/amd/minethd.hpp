@@ -2,7 +2,7 @@
 
 #include "amd_gpu/gpu.hpp"
 #include "jconf.hpp"
-#include "xmrstak/backend/cpu/crypto/cryptonight.h"
+#include "xmrstak/backend/cpu/crypto/cryptonight.hpp"
 #include "xmrstak/backend/miner_work.hpp"
 #include "xmrstak/backend/iBackend.hpp"
 #include "xmrstak/misc/environment.hpp"
