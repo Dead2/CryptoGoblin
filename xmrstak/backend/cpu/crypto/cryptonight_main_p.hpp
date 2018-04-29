@@ -169,7 +169,7 @@ ALIGN(64) void cryptonight_double_hash(const void* input, size_t len, void* outp
         monero_const[0]  = *reinterpret_cast<const uint64_t*>(reinterpret_cast<const uint8_t*>(input) + 35);
         monero_const[0] ^= *(reinterpret_cast<const uint64_t*>(ctx[0]->hash_state) + 24);
         monero_const[1]  = *reinterpret_cast<const uint64_t*>(reinterpret_cast<const uint8_t*>(input) + 35 + len);
-        monero_const[1] ^= *(reinterpret_cast<const uint64_t*>(ctx[0]->hash_state) + 24);
+        monero_const[1] ^= *(reinterpret_cast<const uint64_t*>(ctx[1]->hash_state) + 24);
     }
 
     // Optim - 99% time boundary
