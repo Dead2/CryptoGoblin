@@ -348,13 +348,6 @@ std::vector<iBackend*> minethd::thread_starter(uint32_t threadOffset, miner_work
     return pvThreads;
 }
 
-void minethd::consume_work()
-{
-    memcpy(&oWork, &globalStates::inst().inst().oGlobalWork, sizeof(miner_work));
-    iJobNo++;
-    globalStates::inst().inst().iConsumeCnt++;
-}
-
 minethd::cn_hash_fun minethd::func_selector(bool bHaveAes, bool bPrefetch, xmrstak_algo algo)
 {
     // We have two independent flag bits in the functions
@@ -453,7 +446,6 @@ void minethd::work_main()
 
     piHashVal = (uint64_t*)(result.bResult + 24);
     piNonce = (uint32_t*)(oWork.bWorkBlob + 39);
-    globalStates::inst().inst().iConsumeCnt++;
     result.iThreadId = iThreadNo;
 
     uint8_t version = 0;
@@ -471,7 +463,7 @@ void minethd::work_main()
             while (globalStates::inst().iGlobalJobNo.load(std::memory_order_relaxed) == iJobNo)
                 std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
-            consume_work();
+			globalStates::inst().consume_work(oWork, iJobNo);
             continue;
         }
 
@@ -527,7 +519,7 @@ void minethd::work_main()
             std::this_thread::yield();
         }
 
-        consume_work();
+		globalStates::inst().consume_work(oWork, iJobNo);
     }
 
     cryptonight_free_ctx(ctx);
@@ -778,7 +770,7 @@ void minethd::multiway_work_main()
             while (globalStates::inst().iGlobalJobNo.load(std::memory_order_relaxed) == iJobNo)
                 std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
-            consume_work();
+			globalStates::inst().consume_work(oWork, iJobNo);
             prep_multiway_work<N>(bWorkBlob, piNonce);
             continue;
         }
@@ -841,7 +833,7 @@ void minethd::multiway_work_main()
             std::this_thread::yield();
         }
 
-        consume_work();
+		globalStates::inst().consume_work(oWork, iJobNo);
         prep_multiway_work<N>(bWorkBlob, piNonce);
     }
 
