@@ -31,6 +31,7 @@ POOLCONF],
  *    intense
  *    ipbc
  *    karbo
+ *    masari
  *    monero
  *    sumokoin
  *
