@@ -47,9 +47,6 @@ void globalStates::switch_work(miner_work& pWork, pool_data& dat)
 {
 	jobLock.WriteLock();
 	
-	// this notifies all threads that the job has changed
-	iGlobalJobNo++; 
-
     size_t xid = dat.pool_id;
     dat.pool_id = pool_id;
     pool_id = xid;
@@ -61,6 +58,9 @@ void globalStates::switch_work(miner_work& pWork, pool_data& dat)
 	 */
 	dat.iSavedNonce = iGlobalNonce.exchange(dat.iSavedNonce, std::memory_order_relaxed);
     oGlobalWork = pWork;
+	
+	// this notifies all threads that the job has changed
+	iGlobalJobNo++;
 	
 	jobLock.UnLock();
 }
