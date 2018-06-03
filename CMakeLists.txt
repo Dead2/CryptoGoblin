@@ -134,10 +134,10 @@ if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
   if(CG_FLATTEN1)
     add_definitions("-DDO_FLATTEN1")
   endif()
-  if(CG_FLATTEN1)
+  if(CG_FLATTEN2)
     add_definitions("-DDO_FLATTEN2")
   endif()
-  if(CG_FLATTEN1)
+  if(CG_FLATTEN3)
     add_definitions("-DDO_FLATTEN3")
   endif()
 
@@ -654,12 +654,13 @@ file(GLOB BACKEND_CPP
 )
 
 #if(NOT CG_LTO)
+if(CUDA_FOUND OR OpenCL_FOUND)
     add_library(CryptoGoblin-backend
         STATIC
         ${BACKEND_CPP}
     )
     target_link_libraries(CryptoGoblin-backend ${LIBS})
-#endif()
+endif()
 
 # compile CUDA backend
 if(CUDA_FOUND)
