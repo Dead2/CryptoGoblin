@@ -129,7 +129,7 @@ if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
 
   option(CG_FLATTEN1 "Enable flatten feature for hot leafs (Recommended)" ON)
   option(CG_FLATTEN2 "Enable flatten feature for hot functions (Recommended)" ON)
-  option(CG_FLATTEN3 "Enable flatten feature for even more functions (NOT Recommended)" OFF)
+  option(CG_FLATTEN3 "Enable flatten feature for extra-hash functions (Recommended)" ON)
 
   if(CG_FLATTEN1)
     add_definitions("-DDO_FLATTEN1")

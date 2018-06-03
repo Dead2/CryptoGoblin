@@ -67,18 +67,20 @@ ALIGN(64) void cryptonight_hash(const void* input, size_t len, void* output, cry
 
     uint8_t* l0 = ctx->long_state;
     uint64_t* h0 = (uint64_t*)ctx->hash_state;
+    uint64_t idx0 = h0[0] ^ h0[4];
 
-    uint64_t al0 = h0[0] ^ h0[4];
+    if(PREFETCH)
+        _mm_prefetch((const char*)&l0[idx0 & MASK], _MM_HINT_T0);
+
+    uint64_t al0 = idx0;
     uint64_t ah0 = h0[1] ^ h0[5];
     __m128i bx0 = _mm_set_epi64x(h0[3] ^ h0[7], h0[2] ^ h0[6]);
 
-    uint64_t idx0 = h0[0] ^ h0[4];
 
     // Optim - 90% time boundary
     for(size_t i = 0; i < ITERATIONS; i++)
     {
-        __m128i cx;
-        cx = _mm_load_si128((__m128i *)&l0[idx0 & MASK]);
+        __m128i cx = _mm_load_si128((__m128i *)&l0[idx0 & MASK]);
 
         if(SOFT_AES)
             cx = soft_aesenc(cx, _mm_set_epi64x(ah0, al0));
@@ -95,26 +97,26 @@ ALIGN(64) void cryptonight_hash(const void* input, size_t len, void* output, cry
             _mm_store_si128((__m128i *)&l0[idx0 & MASK], _mm_xor_si128(bx0, cx));
 
         uint64_t idx1 = _mm_cvtsi128_si64(cx);
+        uint64_t* l0_p = (uint64_t*)&l0[idx1 & MASK];
+        if(PREFETCH)
+            _mm_prefetch((const char*)l0_p, _MM_HINT_T0);
+
         bx0 = cx;
 
-        if(PREFETCH)
-            _mm_prefetch((const char*)&l0[idx1 & MASK], _MM_HINT_T0);
-
         uint64_t hi, lo, cl, ch;
-        cl = ((uint64_t*)&l0[idx1 & MASK])[0];
-        ch = ((uint64_t*)&l0[idx1 & MASK])[1];
+        cl = l0_p[0];
+        ch = l0_p[1];
 
         lo = _umul128(idx1, cl, &hi);
         ah0 += lo;
-
         al0 += hi;
-        ((uint64_t*)&l0[idx1 & MASK])[0] = al0;
+        l0_p[0] = al0;
         al0 ^= cl;
 
         if(ALGO == cryptonight_monero || ALGO == cryptonight_aeon)
-            ((uint64_t*)&l0[idx1 & MASK])[1] = ah0 ^ monero_const;
+            l0_p[1] = ah0 ^ monero_const;
         else
-            ((uint64_t*)&l0[idx1 & MASK])[1] = ah0;
+            l0_p[1] = ah0;
 
         ah0 ^= ch;
 
