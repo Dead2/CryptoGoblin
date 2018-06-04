@@ -24,7 +24,7 @@ struct globalStates
     //pool_data is in-out winapi style
     void switch_work(miner_work& pWork, pool_data& dat);
 
-    inline void calc_start_nonce(uint32_t& nonce, bool use_nicehash, uint32_t reserve_count)
+     inline void calc_start_nonce(uint32_t& nonce, bool use_nicehash, uint32_t reserve_count)
     {
         if(use_nicehash)
             nonce = (nonce & 0xFF000000) | iGlobalNonce.fetch_add(reserve_count);
@@ -32,7 +32,7 @@ struct globalStates
             nonce = iGlobalNonce.fetch_add(reserve_count);
     }
 
-	void consume_work( miner_work& threadWork, uint64_t& currentJobId);
+    void consume_work( miner_work& threadWork, uint64_t& currentJobId);
 
     miner_work oGlobalWork;
     std::atomic<uint64_t> iGlobalJobNo;
@@ -42,11 +42,11 @@ struct globalStates
     size_t pool_id = invalid_pool_id;
 
 private:
-	globalStates() : iThreadCount(0), iGlobalJobNo(0), iConsumeCnt(0)
+    globalStates() : iGlobalJobNo(0), iConsumeCnt(0), iThreadCount(0)
     {
     }
 
-	::cpputil::RWLock jobLock;
+    ::cpputil::RWLock jobLock;
 };
 
 } // namepsace xmrstak

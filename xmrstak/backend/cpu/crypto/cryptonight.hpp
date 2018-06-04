@@ -10,7 +10,6 @@
 #  include <x86intrin.h>
 #  define _umul128 _xmr_umul128
 # endif
-# define _mm256_set_m128i(v0, v1)  _mm256_insertf128_si256(_mm256_castsi128_si256(v1), (v0), 1)
 #else
 # include <intrin.h>
 #endif // __GNUC__

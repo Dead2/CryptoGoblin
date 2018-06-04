@@ -463,7 +463,7 @@ void minethd::work_main()
             while (globalStates::inst().iGlobalJobNo.load(std::memory_order_relaxed) == iJobNo)
                 std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
-			globalStates::inst().consume_work(oWork, iJobNo);
+            globalStates::inst().consume_work(oWork, iJobNo);
             continue;
         }
 
@@ -506,9 +506,9 @@ void minethd::work_main()
             if((nonce_ctr++ & (nonce_chunk-1)) == 0)
             {
                 globalStates::inst().calc_start_nonce(result.iNonce, oWork.bNiceHash, nonce_chunk);
-				// check if the job is still valid, there is a small posibility that the job is switched
-				if(globalStates::inst().iGlobalJobNo.load(std::memory_order_relaxed) != iJobNo)
-					break;
+                // check if the job is still valid, there is a small posibility that the job is switched
+                if(globalStates::inst().iGlobalJobNo.load(std::memory_order_relaxed) != iJobNo)
+                    break;
             }
 
             *piNonce = result.iNonce;
@@ -522,7 +522,7 @@ void minethd::work_main()
             std::this_thread::yield();
         }
 
-		globalStates::inst().consume_work(oWork, iJobNo);
+        globalStates::inst().consume_work(oWork, iJobNo);
     }
 
     cryptonight_free_ctx(ctx);
@@ -773,7 +773,7 @@ void minethd::multiway_work_main()
             while (globalStates::inst().iGlobalJobNo.load(std::memory_order_relaxed) == iJobNo)
                 std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
-			globalStates::inst().consume_work(oWork, iJobNo);
+            globalStates::inst().consume_work(oWork, iJobNo);
             prep_multiway_work<N>(bWorkBlob, piNonce);
             continue;
         }
@@ -818,9 +818,9 @@ void minethd::multiway_work_main()
             {
                 globalStates::inst().calc_start_nonce(iNonce, oWork.bNiceHash, nonce_chunk);
                 nonce_ctr = nonce_chunk;
-				// check if the job is still valid, there is a small posibility that the job is switched
-				if(globalStates::inst().iGlobalJobNo.load(std::memory_order_relaxed) != iJobNo)
-					break;
+                // check if the job is still valid, there is a small posibility that the job is switched
+                if(globalStates::inst().iGlobalJobNo.load(std::memory_order_relaxed) != iJobNo)
+                    break;
             }
 
             for (size_t i = 0; i < N; i++)
@@ -839,7 +839,7 @@ void minethd::multiway_work_main()
             std::this_thread::yield();
         }
 
-		globalStates::inst().consume_work(oWork, iJobNo);
+        globalStates::inst().consume_work(oWork, iJobNo);
         prep_multiway_work<N>(bWorkBlob, piNonce);
     }
 

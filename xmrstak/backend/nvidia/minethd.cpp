@@ -238,7 +238,7 @@ void minethd::work_main()
             while (globalStates::inst().iGlobalJobNo.load(std::memory_order_relaxed) == iJobNo)
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
-			globalStates::inst().consume_work(oWork, iJobNo);
+            globalStates::inst().consume_work(oWork, iJobNo);
             continue;
         }
         uint8_t new_version = oWork.getVersion();
@@ -275,10 +275,10 @@ void minethd::work_main()
             if((round_ctr++ & 0xF) == 0)
             {
                 globalStates::inst().calc_start_nonce(iNonce, oWork.bNiceHash, h_per_round * 16);
-			// check if the job is still valid, there is a small posibility that the job is switched
-			if(globalStates::inst().iGlobalJobNo.load(std::memory_order_relaxed) != iJobNo)
-				break;
-			}
+            // check if the job is still valid, there is a small posibility that the job is switched
+            if(globalStates::inst().iGlobalJobNo.load(std::memory_order_relaxed) != iJobNo)
+                break;
+            }
 
             uint32_t foundNonce[10];
             uint32_t foundCount;
@@ -317,7 +317,7 @@ void minethd::work_main()
             std::this_thread::yield();
         }
 
-		globalStates::inst().consume_work(oWork, iJobNo);
+        globalStates::inst().consume_work(oWork, iJobNo);
     }
 }
 

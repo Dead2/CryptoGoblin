@@ -190,7 +190,7 @@ void minethd::work_main()
             while (globalStates::inst().iGlobalJobNo.load(std::memory_order_relaxed) == iJobNo)
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
-			globalStates::inst().consume_work(oWork, iJobNo);
+            globalStates::inst().consume_work(oWork, iJobNo);
             continue;
         }
 
@@ -229,11 +229,11 @@ void minethd::work_main()
             if((round_ctr++ & 0xF) == 0)
             {
                 globalStates::inst().calc_start_nonce(pGpuCtx->Nonce, oWork.bNiceHash, h_per_round * 16);
-				// check if the job is still valid, there is a small possibility that the job is switched
-			if(globalStates::inst().iGlobalJobNo.load(std::memory_order_relaxed) != iJobNo)
-				break;
-			}
-			
+                // check if the job is still valid, there is a small possibility that the job is switched
+            if(globalStates::inst().iGlobalJobNo.load(std::memory_order_relaxed) != iJobNo)
+                break;
+            }
+
 
             cl_uint results[0x100];
             memset(results,0,sizeof(cl_uint)*(0x100));
@@ -264,7 +264,7 @@ void minethd::work_main()
             std::this_thread::yield();
         }
 
-		globalStates::inst().consume_work(oWork, iJobNo);
+        globalStates::inst().consume_work(oWork, iJobNo);
     }
 }
 
