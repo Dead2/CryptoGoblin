@@ -9,20 +9,20 @@ R"===(
  *
  *                  Using one double thread instead of two single threads can save power, at the cost of ~15-20% hashrate.
  *
- * prefetch -       Some sytems can gain up to extra 5% here, but sometimes it will have no difference or make
+ * prefetch -       Some systems can gain up to extra 5% here, but sometimes it will have no difference or make
  *                  things slower.
  *
- * affine_to_cpu -  This can be either false (no affinity), or the CPU core number. Note that on hyperthreading 
- *                  systems it is better to assign threads to physical cores. On Windows this usually means selecting 
- *                  even or odd numbered cpu numbers. For Linux it will be usually the lower CPU numbers, so for a 4 
+ * affine_to_cpu -  This can be either false (no affinity), or the CPU core number. Note that on hyperthreading
+ *                  systems it is better to assign threads to physical cores. On Windows this usually means selecting
+ *                  even or odd numbered cpu numbers. For Linux it will be usually the lower CPU numbers, so for a 4
  *                  physical core CPU you should select cpu numbers 0-3.
  *
  * On the first run the miner will look at your system and suggest a basic configuration that will work,
  * you can try to tweak it from there to get the best performance. Read TUNING.txt for more information.
- * 
+ *
  * A filled out configuration should look like this:
  * "cpu_threads_conf" :
- * [ 
+ * [
  *      { "thread_mode" : 1, "prefetch" : true, "affine_to_cpu" : 0 },
  *      { "thread_mode" : 2, "prefetch" : true, "affine_to_cpu" : 1 },
  * ],

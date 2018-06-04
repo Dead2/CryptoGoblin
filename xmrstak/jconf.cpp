@@ -97,7 +97,7 @@ xmrstak::coin_selection coins[] = {
     { "cryptonight_lite_v7",        {cryptonight_aeon,   cryptonight_aeon,    0u },  {cryptonight_aeon,   cryptonight_aeon,     0u },   nullptr },
     { "cryptonight_lite_v7_xor",    {cryptonight_ipbc,   cryptonight_ipbc,    0u },  {cryptonight_aeon,   cryptonight_aeon,     0u },   nullptr },
     { "cryptonight_v7",             {cryptonight_monero, cryptonight_monero,  0u },  {cryptonight_monero, cryptonight_monero,   0u },   nullptr },
-	{ "cryptonight_v7_stellite", {cryptonight_stellite, cryptonight_stellite, 0u },  {cryptonight_monero, cryptonight_monero,   0u },   nullptr },
+    { "cryptonight_v7_stellite", {cryptonight_stellite, cryptonight_stellite, 0u },  {cryptonight_monero, cryptonight_monero,   0u },   nullptr },
     { "edollar",                    {cryptonight_monero, cryptonight,       255u },  {cryptonight_monero, cryptonight_monero,   0u },   nullptr },
     { "electroneum",                {cryptonight_monero, cryptonight,       255u },  {cryptonight_monero, cryptonight_monero,   0u },   nullptr },
     { "graft",                      {cryptonight_monero, cryptonight,         8u },  {cryptonight_monero, cryptonight_monero,   0u },   nullptr },
@@ -108,12 +108,12 @@ xmrstak::coin_selection coins[] = {
     { "monero",                     {cryptonight_monero, cryptonight_monero,  0u },  {cryptonight_monero, cryptonight_monero,   0u },   "pool.supportxmr.com:5555" },
     { "monero7",                    {cryptonight_monero, cryptonight_monero,  0u },  {cryptonight_monero, cryptonight_monero,   0u },   "pool.supportxmr.com:5555" },
     { "moneroV",                    {cryptonight_monero, cryptonight_monero,  0u },  {cryptonight_monero, cryptonight_monero,   0u },   nullptr },
-	{ "stellite",                 {cryptonight_stellite, cryptonight_stellite, 0u},  {cryptonight_monero, cryptonight_monero,   0u },   nullptr },
+    { "stellite",                 {cryptonight_stellite, cryptonight_stellite, 0u},  {cryptonight_monero, cryptonight_monero,   0u },   nullptr },
     { "sumokoin",                   {cryptonight_heavy,  cryptonight_heavy,   0u },  {cryptonight_heavy,  cryptonight_heavy,    0u },   nullptr },
     { "pinkstar",                   {cryptonight_aeon,   cryptonight_lite,    4u },  {cryptonight_aeon,   cryptonight_aeon,     0u },   nullptr }
 };
 
-constexpr size_t coin_alogo_size = (sizeof(coins)/sizeof(coins[0]));
+constexpr size_t coin_algo_size = (sizeof(coins)/sizeof(coins[0]));
 
 inline bool checkType(Type have, Type want)
 {
@@ -314,7 +314,7 @@ std::string jconf::GetMiningCoin()
 void jconf::GetAlgoList(std::string& list)
 {
     list.reserve(256);
-    for(size_t i=0; i < coin_alogo_size; i++)
+    for(size_t i=0; i < coin_algo_size; i++)
     {
         list += "\t- ";
         list += coins[i].coin_name;
@@ -326,7 +326,7 @@ bool jconf::IsOnAlgoList(std::string& needle)
 {
     std::transform(needle.begin(), needle.end(), needle.begin(), ::tolower);
 
-    for(size_t i=0; i < coin_alogo_size; i++)
+    for(size_t i=0; i < coin_algo_size; i++)
     {
         if(needle == coins[i].coin_name)
             return true;
@@ -338,7 +338,7 @@ const char* jconf::GetDefaultPool(const char* needle)
 {
     const char* default_example = "pool.example.com:3333";
 
-    for(size_t i=0; i < coin_alogo_size; i++)
+    for(size_t i=0; i < coin_algo_size; i++)
     {
         if(strcmp(needle, coins[i].coin_name) == 0)
         {
@@ -618,7 +618,7 @@ bool jconf::parse_config(const char* sFilename, const char* sFilenamePools)
         return false;
     }
 
-    for(size_t i=0; i < coin_alogo_size; i++)
+    for(size_t i=0; i < coin_algo_size; i++)
     {
         if(ctmp == coins[i].coin_name)
         {

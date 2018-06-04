@@ -336,7 +336,7 @@ bool jpsock::process_line(char* line, size_t len)
         mt = GetObjectMember(prv->jsonDoc, "error");
 
         const char* sError = nullptr;
-        size_t iErrorLn = 0;
+        size_t iErrorLen = 0;
         if (mt == nullptr || mt->IsNull())
         {
             /* If there was no error we need a result */
@@ -353,7 +353,7 @@ bool jpsock::process_line(char* line, size_t len)
             if(msg == nullptr || !msg->IsString())
                 return set_socket_error("PARSE error: Protocol error 6");
 
-            iErrorLn = msg->GetStringLength();
+            iErrorLen = msg->GetStringLength();
             sError = msg->GetString();
         }
 
@@ -371,7 +371,7 @@ bool jpsock::process_line(char* line, size_t len)
         if(sError != nullptr)
         {
             prv->oCallRsp.pCallData = nullptr;
-            prv->oCallRsp.sCallErr.assign(sError, iErrorLn);
+            prv->oCallRsp.sCallErr.assign(sError, iErrorLen);
             call_error = true;
         }
         else
@@ -404,15 +404,15 @@ bool jpsock::process_pool_job(const opq_json_val* params)
     if (jobid->GetStringLength() >= sizeof(pool_job::sJobID)) // Note >=
         return set_socket_error("PARSE error: Job error 3");
 
-    uint32_t iWorkLn = blob->GetStringLength() / 2;
-    if (iWorkLn > sizeof(pool_job::bWorkBlob))
+    uint32_t iWorkLen = blob->GetStringLength() / 2;
+    if (iWorkLen > sizeof(pool_job::bWorkBlob))
         return set_socket_error("PARSE error: Invalid job length. Are you sure you are mining the correct coin?");
 
     pool_job oPoolJob;
-    if (!hex2bin(blob->GetString(), iWorkLn * 2, oPoolJob.bWorkBlob))
+    if (!hex2bin(blob->GetString(), iWorkLen * 2, oPoolJob.bWorkBlob))
         return set_socket_error("PARSE error: Job error 4");
 
-    oPoolJob.iWorkLen = iWorkLn;
+    oPoolJob.iWorkLen = iWorkLen;
     memset(oPoolJob.sJobID, 0, sizeof(pool_job::sJobID));
     memcpy(oPoolJob.sJobID, jobid->GetString(), jobid->GetStringLength()); //Bounds checking at proto error 3
 
@@ -655,9 +655,9 @@ bool jpsock::cmd_submit(const char* sJobId, uint32_t iNonce, const uint8_t* bRes
         case cryptonight_aeon:
             algo_name = "cryptonight_lite_v7";
             break;
-		case cryptonight_stellite:
-			algo_name = "cryptonight_v7_stellite";
-			break;
+        case cryptonight_stellite:
+            algo_name = "cryptonight_v7_stellite";
+            break;
         case cryptonight_ipbc:
             algo_name = "cryptonight_lite_v7_xor";
             break;
