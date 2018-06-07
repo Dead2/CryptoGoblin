@@ -265,16 +265,16 @@ cryptonight_ctx* cryptonight_alloc_ctx(size_t use_fast_mem, size_t use_mlock, al
 
 void cryptonight_free_ctx(cryptonight_ctx* ctx)
 {
-    size_t hashMemSize = std::max(
-        cn_select_memory(::jconf::inst()->GetCurrentCoinSelection().GetDescription(1).GetMiningAlgo()),
-        cn_select_memory(::jconf::inst()->GetCurrentCoinSelection().GetDescription(1).GetMiningAlgoRoot())
-    );
-
     if(ctx->ctx_info[0] != 0)
     {
 #ifdef _WIN32
         VirtualFree(ctx->long_state, 0, MEM_RELEASE);
 #else
+        size_t hashMemSize = std::max(
+            cn_select_memory(::jconf::inst()->GetCurrentCoinSelection().GetDescription(1).GetMiningAlgo()),
+            cn_select_memory(::jconf::inst()->GetCurrentCoinSelection().GetDescription(1).GetMiningAlgoRoot())
+        );
+
         if(ctx->ctx_info[1] != 0)
             munlock(ctx->long_state, hashMemSize);
         munmap(ctx->long_state, hashMemSize);
