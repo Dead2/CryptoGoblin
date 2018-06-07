@@ -68,6 +68,11 @@ if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
   set(CYAN        "${Esc}[36m")
   set(WHITE       "${Esc}[37m")
 
+  option(CG_ONLY_XMR "Disable all algorithms except Monero's (XMR) algorithm." OFF)
+  if(CG_ONLY_XMR)
+    add_definitions("-DONLY_XMR_ALGO")
+  endif()
+
   option(CG_LTO "Link-time optimizations (Recommended)(PS: Compile requires much more ram)" ON)
   option(CG_PORTABLE "Enable portable build" OFF)
   if(CG_PORTABLE)

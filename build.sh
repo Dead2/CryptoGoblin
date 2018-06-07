@@ -38,6 +38,10 @@ portable="OFF"
 # Optionally force enable/disable static build by uncommenting:
 # static="ON"
 
+# Disable all algorithms except the one needed by Monero/XMR. This results
+# in a smaller executable and can give a tiny speedup. Defaults to OFF
+# This will make the miner unable to work properly for any other algorithm.
+onlyxmr="OFF"
 
 # What is the oldest cpu the compiled binary needs to work with?
 # Choose "native" if you only need to support the local machine.
@@ -102,7 +106,7 @@ cd build
 rm -rf CMakeFiles/ CMakeCache.txt
 
 set -x
-cmake .. -L -DCMAKE_VERBOSE_MAKEFILE="$verbose" -DCMAKE_LINK_STATIC="$static" -DCMAKE_INSTALL_PREFIX="$installprefix" -DARCH="$arch" -DCG_LTO="$lto" -DCG_PORTABLE="$portable" -DHWLOC_ENABLE="$hwloc" -DMICROHTTPD_ENABLE="$microhttpd" -DOpenSSL_ENABLE="$openssl" -DCPU_ENABLE="$cpu" -DCUDA_ENABLE="$cuda" -DOpenCL_ENABLE="$opencl" $cmakeopt
+cmake .. -L -DCMAKE_VERBOSE_MAKEFILE="$verbose" -DCMAKE_LINK_STATIC="$static" -DCMAKE_INSTALL_PREFIX="$installprefix" -DARCH="$arch" -DCG_LTO="$lto" -DCG_PORTABLE="$portable" -DCG_ONLY_XMR="$onlyxmr" -DHWLOC_ENABLE="$hwloc" -DMICROHTTPD_ENABLE="$microhttpd" -DOpenSSL_ENABLE="$openssl" -DCPU_ENABLE="$cpu" -DCUDA_ENABLE="$cuda" -DOpenCL_ENABLE="$opencl" $cmakeopt
 
 make -j3
 set +x

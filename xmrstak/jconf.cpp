@@ -88,6 +88,7 @@ constexpr size_t iConfigCnt = (sizeof(oConfigValues)/sizeof(oConfigValues[0]));
 
 xmrstak::coin_selection coins[] = {
     // name, userpool, devpool, default_pool_suggestion
+#ifndef ONLY_XMR_ALGO
     { "aeon7",                      {cryptonight_aeon,   cryptonight_lite,    7u },  {cryptonight_aeon,   cryptonight_aeon,     0u },   "mine.aeon-pool.com:5555" },
     { "bbscoin",                    {cryptonight_monero, cryptonight,         3u },  {cryptonight_monero, cryptonight_monero,   0u },   nullptr },
     { "croat",                      {cryptonight_monero, cryptonight,       255u },  {cryptonight_monero, cryptonight_monero,   0u },   nullptr },
@@ -112,6 +113,12 @@ xmrstak::coin_selection coins[] = {
     { "stellite",                 {cryptonight_stellite, cryptonight_stellite, 0u},  {cryptonight_monero, cryptonight_monero,   0u },   nullptr },
     { "sumokoin",                   {cryptonight_heavy,  cryptonight_heavy,   0u },  {cryptonight_heavy,  cryptonight_heavy,    0u },   nullptr },
     { "pinkstar",                   {cryptonight_aeon,   cryptonight_lite,    4u },  {cryptonight_aeon,   cryptonight_aeon,     0u },   nullptr }
+#else
+    { "cryptonight_v7",             {cryptonight_monero, cryptonight_monero,  0u },  {cryptonight_monero, cryptonight_monero,   0u },   nullptr },
+    { "monero",                     {cryptonight_monero, cryptonight_monero,  0u },  {cryptonight_monero, cryptonight_monero,   0u },   "pool.supportxmr.com:5555" },
+    { "monero7",                    {cryptonight_monero, cryptonight_monero,  0u },  {cryptonight_monero, cryptonight_monero,   0u },   "pool.supportxmr.com:5555" },
+    { "moneroV",                    {cryptonight_monero, cryptonight_monero,  0u },  {cryptonight_monero, cryptonight_monero,   0u },   nullptr },
+#endif
 };
 
 constexpr size_t coin_algo_size = (sizeof(coins)/sizeof(coins[0]));

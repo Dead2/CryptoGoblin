@@ -234,7 +234,11 @@ bool minethd::self_test()
 
     bool bResult = true;
 
-    if(::jconf::inst()->GetCurrentCoinSelection().GetDescription(1).GetMiningAlgo() == cryptonight)
+    if(::jconf::inst()->GetCurrentCoinSelection().GetDescription(1).GetMiningAlgo() == cryptonight_monero)
+    {
+    }
+#ifndef ONLY_XMR_ALGO
+    else if(::jconf::inst()->GetCurrentCoinSelection().GetDescription(1).GetMiningAlgo() == cryptonight)
     {
         unsigned char out[32 * MAX_N];
         cn_hash_fun hashf;
@@ -282,9 +286,6 @@ bool minethd::self_test()
     else if(::jconf::inst()->GetCurrentCoinSelection().GetDescription(1).GetMiningAlgo() == cryptonight_lite)
     {
     }
-    else if(::jconf::inst()->GetCurrentCoinSelection().GetDescription(1).GetMiningAlgo() == cryptonight_monero)
-    {
-    }
     else if(::jconf::inst()->GetCurrentCoinSelection().GetDescription(1).GetMiningAlgo() == cryptonight_aeon)
     {
     }
@@ -294,6 +295,7 @@ bool minethd::self_test()
     else if(::jconf::inst()->GetCurrentCoinSelection().GetDescription(1).GetMiningAlgo() == cryptonight_stellite)
     {
     }
+#endif
     for (size_t i = 0; i < MAX_N; i++)
         cryptonight_free_ctx(ctx[i]);
 
@@ -357,14 +359,15 @@ minethd::cn_hash_fun minethd::func_selector(bool bHaveAes, bool bPrefetch, xmrst
     uint8_t algv;
     switch(algo)
     {
-    case cryptonight:
-        algv = 2;
+    case cryptonight_monero:
+        algv = 0;
         break;
+#ifndef ONLY_XMR_ALGO
     case cryptonight_lite:
         algv = 1;
         break;
-    case cryptonight_monero:
-        algv = 0;
+    case cryptonight:
+        algv = 2;
         break;
     case cryptonight_heavy:
         algv = 3;
@@ -381,6 +384,12 @@ minethd::cn_hash_fun minethd::func_selector(bool bHaveAes, bool bPrefetch, xmrst
     default:
         algv = 2;
         break;
+#else
+    default:
+        algv = 0;
+        printer::inst()->print_msg(L0, RED("Unsupported algorithm selected, miner was only compiled with XMR support."));
+        break;
+#endif
     }
 
     static const cn_hash_fun func_table[] = {
@@ -388,6 +397,7 @@ minethd::cn_hash_fun minethd::func_selector(bool bHaveAes, bool bPrefetch, xmrst
         cryptonight_hash<cryptonight_monero, true, false>,
         cryptonight_hash<cryptonight_monero, false, true>,
         cryptonight_hash<cryptonight_monero, true, true>,
+#ifndef ONLY_XMR_ALGO
         cryptonight_hash<cryptonight_lite, false, false>,
         cryptonight_hash<cryptonight_lite, true, false>,
         cryptonight_hash<cryptonight_lite, false, true>,
@@ -412,6 +422,7 @@ minethd::cn_hash_fun minethd::func_selector(bool bHaveAes, bool bPrefetch, xmrst
         cryptonight_hash<cryptonight_stellite, true, false>,
         cryptonight_hash<cryptonight_stellite, false, true>,
         cryptonight_hash<cryptonight_stellite, true, true>
+#endif
     };
 
     std::bitset<2> digit;
@@ -537,14 +548,15 @@ minethd::cn_hash_fun_multi minethd::func_multi_selector(size_t N, bool bHaveAes,
     uint8_t algv;
     switch(algo)
     {
-    case cryptonight:
-        algv = 2;
+    case cryptonight_monero:
+        algv = 0;
         break;
+#ifndef ONLY_XMR_ALGO
     case cryptonight_lite:
         algv = 1;
         break;
-    case cryptonight_monero:
-        algv = 0;
+    case cryptonight:
+        algv = 2;
         break;
     case cryptonight_heavy:
         algv = 3;
@@ -561,6 +573,12 @@ minethd::cn_hash_fun_multi minethd::func_multi_selector(size_t N, bool bHaveAes,
     default:
         algv = 2;
         break;
+#else
+    default:
+        algv = 0;
+        printer::inst()->print_msg(L0, RED("Unsupported algorithm selected, miner was only compiled with XMR support."));
+        break;
+#endif
     }
 
     static const cn_hash_fun_multi func_table[] = {
@@ -580,6 +598,7 @@ minethd::cn_hash_fun_multi minethd::func_multi_selector(size_t N, bool bHaveAes,
         cryptonight_penta_hash<cryptonight_monero, true, false>,
         cryptonight_penta_hash<cryptonight_monero, false, true>,
         cryptonight_penta_hash<cryptonight_monero, true, true>,
+#ifndef ONLY_XMR_ALGO
 
         cryptonight_double_hash<cryptonight_lite, false, false>,
         cryptonight_double_hash<cryptonight_lite, true, false>,
@@ -682,6 +701,7 @@ minethd::cn_hash_fun_multi minethd::func_multi_selector(size_t N, bool bHaveAes,
         cryptonight_penta_hash<cryptonight_stellite, true, false>,
         cryptonight_penta_hash<cryptonight_stellite, false, true>,
         cryptonight_penta_hash<cryptonight_stellite, true, true>,
+#endif
     };
 
     std::bitset<2> digit;
