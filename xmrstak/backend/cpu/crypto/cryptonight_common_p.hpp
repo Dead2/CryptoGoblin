@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cfenv>
+
 #if defined(__GNUC__)
 ALWAYS_INLINE static inline uint64_t _xmr_umul128(uint64_t a, uint64_t b, uint64_t* hi){
     unsigned __int128 r = (unsigned __int128)a * (unsigned __int128)b;
@@ -40,7 +42,8 @@ static void cryptonight_monero_tweak(uint64_t* mem_out, __m128i tmp){
     __m128i tmp2 = _mm_castps_si128(_mm_movehl_ps(_mm_castsi128_ps(tmp), _mm_castsi128_ps(tmp)));
     uint64_t vh = _mm_cvtsi128_si64(tmp2);
 
-    uint8_t x = vh >> 24;
+    //uint8_t x = vh >> 24;
+    uint8_t x = uint8_t(vh / 16777216);
     static const uint16_t table = 0x7531;
 
     uint8_t index;
@@ -60,7 +63,8 @@ ALWAYS_INLINE FLATTEN inline static void soft_cryptonight_monero_tweak(uint64_t*
     __m128i tmp2 = _mm_castps_si128(_mm_movehl_ps(_mm_castsi128_ps(tmp), _mm_castsi128_ps(tmp)));
     uint64_t vh = _mm_cvtsi128_si64(tmp2);
 
-    uint8_t x = vh >> 24;
+    //uint8_t x = vh >> 24;
+    uint8_t x = uint8_t(vh / 16777216);
     static const uint16_t table = 0x7531;
 
     uint8_t index;
@@ -72,3 +76,31 @@ ALWAYS_INLINE FLATTEN inline static void soft_cryptonight_monero_tweak(uint64_t*
     vh ^= ((table >> index) & 0x3) << 28;
     mem_out[1] = vh;
 }
+
+inline __m128i int_sqrt33_1_double_precision(const uint64_t n0)
+{
+    __m128d x = _mm_castsi128_pd(_mm_add_epi64(_mm_cvtsi64_si128(n0 >> 12), _mm_set_epi64x(0, 1023ULL << 52)));
+    x = _mm_sqrt_sd(_mm_setzero_pd(), x);
+    uint64_t r = static_cast<uint64_t>(_mm_cvtsi128_si64(_mm_castpd_si128(x)));
+    const uint64_t s = r >> 20;
+    r >>= 19;
+    uint64_t x2 = (s - (1022ULL << 32)) * (r - s - (1022ULL << 32) + 1);
+#if defined _MSC_VER || (__GNUC__ >= 7)
+    _addcarry_u64(_subborrow_u64(0, x2, n0, (unsigned long long int*)&x2), r, 0, (unsigned long long int*)&r);
+#else
+    // GCC versions prior to 7 don't generate correct assembly for _subborrow_u64 -> _addcarry_u64 sequence
+    // Fallback to simpler code
+    if (x2 < n0) ++r;
+#endif
+    return _mm_cvtsi64_si128(r);
+}
+
+inline void set_float_rounding_mode()
+{
+#ifdef _MSC_VER
+    _control87(RC_DOWN, MCW_RC);
+#else
+    std::fesetround(FE_DOWNWARD);
+#endif
+}
+
