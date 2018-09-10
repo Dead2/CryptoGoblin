@@ -446,9 +446,9 @@ minethd::cn_hash_fun minethd::func_multi_selector(bool bHaveAes, bool bPrefetch,
     case cryptonight_stellite:
         algv = 6;
         break;
-	case cryptonight_monero_v8:
-		algv = 10;
-		break;
+    case cryptonight_monero_v8:
+        algv = 10;
+        break;
     default:
         algv = 2;
         break;
