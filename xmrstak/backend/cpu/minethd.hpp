@@ -31,9 +31,9 @@ public:
 
 private:
     template<size_t N>
-    static cn_hash_fun func_multi_selector(bool bHaveAes, bool bPrefetch, xmrstak_algo algo);
+    static cn_hash_fun func_multi_selector(bool bHaveAes, bool bPrefetch, xmrstak_algo algo, const std::string& asm_version_str = "auto");
 
-    minethd(miner_work& pWork, size_t iNo, int iMultiway, bool prefetch, int64_t affinity);
+    minethd(miner_work& pWork, size_t iNo, int iMultiway, bool prefetch, int64_t affinity, const std::string& asm_version);
 
     template<uint32_t N>
     void multiway_work_main();
@@ -59,6 +59,7 @@ private:
 
     bool bQuit;
     bool bPrefetch;
+    std::string asm_version_str = "auto";
 };
 
 } // namespace cpu

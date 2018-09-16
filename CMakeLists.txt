@@ -646,6 +646,15 @@ if(CMAKE_LINK_STATIC)
     endif()
 endif()
 
+enable_language(ASM)
+# asm optimized monero v8 code
+add_library(xmr-stak-asm
+    STATIC
+    "xmrstak/backend/cpu/crypto/asm/cryptonigh_v8_main_loop.S"
+)
+set_property(TARGET xmr-stak-asm PROPERTY LINKER_LANGUAGE C)
+
+
 # compile generic backend files
 file(GLOB BACKEND_CPP
     "xmrstak/*.cpp"
@@ -729,7 +738,7 @@ endif()
 add_executable(CryptoGoblin
     ${SRCFILES_CPP}
 )
-target_link_libraries(CryptoGoblin ${LIBS})
+target_link_libraries(CryptoGoblin ${LIBS} xmr-stak-asm)
 
 if(CG_LTO)
     set_target_properties(CryptoGoblin PROPERTIES COMPILE_FLAGS "${CG_LTO_CFLAGS}")
