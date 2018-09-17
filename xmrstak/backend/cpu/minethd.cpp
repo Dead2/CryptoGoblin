@@ -422,7 +422,7 @@ minethd::cn_hash_fun minethd::func_multi_selector(bool bHaveAes, bool bPrefetch,
     // check for asm optimized version for cryptonight_v8
     if(N == 1 && algo == cryptonight_monero_v8 && bHaveAes)
     {
-        if(asm_version_str != "auto")
+		if(asm_version_str != "off")
         {
             if(asm_version_str == "intel")
             {
