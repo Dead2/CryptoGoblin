@@ -646,15 +646,25 @@ if(CMAKE_LINK_STATIC)
     endif()
 endif()
 
-enable_language(ASM)
-set_property(SOURCE "xmrstak/backend/cpu/crypto/asm/cryptonigh_v8_main_loop.S" PROPERTY LANGUAGE C)
-# asm optimized monero v8 code
-add_library(xmr-stak-asm
-    STATIC
-    "xmrstak/backend/cpu/crypto/asm/cryptonigh_v8_main_loop.S"
-)
-set_property(TARGET xmr-stak-asm PROPERTY LINKER_LANGUAGE C)
+if(CMAKE_C_COMPILER_ID MATCHES "MSVC")
+    # asm optimized monero v8 code
+    enable_language(ASM_MASM)
+    set_property(SOURCE "xmrstak/backend/cpu/crypto/asm/cryptonigh_v8_main_loop.asm" PROPERTY ASM_MASM)
+    add_library(xmr-stak-asm
+        STATIC
+        "xmrstak/backend/cpu/crypto/asm/cryptonigh_v8_main_loop.asm"
+    )
+else()
+    # asm optimized monero v8 code
+    enable_language(ASM)
+    set_property(SOURCE "xmrstak/backend/cpu/crypto/asm/cryptonigh_v8_main_loop.S" PROPERTY C)
+    add_library(xmr-stak-asm
+        STATIC
+        "xmrstak/backend/cpu/crypto/asm/cryptonigh_v8_main_loop.S"
+    )
+endif()
 
+set_property(TARGET xmr-stak-asm PROPERTY LINKER_LANGUAGE C)
 
 # compile generic backend files
 file(GLOB BACKEND_CPP
@@ -701,7 +711,7 @@ if(CUDA_FOUND)
             ${CUDASRCFILES}
         )
     endif()
-    target_link_libraries(CryptoGoblin_cuda CryptoGoblin-backend ${CUDA_LIBRARIES})
+    target_link_libraries(CryptoGoblin_cuda CryptoGoblin-backend xmr-stak-asm ${CUDA_LIBRARIES})
     if(WIN32 AND NOT (CMAKE_CXX_COMPILER_ID MATCHES "MSVC"))
         set_target_properties(CryptoGoblin_cuda PROPERTIES PREFIX "")
     endif()
@@ -717,7 +727,7 @@ if(OpenCL_FOUND)
         SHARED
         ${OPENCLSRCFILES}
     )
-    target_link_libraries(CryptoGoblin_opencl CryptoGoblin-backend ${OpenCL_LIBRARY})
+    target_link_libraries(CryptoGoblin_opencl CryptoGoblin-backend xmr-stak-asm ${OpenCL_LIBRARY})
     if(WIN32 AND NOT (CMAKE_CXX_COMPILER_ID MATCHES "MSVC"))
         set_target_properties(CryptoGoblin_opencl PROPERTIES PREFIX "")
     endif()
