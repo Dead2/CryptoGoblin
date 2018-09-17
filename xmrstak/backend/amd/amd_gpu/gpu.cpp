@@ -17,6 +17,7 @@
 #include "xmrstak/jconf.hpp"
 #include "xmrstak/picosha2/picosha2.hpp"
 #include "xmrstak/params.hpp"
+#include "xmrstak/version.hpp"
 
 #include <stdio.h>
 #include <string.h>
@@ -378,6 +379,13 @@ size_t InitOpenCLGpu(cl_context opencl_ctx, GpuContext* ctx, const char* source_
         return ERR_OCL_API;
     }
 
+    std::vector<char> openCLDriverVer(1024);
+    if(ret = clGetDeviceInfo(ctx->DeviceID, CL_DRIVER_VERSION, openCLDriverVer.size(), openCLDriverVer.data(), NULL) != CL_SUCCESS)
+    {
+        printer::inst()->print_msg(L1,"WARNING: %s when calling clGetDeviceInfo to get CL_DRIVER_VERSION for device %u.", err_to_str(ret),ctx->deviceIdx );
+        return ERR_OCL_API;
+    }
+
     xmrstak_algo miner_algo[2] = {
         ::jconf::inst()->GetCurrentCoinSelection().GetDescription(1).GetMiningAlgo(),
         ::jconf::inst()->GetCurrentCoinSelection().GetDescription(1).GetMiningAlgoRoot()
@@ -391,9 +399,9 @@ size_t InitOpenCLGpu(cl_context opencl_ctx, GpuContext* ctx, const char* source_
         int threadMemMask = cn_select_mask(miner_algo[ii]);
         int hashIterations = cn_select_iter(miner_algo[ii]);
 
-    char options[512];
-    snprintf(options, sizeof(options),
-        "-DITERATIONS=%d -DMASK=%d -DWORKSIZE=%llu -DSTRIDED_INDEX=%d -DMEM_CHUNK_EXPONENT=%d  -DCOMP_MODE=%d -DMEMORY=%llu -DALGO=%d",
+        char options[512];
+        snprintf(options, sizeof(options),
+            "-DITERATIONS=%d -DMASK=%d -DWORKSIZE=%llu -DSTRIDED_INDEX=%d -DMEM_CHUNK_EXPONENT=%d  -DCOMP_MODE=%d -DMEMORY=%llu -DALGO=%d",
         hashIterations, threadMemMask, int_port(ctx->workSize), ctx->stridedIndex, int(1u<<ctx->memChunk), ctx->compMode ? 1 : 0,
             int_port(hashMemSize), int(miner_algo[ii]));
     /* create a hash for the compile time cache
@@ -405,6 +413,8 @@ size_t InitOpenCLGpu(cl_context opencl_ctx, GpuContext* ctx, const char* source_
     std::string src_str(source_code);
     src_str += options;
     src_str += devNameVec.data();
+    src_str += get_version_str();
+    src_str += openCLDriverVer.data();
     std::string hash_hex_str;
     picosha2::hash256_hex_string(src_str, hash_hex_str);
 
