@@ -647,6 +647,7 @@ if(CMAKE_LINK_STATIC)
 endif()
 
 enable_language(ASM)
+set_property(SOURCE "xmrstak/backend/cpu/crypto/asm/cryptonigh_v8_main_loop.S" PROPERTY LANGUAGE C)
 # asm optimized monero v8 code
 add_library(xmr-stak-asm
     STATIC
