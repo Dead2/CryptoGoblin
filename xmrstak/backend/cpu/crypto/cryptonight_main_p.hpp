@@ -35,7 +35,7 @@ extern void(*const extra_hashes[4])(const void *, char *);
 extern "C" void cryptonight_v8_mainloop_ivybridge_asm(cryptonight_ctx* ctx0);
 extern "C" void cryptonight_v8_mainloop_ryzen_asm(cryptonight_ctx* ctx0);
 
-#define CN_MONERO_V8_SHUFFLE(n, l0, idx0, ax0, bx0, bx1) \
+#define CN_MONERO_V8_SHUFFLE_0(n, l0, idx0, ax0, bx0, bx1) \
     /* Shuffle the other 3x16 byte chunks in the current 64-byte cache line */ \
     if(ALGO == cryptonight_monero_v8){ \
         const uint64_t idx2 = idx0 & MASK; \
@@ -46,6 +46,22 @@ extern "C" void cryptonight_v8_mainloop_ryzen_asm(cryptonight_ctx* ctx0);
         _mm_store_si128((__m128i *)&l0[idx2 ^ 0x20], _mm_add_epi64(chunk1, bx0)); \
         _mm_store_si128((__m128i *)&l0[idx2 ^ 0x30], _mm_add_epi64(chunk2, ax0)); \
     }
+
+#define CN_MONERO_V8_SHUFFLE_1(n, l0, idx0, ax0, bx0, bx1, lo, hi) \
+    /* Shuffle the other 3x16 byte chunks in the current 64-byte cache line */ \
+    if(ALGO == cryptonight_monero_v8) \
+    { \
+        const uint64_t idx1 = idx0 & MASK; \
+        const __m128i chunk1 = _mm_xor_si128(_mm_load_si128((__m128i *)&l0[idx1 ^ 0x10]), _mm_set_epi64x(lo, hi)); \
+        const __m128i chunk2 = _mm_load_si128((__m128i *)&l0[idx1 ^ 0x20]); \
+        hi ^= ((uint64_t*)&chunk2)[0]; \
+        lo ^= ((uint64_t*)&chunk2)[1]; \
+        const __m128i chunk3 = _mm_load_si128((__m128i *)&l0[idx1 ^ 0x30]); \
+        _mm_store_si128((__m128i *)&l0[idx1 ^ 0x10], _mm_add_epi64(chunk3, bx1)); \
+        _mm_store_si128((__m128i *)&l0[idx1 ^ 0x20], _mm_add_epi64(chunk1, bx0)); \
+        _mm_store_si128((__m128i *)&l0[idx1 ^ 0x30], _mm_add_epi64(chunk2, ax0)); \
+    }
+
 
 #define CN_MONERO_V8_DIV(n, cx, sqrt_result, division_result_xmm, cl) \
     if(ALGO == cryptonight_monero_v8){ \
@@ -124,7 +140,7 @@ extern "C" void cryptonight_v8_mainloop_ryzen_asm(cryptonight_ctx* ctx0);
         cx = soft_aesenc(cx, ax0); \
     else \
         cx = _mm_aesenc_si128(cx, ax0); \
-    CN_MONERO_V8_SHUFFLE(n, l0, idx0, ax0, bx0, bx1)
+    CN_MONERO_V8_SHUFFLE_0(n, l0, idx0, ax0, bx0, bx1)
 
 #define CN_STEP2(n, monero_const, l0, ax0, bx0, idx1, ptr0, ptr1, cx) \
     if(ALGO == cryptonight_monero || ALGO == cryptonight_aeon || ALGO == cryptonight_ipbc || ALGO == cryptonight_stellite) \
@@ -150,15 +166,16 @@ extern "C" void cryptonight_v8_mainloop_ryzen_asm(cryptonight_ctx* ctx0);
     \
     CN_MONERO_V8_DIV(n, cx, sqrt_result, division_result_xmm, cl); \
     CN_MONERO_V8_SHUFFLE(n, l0, idx1, ax0, bx0, bx1); \
-    if(ALGO == cryptonight_monero_v8){ \
-        bx1 = bx0; \
-        bx0 = cx; \
-    } \
     { \
         uint64_t hi; \
         lo = _umul128(idx1, cl, &hi); \
+        CN_MONERO_V8_SHUFFLE_1(n, l0, idx0, ax0, bx0, bx1, lo, hi); \
         ah0 += lo; \
         al0 += hi; \
+    } \
+    if(ALGO == cryptonight_monero_v8){ \
+        bx1 = bx0; \
+        bx0 = cx; \
     } \
     (ptr1)[0] = al0; \
     if(PREFETCH) \

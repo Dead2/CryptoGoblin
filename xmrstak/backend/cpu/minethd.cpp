@@ -249,25 +249,26 @@ bool minethd::self_test()
             algo = ::jconf::inst()->GetCurrentCoinSelection().GetDescription(1).GetMiningAlgoRoot();
 
 
-        if(algo == cryptonight_monero)
-        {
-            hashf = func_selector(::jconf::inst()->HaveHardwareAes(), false, xmrstak_algo::cryptonight_monero);
-            hashf("This is a test This is a test This is a test", 44, out, ctx);
-            bResult = bResult &&  memcmp(out, "\x1\x57\xc5\xee\x18\x8b\xbe\xc8\x97\x52\x85\xa3\x6\x4e\xe9\x20\x65\x21\x76\x72\xfd\x69\xa1\xae\xbd\x7\x66\xc7\xb5\x6e\xe0\xbd", 32) == 0;
+		if(algo == cryptonight_monero)
+		{
+			hashf = func_selector(::jconf::inst()->HaveHardwareAes(), false, xmrstak_algo::cryptonight_monero);
+			hashf("This is a test This is a test This is a test", 44, out, ctx);
+			bResult = bResult &&  memcmp(out, "\x1\x57\xc5\xee\x18\x8b\xbe\xc8\x97\x52\x85\xa3\x6\x4e\xe9\x20\x65\x21\x76\x72\xfd\x69\xa1\xae\xbd\x7\x66\xc7\xb5\x6e\xe0\xbd", 32) == 0;
 
-            hashf = func_selector(::jconf::inst()->HaveHardwareAes(), true, xmrstak_algo::cryptonight_monero);
-            hashf("This is a test This is a test This is a test", 44, out, ctx);
-            bResult = bResult &&  memcmp(out, "\x1\x57\xc5\xee\x18\x8b\xbe\xc8\x97\x52\x85\xa3\x6\x4e\xe9\x20\x65\x21\x76\x72\xfd\x69\xa1\xae\xbd\x7\x66\xc7\xb5\x6e\xe0\xbd", 32) == 0;
-        }
-        else if(algo == cryptonight_monero_v8)
-        {
-            hashf = func_selector(::jconf::inst()->HaveHardwareAes(), false, xmrstak_algo::cryptonight_monero_v8);
-            hashf("This is a test This is a test This is a test", 44, out, ctx);
-            bResult = memcmp(out, "\x4c\xf1\xff\x9c\xa4\x6e\xb4\x33\xb3\x6c\xd9\xf7\x0e\x02\xb1\x4c\xc0\x6b\xfd\x18\xca\x77\xfa\x9c\xca\xaf\xd1\xfd\x96\xc6\x74\xb0", 32) == 0;
-            hashf = func_selector(::jconf::inst()->HaveHardwareAes(), true, xmrstak_algo::cryptonight_monero_v8);
-            hashf("This is a test This is a test This is a test", 44, out, ctx);
-            bResult &= memcmp(out, "\x4c\xf1\xff\x9c\xa4\x6e\xb4\x33\xb3\x6c\xd9\xf7\x0e\x02\xb1\x4c\xc0\x6b\xfd\x18\xca\x77\xfa\x9c\xca\xaf\xd1\xfd\x96\xc6\x74\xb0", 32) == 0;
-        }
+			hashf = func_selector(::jconf::inst()->HaveHardwareAes(), true, xmrstak_algo::cryptonight_monero);
+			hashf("This is a test This is a test This is a test", 44, out, ctx);
+			bResult = bResult &&  memcmp(out, "\x1\x57\xc5\xee\x18\x8b\xbe\xc8\x97\x52\x85\xa3\x6\x4e\xe9\x20\x65\x21\x76\x72\xfd\x69\xa1\xae\xbd\x7\x66\xc7\xb5\x6e\xe0\xbd", 32) == 0;
+		}
+		else if(algo == cryptonight_monero_v8)
+		{
+			hashf = func_selector(::jconf::inst()->HaveHardwareAes(), false, xmrstak_algo::cryptonight_monero_v8);
+			hashf("This is a test This is a test This is a test", 44, out, ctx);
+			bResult = memcmp(out, "\x35\x3f\xdc\x06\x8f\xd4\x7b\x03\xc0\x4b\x94\x31\xe0\x05\xe0\x0b\x68\xc2\x16\x8a\x3c\xc7\x33\x5c\x8b\x9b\x30\x81\x56\x59\x1a\x4f", 32) == 0;
+
+			hashf = func_selector(::jconf::inst()->HaveHardwareAes(), true, xmrstak_algo::cryptonight_monero_v8);
+			hashf("This is a test This is a test This is a test", 44, out, ctx);
+			bResult &= memcmp(out, "\x35\x3f\xdc\x06\x8f\xd4\x7b\x03\xc0\x4b\x94\x31\xe0\x05\xe0\x0b\x68\xc2\x16\x8a\x3c\xc7\x33\x5c\x8b\x9b\x30\x81\x56\x59\x1a\x4f", 32) == 0;
+		}
 #ifndef ONLY_XMR_ALGO
         else if(algo == cryptonight)
         {
