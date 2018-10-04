@@ -144,7 +144,7 @@ std::vector<iBackend*>* minethd::thread_starter(uint32_t threadOffset, miner_wor
 {
     std::vector<iBackend*>* pvThreads = new std::vector<iBackend*>();
 
-	auto miner_algo = ::jconf::inst()->GetCurrentCoinSelection().GetDescription(1).GetMiningAlgoRoot();
+    auto miner_algo = ::jconf::inst()->GetCurrentCoinSelection().GetDescription(1).GetMiningAlgoRoot();
 
     if(!configEditor::file_exist(params::inst().configFileNVIDIA))
     {
@@ -277,7 +277,7 @@ void minethd::work_main()
             if((round_ctr++ & 0xF) == 0)
             {
                 globalStates::inst().calc_start_nonce(iNonce, oWork.bNiceHash, h_per_round * 16);
-            // check if the job is still valid, there is a small posibility that the job is switched
+                // check if the job is still valid, there is a small possibility that the job is switched
             if(globalStates::inst().iGlobalJobNo.load(std::memory_order_relaxed) != iJobNo)
                 break;
             }
