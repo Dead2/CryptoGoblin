@@ -427,9 +427,8 @@ std::vector<iBackend*> minethd::thread_starter(uint32_t threadOffset, miner_work
 static std::string getAsmName(const uint32_t num_hashes)
 {
 	std::string asm_type = "off";
-	if(num_hashes == 0)
-		return asm_type;
-
+	if(num_hashes != 0)
+	{
 	auto cpu_model = getModel();
 
 	if(cpu_model.avx && cpu_model.aes)
@@ -439,6 +438,8 @@ static std::string getAsmName(const uint32_t num_hashes)
 		else if(cpu_model.type_name.find("AMD") != std::string::npos && num_hashes == 1)
 			asm_type = "amd_avx";
     }
+	}
+	return asm_type;
 }
 
 template<size_t N>
