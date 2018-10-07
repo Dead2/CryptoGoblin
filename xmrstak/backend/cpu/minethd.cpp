@@ -566,10 +566,11 @@ minethd::cn_hash_fun minethd::func_multi_selector(bool bHaveAes, bool bPrefetch,
                         }
                         if(asm_version_str == "auto" && (selected_asm != "intel_avx" || selected_asm != "amd_avx"))
                                 printer::inst()->print_msg(L3, "Switch to assembler version for '%s' cpu's", selected_asm.c_str());
-						else if(selected_asm != "intel_avx" || selected_asm != "amd_avx") // unknown asm type
+			else if(selected_asm != "intel_avx" && selected_asm != "amd_avx") // unknown asm type
                                 printer::inst()->print_msg(L1, "Assembler '%s' unknown, fallback to non asm version of cryptonight_v8", selected_asm.c_str());
                 }
         }
+	
 	return selected_function;
 }
 
