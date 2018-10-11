@@ -63,10 +63,35 @@ std::vector<iBackend*>* BackendConnector::thread_starter(miner_work& pWork)
 #ifndef CONF_NO_CUDA
     if(params::inst().useNVIDIA)
     {
-        plugin nvidiaplugin("NVIDIA", "CryptoGoblin_cuda");
+		plugin nvidiaplugin;
+		std::vector<iBackend*>* nvidiaThreads;
+		std::vector<std::string> libNames = {"CryptoGoblin_cuda10_0", "CryptoGoblin_cuda9_2", "CryptoGoblin_cuda"};
+		size_t numWorkers = 0u;
+
+		for( const auto & name : libNames)
+		{
+			printer::inst()->print_msg(L0, "NVIDIA: try to load library '%s'", name.c_str());
+			nvidiaplugin.load("NVIDIA", name);
         std::vector<iBackend*>* nvidiaThreads = nvidiaplugin.startBackend(static_cast<uint32_t>(pvThreads->size()), pWork, environment::inst());
+			if(nvidiaThreads != nullptr)
+			{
         pvThreads->insert(std::end(*pvThreads), std::begin(*nvidiaThreads), std::end(*nvidiaThreads));
-        if(nvidiaThreads->size() == 0)
+				numWorkers = nvidiaThreads->size();
+				delete nvidiaThreads;
+			}
+			else
+			{
+				// remove the plugin if we have found no GPUs
+				nvidiaplugin.unload();
+			}
+			// we found at leat one working GPU
+			if(numWorkers != 0)
+			{
+				printer::inst()->print_msg(L0, "NVIDIA: use library '%s'", name.c_str());
+				break;
+			}
+		}
+		if(numWorkers == 0)
             printer::inst()->print_msg(L0, "WARNING: backend NVIDIA disabled.");
     }
 #endif
@@ -75,10 +100,17 @@ std::vector<iBackend*>* BackendConnector::thread_starter(miner_work& pWork)
     if(params::inst().useAMD)
     {
         const std::string backendName = xmrstak::params::inst().openCLVendor;
-        plugin amdplugin(backendName, "CryptoGoblin_opencl");
+		plugin amdplugin;
+		amdplugin.load(backendName, "CryptoGoblin_opencl");
         std::vector<iBackend*>* amdThreads = amdplugin.startBackend(static_cast<uint32_t>(pvThreads->size()), pWork, environment::inst());
+		size_t numWorkers = 0u;
+		if(amdThreads != nullptr)
+		{
         pvThreads->insert(std::end(*pvThreads), std::begin(*amdThreads), std::end(*amdThreads));
-        if(amdThreads->size() == 0)
+			numWorkers = amdThreads->size();
+			delete amdThreads;
+		}
+		if(numWorkers == 0)
             printer::inst()->print_msg(L0, "WARNING: backend %s (OpenCL) disabled.", backendName.c_str());
     }
 #endif
