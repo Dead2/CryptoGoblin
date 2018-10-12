@@ -77,7 +77,7 @@ ALWAYS_INLINE FLATTEN inline static void soft_cryptonight_monero_tweak(uint64_t*
     mem_out[1] = vh;
 }
 
-inline __m128i int_sqrt33_1_double_precision(const uint64_t n0)
+inline uint64_t int_sqrt33_1_double_precision(const uint64_t n0)
 {
     __m128d x = _mm_castsi128_pd(_mm_add_epi64(_mm_cvtsi64_si128(n0 >> 12), _mm_set_epi64x(0, 1023ULL << 52)));
     x = _mm_sqrt_sd(_mm_setzero_pd(), x);
@@ -92,7 +92,7 @@ inline __m128i int_sqrt33_1_double_precision(const uint64_t n0)
     // Fallback to simpler code
     if (x2 < n0) ++r;
 #endif
-    return _mm_cvtsi64_si128(r);
+    return r;
 }
 
 inline void set_float_rounding_mode()
@@ -103,4 +103,47 @@ inline void set_float_rounding_mode()
     std::fesetround(FE_DOWNWARD);
 #endif
 }
+
+/** optimal type for sqrt
+ *
+ * Depending on the number of hashes calculated the optimal type for the sqrt value will be selected.
+ *
+ * @tparam N number of hashes per thread
+ */
+template<size_t N>
+struct GetOptimalSqrtType
+{
+    using type = __m128i;
+};
+
+template<>
+struct GetOptimalSqrtType<1u>
+{
+    using type = uint64_t;
+};
+
+template<size_t N>
+using GetOptimalSqrtType_t = typename GetOptimalSqrtType<N>::type;
+
+/** assign a value and convert if necessary
+ *
+ * @param output output type
+ * @param input value which is assigned to output
+ * @{
+ */
+inline void assign(__m128i& output, const uint64_t input)
+{
+    output = _mm_cvtsi64_si128(input);
+}
+
+inline void assign(uint64_t& output, const uint64_t input)
+{
+    output = input;
+}
+
+inline void assign(uint64_t& output, const __m128i& input)
+{
+    output = _mm_cvtsi128_si64(input);
+}
+/** @} */
 
