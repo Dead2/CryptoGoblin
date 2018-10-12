@@ -130,7 +130,7 @@ __global__ void cryptonight_extra_gpu_prepare( int threads, uint32_t * __restric
 	uint32_t input[21];
 
 	memcpy( input, d_input, len );
-	//*((uint32_t *)(((char *)input) + 39)) = startNonce + thread;
+	// *((uint32_t *)(((char *)input) + 39)) = startNonce + thread;
 	uint32_t nonce = startNonce + thread;
 	for ( int i = 0; i < sizeof (uint32_t ); ++i )
 		( ( (char *) input ) + 39 )[i] = ( (char*) ( &nonce ) )[i]; //take care of pointer alignment
@@ -340,24 +340,6 @@ extern "C" void cryptonight_extra_cpu_prepare(nvid_ctx* ctx, uint32_t startNonce
 		CUDA_CHECK_KERNEL(ctx->device_id, cryptonight_extra_gpu_prepare<cryptonight_heavy><<<grid, block >>>( wsize, ctx->d_input, ctx->inputlen, startNonce,
 			ctx->d_ctx_state,ctx->d_ctx_state2, ctx->d_ctx_a, ctx->d_ctx_b, ctx->d_ctx_key1, ctx->d_ctx_key2 ));
 	}
-<<<<<<< HEAD
-=======
-	else if(miner_algo == cryptonight_haven)
-	{
-		CUDA_CHECK_KERNEL(ctx->device_id, cryptonight_extra_gpu_prepare<cryptonight_haven><<<grid, block >>>( wsize, ctx->d_input, ctx->inputlen, startNonce,
-			ctx->d_ctx_state,ctx->d_ctx_state2, ctx->d_ctx_a, ctx->d_ctx_b, ctx->d_ctx_key1, ctx->d_ctx_key2 ));
-	}
-	else if(miner_algo == cryptonight_bittube2)
-	{
-		CUDA_CHECK_KERNEL(ctx->device_id, cryptonight_extra_gpu_prepare<cryptonight_bittube2><<<grid, block >>>( wsize, ctx->d_input, ctx->inputlen, startNonce,
-			ctx->d_ctx_state,ctx->d_ctx_state2, ctx->d_ctx_a, ctx->d_ctx_b, ctx->d_ctx_key1, ctx->d_ctx_key2 ));
-	}
-	if(miner_algo == cryptonight_monero_v8)
-	{
-		CUDA_CHECK_KERNEL(ctx->device_id, cryptonight_extra_gpu_prepare<cryptonight_monero_v8><<<grid, block >>>( wsize, ctx->d_input, ctx->inputlen, startNonce,
-			ctx->d_ctx_state,ctx->d_ctx_state2, ctx->d_ctx_a, ctx->d_ctx_b, ctx->d_ctx_key1, ctx->d_ctx_key2 ));
-	}
->>>>>>> d035dbc... NVIDIA: cryptonight_v8
 	else
 	{
 		/* pass two times d_ctx_state because the second state is used later in phase1,

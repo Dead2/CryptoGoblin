@@ -224,12 +224,12 @@ bool minethd::self_test()
         return false;
 
     cryptonight_ctx *ctx[MAX_N] = {0};
-    for (size_t i = 0; i < MAX_N; i++)
+    for (uint32_t i = 0; i < MAX_N; i++)
     {
         if ((ctx[i] = minethd_alloc_ctx()) == nullptr)
         {
             printer::inst()->print_msg(L0, "ERROR: miner was not able to allocate memory.");
-            for (int j = 0; j < i; j++)
+            for (uint32_t j = 0; j < i; j++)
                 cryptonight_free_ctx(ctx[j]);
             return false;
         }
@@ -369,7 +369,7 @@ bool minethd::self_test()
                 "Cryptonight hash self-test failed. This might be caused by bad compiler optimizations.");
     }
 
-    for (int i = 0; i < MAX_N; i++)
+    for (uint32_t i = 0; i < MAX_N; i++)
         cryptonight_free_ctx(ctx[i]);
 
     return bResult;
@@ -644,7 +644,7 @@ void minethd::multiway_work_main()
         if(ctx[i] == nullptr)
         {
             printer::inst()->print_msg(L0, "ERROR: miner was not able to allocate memory.");
-            for (int j = 0; j < i; j++)
+            for (uint32_t j = 0; j < i; j++)
                 cryptonight_free_ctx(ctx[j]);
             win_exit(1);
         }
