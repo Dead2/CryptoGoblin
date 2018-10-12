@@ -89,7 +89,7 @@ xmrstak::coin_selection coins[] = {
     // name, userpool, devpool, default_pool_suggestion
 #ifndef ONLY_XMR_ALGO
     { "aeon7",                      {cryptonight_aeon,   cryptonight_lite,    7u },  {cryptonight_aeon,   cryptonight_aeon,     0u },   "mine.aeon-pool.com:5555" },
-    { "bbscoin",                    {cryptonight_monero, cryptonight,         3u },  {cryptonight_monero, cryptonight_monero,   0u },   nullptr },
+    { "bbscoin",                    {cryptonight_lite, cryptonight_monero,    4u },  {cryptonight_monero, cryptonight_monero,   0u },   nullptr },
     { "croat",                      {cryptonight_monero, cryptonight,       255u },  {cryptonight_monero, cryptonight_monero,   0u },   nullptr },
     { "cryptonight",                {cryptonight,        cryptonight,         0u },  {cryptonight_monero, cryptonight_monero,   0u },   nullptr },
     { "cryptonight_heavy",          {cryptonight_heavy,  cryptonight_heavy,   0u },  {cryptonight_heavy,  cryptonight_heavy,    0u },   nullptr },
