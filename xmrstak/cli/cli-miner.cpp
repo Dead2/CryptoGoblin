@@ -760,7 +760,7 @@ int main(int argc, char *argv[])
 
     if (!BackendConnector::self_test())
     {
-		printer::inst()->print_msg(L0, "Self test not passed!");
+        printer::inst()->print_msg(L0, "Self test not passed!");
         win_exit();
         return 1;
     }

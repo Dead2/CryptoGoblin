@@ -193,8 +193,8 @@ cryptonight_ctx* cryptonight_alloc_ctx(size_t use_fast_mem, size_t use_mlock, al
         ptr->long_state = (uint8_t*)_mm_malloc(hashMemSize, 2*1024*1024);
         ptr->ctx_info[0] = 0;
         ptr->ctx_info[1] = 0;
-		if(ptr->long_state == NULL)
-			printer::inst()->print_msg(L0, "MEMORY ALLOC FAILED: _mm_malloc was not able to allocate %s byte",std::to_string(hashMemSize).c_str());
+        if(ptr->long_state == NULL)
+            printer::inst()->print_msg(L0, "MEMORY ALLOC FAILED: _mm_malloc was not able to allocate %s byte",std::to_string(hashMemSize).c_str());
         return ptr;
     }
 
@@ -224,23 +224,23 @@ cryptonight_ctx* cryptonight_alloc_ctx(size_t use_fast_mem, size_t use_mlock, al
 #else
 //http://man7.org/linux/man-pages/man2/mmap.2.html
 #if defined(__APPLE__)
-	ptr->long_state  = (uint8_t*)mmap(NULL, hashMemSize, PROT_READ | PROT_WRITE,
+    ptr->long_state  = (uint8_t*)mmap(NULL, hashMemSize, PROT_READ | PROT_WRITE,
         MAP_PRIVATE | MAP_ANON, VM_FLAGS_SUPERPAGE_SIZE_2MB, 0);
 #elif defined(__FreeBSD__)
-	ptr->long_state = (uint8_t*)mmap(NULL, hashMemSize, PROT_READ | PROT_WRITE,
+    ptr->long_state = (uint8_t*)mmap(NULL, hashMemSize, PROT_READ | PROT_WRITE,
         MAP_PRIVATE | MAP_ANONYMOUS | MAP_ALIGNED_SUPER | MAP_PREFAULT_READ, -1, 0);
 #elif defined(__OpenBSD__)
-	ptr->long_state = (uint8_t*)mmap(NULL, hashMemSize, PROT_READ | PROT_WRITE,
+    ptr->long_state = (uint8_t*)mmap(NULL, hashMemSize, PROT_READ | PROT_WRITE,
                 MAP_PRIVATE | MAP_ANON, -1, 0);
 #else
-	ptr->long_state = (uint8_t*)mmap(NULL, hashMemSize, PROT_READ | PROT_WRITE,
-		MAP_PRIVATE | MAP_ANONYMOUS | MAP_HUGETLB | MAP_POPULATE, -1, 0);
+    ptr->long_state = (uint8_t*)mmap(NULL, hashMemSize, PROT_READ | PROT_WRITE,
+        MAP_PRIVATE | MAP_ANONYMOUS | MAP_HUGETLB | MAP_POPULATE, -1, 0);
 #endif
 
     if (ptr->long_state == MAP_FAILED)
     {
         _mm_free(ptr);
-		msg->warning = "mmap failed, check attribute 'use_slow_memory' in 'config.txt'";
+        msg->warning = "mmap failed, check attribute 'use_slow_memory' in 'config.txt'";
         return NULL;
     }
 

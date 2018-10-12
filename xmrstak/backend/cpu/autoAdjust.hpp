@@ -136,7 +136,7 @@ private:
 
             ::jconf::cpuid(1, 0, cpu_info);
 
-			if(getModel().family < 0x17) //0x17h is Zen
+            if(getModel().family < 0x17) //0x17h is Zen
                 old_amd = true;
 
             return true;

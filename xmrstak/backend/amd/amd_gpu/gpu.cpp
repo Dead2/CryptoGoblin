@@ -380,7 +380,7 @@ size_t InitOpenCLGpu(cl_context opencl_ctx, GpuContext* ctx, const char* source_
     }
 
     std::vector<char> openCLDriverVer(1024);
-	if((ret = clGetDeviceInfo(ctx->DeviceID, CL_DRIVER_VERSION, openCLDriverVer.size(), openCLDriverVer.data(), NULL)) != CL_SUCCESS)
+    if((ret = clGetDeviceInfo(ctx->DeviceID, CL_DRIVER_VERSION, openCLDriverVer.size(), openCLDriverVer.data(), NULL)) != CL_SUCCESS)
     {
         printer::inst()->print_msg(L1,"WARNING: %s when calling clGetDeviceInfo to get CL_DRIVER_VERSION for device %u.", err_to_str(ret),ctx->deviceIdx );
         return ERR_OCL_API;
@@ -399,26 +399,26 @@ size_t InitOpenCLGpu(cl_context opencl_ctx, GpuContext* ctx, const char* source_
         int threadMemMask = cn_select_mask(miner_algo[ii]);
         int hashIterations = cn_select_iter(miner_algo[ii]);
 
-		size_t mem_chunk_exp = 1u << ctx->memChunk;
-		size_t strided_index = ctx->stridedIndex;
-		/* Adjust the config settings to a valid combination
-		 * this is required if the dev pool is mining monero
-		 * but the user tuned there settings for another currency
-		 */
-		if(miner_algo[ii] == cryptonight_monero_v8)
-		{
-			if(ctx->memChunk < 2)
-				mem_chunk_exp = 1u << 2;
-			if(strided_index == 1)
-				strided_index = 0;
-		}
+        size_t mem_chunk_exp = 1u << ctx->memChunk;
+        size_t strided_index = ctx->stridedIndex;
+        /* Adjust the config settings to a valid combination
+         * this is required if the dev pool is mining monero
+         * but the user tuned there settings for another currency
+         */
+        if(miner_algo[ii] == cryptonight_monero_v8)
+        {
+            if(ctx->memChunk < 2)
+                mem_chunk_exp = 1u << 2;
+            if(strided_index == 1)
+                strided_index = 0;
+        }
 
         std::string options;
         options += " -DITERATIONS=" + std::to_string(hashIterations);
         options += " -DMASK=" + std::to_string(threadMemMask);
         options += " -DWORKSIZE=" + std::to_string(ctx->workSize);
-		options += " -DSTRIDED_INDEX=" + std::to_string(strided_index);
-		options += " -DMEM_CHUNK_EXPONENT=" + std::to_string(mem_chunk_exp);
+        options += " -DSTRIDED_INDEX=" + std::to_string(strided_index);
+        options += " -DMEM_CHUNK_EXPONENT=" + std::to_string(mem_chunk_exp);
         options += " -DCOMP_MODE=" + std::to_string(ctx->compMode ? 1u : 0u);
         options += " -DMEMORY=" + std::to_string(hashMemSize);
         options += " -DALGO=" + std::to_string(miner_algo[ii]);

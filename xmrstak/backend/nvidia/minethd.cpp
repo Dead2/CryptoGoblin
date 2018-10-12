@@ -78,7 +78,7 @@ minethd::minethd(miner_work& pWork, size_t iNo, const jconf::thd_cfg& cfg)
     ctx.device_bfactor = (int)cfg.bfactor;
     ctx.device_bsleep = (int)cfg.bsleep;
     ctx.syncMode = cfg.syncMode;
-	ctx.memMode = cfg.memMode;
+    ctx.memMode = cfg.memMode;
     this->affinity = cfg.cpu_aff;
 
     std::future<void> numa_guard = numa_promise.get_future();
@@ -165,10 +165,10 @@ std::vector<iBackend*>* minethd::thread_starter(uint32_t threadOffset, miner_wor
         std::cout<<"WARNING: NVIDIA no device found"<<std::endl;
         return pvThreads;
     }
-	else
-	{
-		std::cout<<"NVIDIA: found "<< deviceCount <<" potential device's"<<std::endl;
-	}
+    else
+    {
+        std::cout<<"NVIDIA: found "<< deviceCount <<" potential device's"<<std::endl;
+    }
 
     size_t i, n = jconf::inst()->GetGPUThreadCount();
     pvThreads->reserve(n);

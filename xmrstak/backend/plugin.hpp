@@ -27,11 +27,11 @@ namespace xmrstak
 struct plugin
 {
 
-	plugin() = default;
+    plugin() = default;
 
-	void load(const std::string backendName, const std::string libName)
+    void load(const std::string backendName, const std::string libName)
     {
-		m_backendName = backendName;
+        m_backendName = backendName;
 #ifdef _WIN32
         libBackend = LoadLibrary(TEXT((libName + ".dll").c_str()));
         if(!libBackend)
@@ -90,29 +90,29 @@ struct plugin
         return fn_startBackend(threadOffset, pWork, env);
     }
 
-	void unload()
-	{
-		if(libBackend)
-		{
+    void unload()
+    {
+        if(libBackend)
+        {
 #ifdef _WIN32
-			FreeLibrary(libBackend);
+            FreeLibrary(libBackend);
 #else
-			dlclose(libBackend);
+            dlclose(libBackend);
 #endif
-		}
-		fn_startBackend = nullptr;
-	}
+        }
+        fn_startBackend = nullptr;
+    }
 
-	std::string m_backendName;
+    std::string m_backendName;
 
-	typedef std::vector<iBackend*>* (*startBackend_t)(uint32_t threadOffset, miner_work& pWork, environment& env);
+    typedef std::vector<iBackend*>* (*startBackend_t)(uint32_t threadOffset, miner_work& pWork, environment& env);
 
-	startBackend_t fn_startBackend = nullptr;
+    startBackend_t fn_startBackend = nullptr;
 
 #ifdef _WIN32
     HINSTANCE libBackend;
 #else
-	void *libBackend = nullptr;
+    void *libBackend = nullptr;
 #endif
 };
 

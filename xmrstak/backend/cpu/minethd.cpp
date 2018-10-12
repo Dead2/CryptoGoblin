@@ -228,8 +228,8 @@ bool minethd::self_test()
     {
         if ((ctx[i] = minethd_alloc_ctx()) == nullptr)
         {
-			printer::inst()->print_msg(L0, "ERROR: miner was not able to allocate memory.");
-			for (int j = 0; j < i; j++)
+            printer::inst()->print_msg(L0, "ERROR: miner was not able to allocate memory.");
+            for (int j = 0; j < i; j++)
                 cryptonight_free_ctx(ctx[j]);
             return false;
         }
@@ -427,26 +427,26 @@ std::vector<iBackend*> minethd::thread_starter(uint32_t threadOffset, miner_work
  */
 static std::string getAsmName(const uint32_t num_hashes)
 {
-	std::string asm_type = "off";
-	if(num_hashes != 0)
-	{
-	auto cpu_model = getModel();
+    std::string asm_type = "off";
+    if(num_hashes != 0)
+    {
+    auto cpu_model = getModel();
 
-	if(cpu_model.avx && cpu_model.aes)
+    if(cpu_model.avx && cpu_model.aes)
             {
-		if(cpu_model.type_name.find("Intel") != std::string::npos)
-			asm_type = "intel_avx";
-		else if(cpu_model.type_name.find("AMD") != std::string::npos && num_hashes == 1)
-			asm_type = "amd_avx";
+        if(cpu_model.type_name.find("Intel") != std::string::npos)
+            asm_type = "intel_avx";
+        else if(cpu_model.type_name.find("AMD") != std::string::npos && num_hashes == 1)
+            asm_type = "amd_avx";
     }
-	}
-	return asm_type;
+    }
+    return asm_type;
 }
 
 template<size_t N>
 minethd::cn_hash_fun minethd::func_multi_selector(bool bHaveAes, bool bPrefetch, xmrstak_algo algo, const std::string& asm_version_str)
 {
-	static_assert(N >= 1, "number of threads must be >= 1" );
+    static_assert(N >= 1, "number of threads must be >= 1" );
 
     // We have two independent flag bits in the functions
     // therefore we will build a binary digit and select the
@@ -539,7 +539,7 @@ minethd::cn_hash_fun minethd::func_multi_selector(bool bHaveAes, bool bPrefetch,
     digit.set(0, !bHaveAes);
     digit.set(1, bPrefetch);
 
-	auto selected_function = func_table[ algv << 2 | digit.to_ulong() ];
+    auto selected_function = func_table[ algv << 2 | digit.to_ulong() ];
 
 
         // check for asm optimized version for cryptonight_v8
@@ -567,12 +567,12 @@ minethd::cn_hash_fun minethd::func_multi_selector(bool bHaveAes, bool bPrefetch,
                         }
                         if(asm_version_str == "auto" && (selected_asm != "intel_avx" || selected_asm != "amd_avx"))
                                 printer::inst()->print_msg(L3, "Switch to assembler version for '%s' cpu's", selected_asm.c_str());
-			else if(selected_asm != "intel_avx" && selected_asm != "amd_avx") // unknown asm type
+            else if(selected_asm != "intel_avx" && selected_asm != "amd_avx") // unknown asm type
                                 printer::inst()->print_msg(L1, "Assembler '%s' unknown, fallback to non asm version of cryptonight_v8", selected_asm.c_str());
                 }
         }
-	
-	return selected_function;
+
+    return selected_function;
 }
 
 minethd::cn_hash_fun minethd::func_selector(bool bHaveAes, bool bPrefetch, xmrstak_algo algo)
@@ -641,13 +641,13 @@ void minethd::multiway_work_main()
     for (size_t i = 0; i < N; i++)
     {
         ctx[i] = minethd_alloc_ctx();
-		if(ctx[i] == nullptr)
-		{
-			printer::inst()->print_msg(L0, "ERROR: miner was not able to allocate memory.");
-			for (int j = 0; j < i; j++)
-				cryptonight_free_ctx(ctx[j]);
-			win_exit(1);
-		}
+        if(ctx[i] == nullptr)
+        {
+            printer::inst()->print_msg(L0, "ERROR: miner was not able to allocate memory.");
+            for (int j = 0; j < i; j++)
+                cryptonight_free_ctx(ctx[j]);
+            win_exit(1);
+        }
         piHashVal[i] = (uint64_t*)(bHashOut + 32 * i + 24);
         piNonce[i] = (i == 0) ? (uint32_t*)(bWorkBlob + 39) : nullptr;
     }
