@@ -29,6 +29,7 @@
 #include "xmrstak/misc/console.hpp"
 #include "xmrstak/backend/cpu/minethd.hpp"
 #include "xmrstak/jconf.hpp"
+#include "xmrstak/cli/colors.hpp"
 #include "xmrstak/misc/executor.hpp"
 #include "xmrstak/misc/environment.hpp"
 #include "xmrstak/params.hpp"
@@ -255,6 +256,7 @@ void minethd::work_main()
                 if ( (*((uint64_t*)(bResult + 24))) < oWork.iTarget)
                     executor::inst()->push_event(ex_event(job_result(oWork.sJobID, results[i], bResult, iThreadNo), oWork.iPoolId));
                 else
+                    printer::inst()->print_msg(L3, RED("AMD Result Invalid"));
                     executor::inst()->push_event(ex_event("AMD Invalid Result", pGpuCtx->deviceIdx, oWork.iPoolId));
             }
 
