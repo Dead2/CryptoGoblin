@@ -112,24 +112,28 @@ if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
     if (NOT (CG_LTO AND CG_PORTABLE))
         set(CG_CFLAGS "${CG_CFLAGS} -fipa-pta")
     endif()
+  endif()
 
-    if(CMAKE_VERBOSE_MAKEFILE STREQUAL "ON")
-        set(CG_CFLAGS "${CG_CFLAGS} -Wall")
-    endif()
+  if(CMAKE_VERBOSE_MAKEFILE STREQUAL "ON")
+      set(CG_CFLAGS "${CG_CFLAGS} -Wall")
+  endif()
 
-    if (CG_LTO)
-        # LTO
-        set(CG_LTO_CFLAGS "-flto -flto-partition=one -fdevirtualize-at-ltrans")
-    endif()
+  if (CG_LTO)
+      # LTO
+      set(CG_LTO_CFLAGS "-flto -flto-partition=one -fdevirtualize-at-ltrans")
+  endif()
 
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CG_CFLAGS}")
-    if(WIN32)
-        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
-    else()
-        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-z,now,-z,relro,-z,combreloc,--sort-common")
-    endif()
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CG_CFLAGS}")
+  if(WIN32)
+      set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
+  else()
+      set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-z,now,-z,relro,-z,combreloc,--sort-common")
+  endif()
 
-    add_definitions("-DNDEBUG")
+  if (CG_DEBUGFLAGS)
+      set(CG_CFLAGS "${CG_CFLAGS} ${CG_DEBUGFLAGS}")
+  else()
+      add_definitions("-DNDEBUG")
   endif()
 
   option(CG_FLATTEN1 "Enable flatten feature for hot leafs (Recommended)" ON)
@@ -259,7 +263,7 @@ if(CUDA_ENABLE)
             endif()
 
             # avoid that nvcc in CUDA 8 complains about sm_20 pending removal
-	    if(CUDA_VERSION VERSION_EQUAL 8.0)
+            if(CUDA_VERSION VERSION_EQUAL 8.0)
                 set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -Wno-deprecated-gpu-targets")
             endif()
 
@@ -606,10 +610,10 @@ execute_process(
 )
 
 if(NOT GIT_COMMIT_HASH STREQUAL "")
-	add_definitions("-DGIT_COMMIT_HASH=${GIT_COMMIT_HASH}")
+  add_definitions("-DGIT_COMMIT_HASH=${GIT_COMMIT_HASH}")
 endif()
 if(NOT GIT_BRANCH STREQUAL "")
-	add_definitions("-DGIT_BRANCH=${GIT_BRANCH}")
+  add_definitions("-DGIT_BRANCH=${GIT_BRANCH}")
 endif()
 
 # generate backend string
@@ -644,7 +648,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     endif()
 endif()
 
-if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
+if(NOT WIN32 AND ${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
     set(CMAKE_CXX_FLAGS "-Wl,-z,noexecstack ${CMAKE_CXX_FLAGS}")
     set(CMAKE_C_FLAGS "-Wl,-z,noexecstack ${CMAKE_C_FLAGS}")
 endif()
@@ -692,8 +696,7 @@ file(GLOB BACKEND_CPP
     "xmrstak/net/*.cpp"
 )
 
-#if(NOT CG_LTO)
-if(CUDA_FOUND OR OpenCL_FOUND)
+if(NOT CG_LTO OR (CUDA_FOUND OR OpenCL_FOUND))
     add_library(CryptoGoblin-backend
         STATIC
         ${BACKEND_CPP}
@@ -769,7 +772,7 @@ if(CG_LTO)
     set_target_properties(CryptoGoblin PROPERTIES COMPILE_FLAGS "${CG_LTO_CFLAGS}")
     set_target_properties(CryptoGoblin PROPERTIES LINK_FLAGS "${CG_LTO_CFLAGS} ${CMAKE_EXE_LINKER_FLAGS}")
 else()
-    target_link_libraries(CryptoGoblin CryptoGoblin-backend)
+    target_link_libraries(CryptoGoblin CryptoGoblin-backend xmr-stak-asm)
 endif()
 
 if (CUDA_FOUND OR OpenCL_FOUND)

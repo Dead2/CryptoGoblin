@@ -48,19 +48,19 @@ extern "C" void cryptonight_v8_double_mainloop_sandybridge_asm(cryptonight_ctx* 
         _mm_store_si128((__m128i *)&l0[idx2 ^ 0x30], _mm_add_epi64(chunk2, ax0)); \
     }
 
-#define CN_MONERO_V8_SHUFFLE_1(n, l0, idx0, ax0, bx0, bx1, lo, hi) \
+#define CN_MONERO_V8_SHUFFLE_1(n, l0, idx1, ax0, bx0, bx1, lo, hi) \
     /* Shuffle the other 3x16 byte chunks in the current 64-byte cache line */ \
     if(ALGO == cryptonight_monero_v8) \
     { \
-        const uint64_t idx1 = idx0 & MASK; \
-        const __m128i chunk1 = _mm_xor_si128(_mm_load_si128((__m128i *)&l0[idx1 ^ 0x10]), _mm_set_epi64x(lo, hi)); \
-        const __m128i chunk2 = _mm_load_si128((__m128i *)&l0[idx1 ^ 0x20]); \
+        const uint64_t idx2 = idx1 & MASK; \
+        const __m128i chunk1 = _mm_xor_si128(_mm_load_si128((__m128i *)&l0[idx2 ^ 0x10]), _mm_set_epi64x(lo, hi)); \
+        const __m128i chunk2 = _mm_load_si128((__m128i *)&l0[idx2 ^ 0x20]); \
         hi ^= ((uint64_t*)&chunk2)[0]; \
         lo ^= ((uint64_t*)&chunk2)[1]; \
-        const __m128i chunk3 = _mm_load_si128((__m128i *)&l0[idx1 ^ 0x30]); \
-        _mm_store_si128((__m128i *)&l0[idx1 ^ 0x10], _mm_add_epi64(chunk3, bx1)); \
-        _mm_store_si128((__m128i *)&l0[idx1 ^ 0x20], _mm_add_epi64(chunk1, bx0)); \
-        _mm_store_si128((__m128i *)&l0[idx1 ^ 0x30], _mm_add_epi64(chunk2, ax0)); \
+        const __m128i chunk3 = _mm_load_si128((__m128i *)&l0[idx2 ^ 0x30]); \
+        _mm_store_si128((__m128i *)&l0[idx2 ^ 0x10], _mm_add_epi64(chunk3, bx1)); \
+        _mm_store_si128((__m128i *)&l0[idx2 ^ 0x20], _mm_add_epi64(chunk1, bx0)); \
+        _mm_store_si128((__m128i *)&l0[idx2 ^ 0x30], _mm_add_epi64(chunk2, ax0)); \
     }
 
 
@@ -94,7 +94,7 @@ extern "C" void cryptonight_v8_double_mainloop_sandybridge_asm(cryptonight_ctx* 
     }
 
 #define CN_INIT(n, monero_const, l0, ax0, bx0, idx0, idx1, ptr0, ptr1, bx1, sqrt_result, division_result_xmm) \
-    keccak<200>((const uint8_t *)input + len * n, len, ctx[n]->hash_state); \
+    keccak_200((const uint8_t *)input + len * n, len, ctx[n]->hash_state); \
     uint64_t monero_const; \
     if(ALGO == cryptonight_monero || ALGO == cryptonight_aeon || ALGO == cryptonight_ipbc || ALGO == cryptonight_stellite){ \
         monero_const =  *reinterpret_cast<const uint64_t*>(reinterpret_cast<const uint8_t*>(input) + len * n + 35); \
@@ -156,17 +156,16 @@ extern "C" void cryptonight_v8_double_mainloop_sandybridge_asm(cryptonight_ctx* 
     if(PREFETCH) \
         _mm_prefetch((const char*)ptr1, _MM_HINT_T0); \
     if(ALGO != cryptonight_monero_v8) \
-        bx0 = cx; \
+        bx0 = cx;
 
 #define CN_STEP3(n, monero_const, l0, ax0, bx0, idx1, ptr1, lo, cl, ch, al0, ah0, cx, bx1, sqrt_result, division_result_xmm) \
     uint64_t lo, cl, ch; \
     uint64_t al0 = _mm_cvtsi128_si64(ax0); \
     uint64_t ah0 = ((uint64_t*)&ax0)[1]; \
-    cl = (ptr1)[0]; \
-    ch = (ptr1)[1]; \
+    cl = ptr1[0]; \
+    ch = ptr1[1]; \
     \
     CN_MONERO_V8_DIV(n, cx, sqrt_result, division_result_xmm, cl); \
-    CN_MONERO_V8_SHUFFLE_0(n, l0, idx1, ax0, bx0, bx1); \
     { \
         uint64_t hi; \
         lo = _umul128(idx1, cl, &hi); \
@@ -178,18 +177,18 @@ extern "C" void cryptonight_v8_double_mainloop_sandybridge_asm(cryptonight_ctx* 
         bx1 = bx0; \
         bx0 = cx; \
     } \
-    (ptr1)[0] = al0; \
+    ptr1[0] = al0; \
     if(PREFETCH) \
         _mm_prefetch((const char*)ptr1, _MM_HINT_T0)
 
 #define CN_STEP4(n, monero_const, l0, ax0, bx0, ptr1, lo, cl, ch, al0, ah0) \
     if (ALGO == cryptonight_monero || ALGO == cryptonight_aeon || ALGO == cryptonight_ipbc || ALGO == cryptonight_stellite){ \
         if (ALGO == cryptonight_ipbc) \
-            (ptr1)[1] = ah0 ^ monero_const ^ (ptr1)[0]; \
+            ptr1[1] = ah0 ^ monero_const ^ ptr1[0]; \
         else \
-            (ptr1)[1] = ah0 ^ monero_const; \
+            ptr1[1] = ah0 ^ monero_const; \
     }else{ \
-        (ptr1)[1] = ah0; \
+        ptr1[1] = ah0; \
     } \
     al0 ^= cl; \
     ah0 ^= ch; \
@@ -215,7 +214,7 @@ extern "C" void cryptonight_v8_double_mainloop_sandybridge_asm(cryptonight_ctx* 
     else \
         cn_implode_scratchpad<ALGO, MEM, PREFETCH>((__m128i*)ctx[n]->long_state, (__m128i*)ctx[n]->hash_state); \
     /* Optim - 99% time boundary */ \
-    keccakf<24>((uint64_t*)ctx[n]->hash_state); \
+    keccakf_24((uint64_t*)ctx[n]->hash_state); \
     extra_hashes[ctx[n]->hash_state[0] & 3](ctx[n]->hash_state, (char*)output + 32 * n)
 
 //! defer the evaluation of an macro
@@ -284,7 +283,7 @@ struct Cryptonight_hash<1>{
     template<xmrstak_algo ALGO, bool SOFT_AES, bool PREFETCH>
     TARGETS("avx,fma,bmi,sse4.1,sse3,default")
     OPTIMIZE("no-align-loops")
-    alignas(64) static void hash(const void* input, size_t len, void* output, cryptonight_ctx** ctx){
+    ALIGN(64) static void hash(const void* input, size_t len, void* output, cryptonight_ctx** ctx){
         constexpr size_t MASK = cn_select_mask<ALGO>();
         constexpr size_t ITERATIONS = cn_select_iter<ALGO>();
         constexpr size_t MEM = cn_select_memory<ALGO>();
@@ -311,7 +310,7 @@ struct Cryptonight_hash<2>{
     template<xmrstak_algo ALGO, bool SOFT_AES, bool PREFETCH>
     TARGETS("avx,fma,bmi,sse4.1,sse3,default")
     OPTIMIZE("no-align-loops")
-    alignas(64) static void hash(const void* input, size_t len, void* output, cryptonight_ctx** ctx){
+    ALIGN(64) static void hash(const void* input, size_t len, void* output, cryptonight_ctx** ctx){
         constexpr size_t MASK = cn_select_mask<ALGO>();
         constexpr size_t ITERATIONS = cn_select_iter<ALGO>();
         constexpr size_t MEM = cn_select_memory<ALGO>();
@@ -338,7 +337,7 @@ struct Cryptonight_hash<3>{
     template<xmrstak_algo ALGO, bool SOFT_AES, bool PREFETCH>
     TARGETS("avx,fma,bmi,sse4.1,sse3,default")
     OPTIMIZE("no-align-loops")
-    alignas(64) static void hash(const void* input, size_t len, void* output, cryptonight_ctx** ctx){
+    ALIGN(64) static void hash(const void* input, size_t len, void* output, cryptonight_ctx** ctx){
         constexpr size_t MASK = cn_select_mask<ALGO>();
         constexpr size_t ITERATIONS = cn_select_iter<ALGO>();
         constexpr size_t MEM = cn_select_memory<ALGO>();
@@ -366,7 +365,7 @@ struct Cryptonight_hash<4>{
     template<xmrstak_algo ALGO, bool SOFT_AES, bool PREFETCH>
     TARGETS("avx,fma,bmi,sse4.1,sse3,default")
     OPTIMIZE("no-align-loops")
-    alignas(64) static void hash(const void* input, size_t len, void* output, cryptonight_ctx** ctx){
+    ALIGN(64) static void hash(const void* input, size_t len, void* output, cryptonight_ctx** ctx){
         constexpr size_t MASK = cn_select_mask<ALGO>();
         constexpr size_t ITERATIONS = cn_select_iter<ALGO>();
         constexpr size_t MEM = cn_select_memory<ALGO>();
@@ -394,7 +393,7 @@ struct Cryptonight_hash<5>{
     template<xmrstak_algo ALGO, bool SOFT_AES, bool PREFETCH>
     TARGETS("avx,fma,bmi,sse4.1,sse3,default")
     OPTIMIZE("no-align-loops")
-    alignas(64) static void hash(const void* input, size_t len, void* output, cryptonight_ctx** ctx){
+    ALIGN(64) static void hash(const void* input, size_t len, void* output, cryptonight_ctx** ctx){
         constexpr size_t MASK = cn_select_mask<ALGO>();
         constexpr size_t ITERATIONS = cn_select_iter<ALGO>();
         constexpr size_t MEM = cn_select_memory<ALGO>();
@@ -427,7 +426,7 @@ struct Cryptonight_hash_asm<1, asm_version>{
     static void hash(const void* input, size_t len, void* output, cryptonight_ctx** ctx){
         constexpr size_t MEM = cn_select_memory<ALGO>();
 
-        keccak<200>((const uint8_t *)input, len, ctx[0]->hash_state);
+        keccak_200((const uint8_t *)input, len, ctx[0]->hash_state);
         cn_explode_scratchpad<ALGO, MEM, false>((__m128i*)ctx[0]->hash_state, (__m128i*)ctx[0]->long_state);
 
         if (asm_version == 1)
@@ -436,7 +435,7 @@ struct Cryptonight_hash_asm<1, asm_version>{
             cryptonight_v8_mainloop_ryzen_asm(ctx[0]);
 
         cn_implode_scratchpad<ALGO, MEM, false>((__m128i*)ctx[0]->long_state, (__m128i*)ctx[0]->hash_state);
-        keccakf<24>((uint64_t*)ctx[0]->hash_state);
+        keccakf_24((uint64_t*)ctx[0]->hash_state);
         extra_hashes[ctx[0]->hash_state[0] & 3](ctx[0]->hash_state, (char*)output);
     }
 };
@@ -450,7 +449,7 @@ struct Cryptonight_hash_asm<2, 0>{
         constexpr size_t MEM = cn_select_memory<ALGO>();
 
         for(size_t i = 0; i < N; ++i){
-            keccak<200>((const uint8_t *)input + len * i, len, ctx[i]->hash_state);
+            keccak_200((const uint8_t *)input + len * i, len, ctx[i]->hash_state);
             /* Optim - 99% time boundary */
             cn_explode_scratchpad<ALGO, MEM, false>((__m128i*)ctx[i]->hash_state, (__m128i*)ctx[i]->long_state);
         }
@@ -461,7 +460,7 @@ struct Cryptonight_hash_asm<2, 0>{
             /* Optim - 90% time boundary */
             cn_implode_scratchpad<ALGO, MEM, false>((__m128i*)ctx[i]->long_state, (__m128i*)ctx[i]->hash_state);
             /* Optim - 99% time boundary */
-            keccakf<24>((uint64_t*)ctx[i]->hash_state);
+            keccakf_24((uint64_t*)ctx[i]->hash_state);
             extra_hashes[ctx[i]->hash_state[0] & 3](ctx[i]->hash_state, (char*)output + 32 * i);
         }
     }

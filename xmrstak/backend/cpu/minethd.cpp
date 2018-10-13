@@ -26,7 +26,7 @@
 #include "xmrstak/misc/console.hpp"
 #include "xmrstak/cli/colors.hpp"
 #include "xmrstak/backend/iBackend.hpp"
-#include "xmrstak/backend//globalStates.hpp"
+#include "xmrstak/backend/globalStates.hpp"
 #include "xmrstak/misc/configEditor.hpp"
 #include "xmrstak/backend/cpu/cpuType.hpp"
 #include "xmrstak/params.hpp"
@@ -320,6 +320,7 @@ bool minethd::self_test()
             bResult = bResult &&  memcmp(out, "\x5a\x24\xa0\x29\xde\x1c\x39\x3f\x3d\x52\x7a\x2f\x9b\x39\xdc\x3d\xb3\xbc\x87\x11\x8b\x84\x52\x9b\x9f\x0\x88\x49\x25\x4b\x5\xce", 32) == 0;
 
             hashf = func_selector(::jconf::inst()->HaveHardwareAes(), true, xmrstak_algo::cryptonight_lite);
+            hashf("This is a test This is a test This is a test", 44, out, ctx);
             bResult = bResult &&  memcmp(out, "\x5a\x24\xa0\x29\xde\x1c\x39\x3f\x3d\x52\x7a\x2f\x9b\x39\xdc\x3d\xb3\xbc\x87\x11\x8b\x84\x52\x9b\x9f\x0\x88\x49\x25\x4b\x5\xce", 32) == 0;
         }
         else if(algo == cryptonight_aeon)
@@ -459,33 +460,30 @@ minethd::cn_hash_fun minethd::func_multi_selector(bool bHaveAes, bool bPrefetch,
         algv = 0;
         break;
     case cryptonight_monero_v8:
-        algv = 10;
+        algv = 1;
         break;
 #ifndef ONLY_XMR_ALGO
     case cryptonight_lite:
-        algv = 1;
+        algv = 2;
         break;
     case cryptonight:
-        algv = 2;
-        break;
-    case cryptonight_heavy:
         algv = 3;
         break;
-    case cryptonight_aeon:
+    case cryptonight_heavy:
         algv = 4;
         break;
-    case cryptonight_ipbc:
+    case cryptonight_aeon:
         algv = 5;
         break;
-    case cryptonight_stellite:
+    case cryptonight_ipbc:
         algv = 6;
         break;
-    default:
-        algv = 2;
+    case cryptonight_stellite:
+        algv = 7;
         break;
 #else
     default:
-        algv = 10;
+        algv = 1;
         printer::inst()->print_msg(L0, RED("Unsupported algorithm selected, miner was only compiled with XMR support."));
         break;
 #endif
@@ -500,7 +498,7 @@ minethd::cn_hash_fun minethd::func_multi_selector(bool bHaveAes, bool bPrefetch,
         Cryptonight_hash<N>::template hash<cryptonight_monero_v8, false, false>,
         Cryptonight_hash<N>::template hash<cryptonight_monero_v8, true, false>,
         Cryptonight_hash<N>::template hash<cryptonight_monero_v8, false, true>,
-        Cryptonight_hash<N>::template hash<cryptonight_monero_v8, true, true>
+        Cryptonight_hash<N>::template hash<cryptonight_monero_v8, true, true>,
 
 #ifndef ONLY_XMR_ALGO
         Cryptonight_hash<N>::template hash<cryptonight_lite, false, false>,
@@ -733,7 +731,10 @@ void minethd::multiway_work_main()
             {
                 if (*piHashVal[i] < oWork.iTarget)
                 {
-                    executor::inst()->push_event(ex_event(job_result(oWork.sJobID, iNonce - N + i, bHashOut + 32 * i, iThreadNo), oWork.iPoolId));
+                    executor::inst()->push_event(
+                        ex_event(job_result(oWork.sJobID, iNonce - N + i, bHashOut + 32 * i, iThreadNo, miner_algo),
+                        oWork.iPoolId)
+                    );
                 }
             }
 
@@ -748,4 +749,4 @@ void minethd::multiway_work_main()
 }
 
 } // namespace cpu
-} // namepsace xmrstak
+} // namespace xmrstak

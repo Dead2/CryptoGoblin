@@ -821,8 +821,8 @@ int main(int argc, char *argv[])
 
     executor::inst()->ex_start(jconf::inst()->DaemonMode());
 
+    uint64_t currentTime;
     uint64_t lastTime = get_timestamp_ms();
-    uint64_t currentTime = get_timestamp_ms();
 
     int key;
     while(true)
@@ -882,7 +882,10 @@ int do_benchmark(int block_version, int wait_sec, int work_sec)
     /* AMD and NVIDIA is currently only supporting work sizes up to 84byte
      * \todo fix this issue
      */
-    xmrstak::miner_work benchWork = xmrstak::miner_work("", work, 84, 0, false, 0);
+    char bench_jobid[64];
+    memset(bench_jobid,0,64);
+    xmrstak::miner_work benchWork = xmrstak::miner_work(bench_jobid, work, 84, 0, false, 0);
+
     printer::inst()->print_msg(L0, "Start a %d second benchmark...",work_sec);
     xmrstak::globalStates::inst().switch_work(benchWork, dat);
     uint64_t iStartStamp = get_timestamp_ms();

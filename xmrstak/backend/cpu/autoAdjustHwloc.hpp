@@ -77,7 +77,8 @@ public:
         catch(const std::runtime_error& err)
         {
             // \todo add fallback to default auto adjust
-            conf += std::string("    { \"thread_mode\" : 1, \"prefetch\" : true, \"affine_to_cpu\" : false },\n");
+            conf += std::string("    { \"thread_mode\" : 1");
+            conf += std::string(", \"prefetch\" : true, \"asm\" : \"auto\", \"affine_to_cpu\" : false },\n");
             printer::inst()->print_msg(L0, "Autoconf FAILED: %s. Create config for a single thread.", err.what());
         }
 

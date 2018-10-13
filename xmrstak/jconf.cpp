@@ -56,31 +56,31 @@ enum configEnum {
 };
 
 struct configVal {
-    configEnum iName;
     const char* sName;
+    configEnum iName;
     Type iType;
 };
 
 // Same order as in configEnum, as per comment above
 // kNullType means any type
 configVal oConfigValues[] = {
-    { aPoolList, "pool_list", kArrayType },
-    { sCurrency, "currency", kStringType },
-    { bTlsSecureAlgo, "tls_secure_algo", kTrueType },
-    { iCallTimeout, "call_timeout", kNumberType },
-    { iNetRetry, "retry_time", kNumberType },
-    { iGiveUpLimit, "giveup_limit", kNumberType },
-    { iVerboseLevel, "verbose_level", kNumberType },
-    { bPrintMotd, "print_motd", kTrueType },
-    { iAutohashTime, "h_print_time", kNumberType },
-    { bDaemonMode, "daemon_mode", kTrueType },
-    { sOutputFile, "output_file", kStringType },
-    { iHttpdPort, "httpd_port", kNumberType },
-    { sHttpLogin, "http_login", kStringType },
-    { sHttpPass, "http_pass", kStringType },
-    { bPreferIpv4, "prefer_ipv4", kTrueType },
-    { bAesOverride, "aes_override", kNullType },
-    { sUseSlowMem, "use_slow_memory", kStringType }
+    { "pool_list",       aPoolList,      kArrayType  },
+    { "currency",        sCurrency,      kStringType },
+    { "tls_secure_algo", bTlsSecureAlgo, kTrueType   },
+    { "call_timeout",    iCallTimeout,   kNumberType },
+    { "retry_time",      iNetRetry,      kNumberType },
+    { "giveup_limit",    iGiveUpLimit,   kNumberType },
+    { "verbose_level",   iVerboseLevel,  kNumberType },
+    { "print_motd",      bPrintMotd,     kTrueType   },
+    { "h_print_time",    iAutohashTime,  kNumberType },
+    { "daemon_mode",     bDaemonMode,    kTrueType   },
+    { "output_file",     sOutputFile,    kStringType },
+    { "httpd_port",      iHttpdPort,     kNumberType },
+    { "http_login",      sHttpLogin,     kStringType },
+    { "http_pass",       sHttpPass,      kStringType },
+    { "prefer_ipv4",     bPreferIpv4,    kTrueType   },
+    { "aes_override",    bAesOverride,   kNullType   },
+    { "use_slow_memory", sUseSlowMem,    kStringType }
 };
 
 constexpr size_t iConfigCnt = (sizeof(oConfigValues)/sizeof(oConfigValues[0]));

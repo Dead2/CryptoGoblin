@@ -442,10 +442,10 @@ size_t InitOpenCLGpu(cl_context opencl_ctx, GpuContext* ctx, const char* source_
     std::ifstream clBinFile(cache_file, std::ofstream::in | std::ofstream::binary);
     if(xmrstak::params::inst().AMDCache == false || !clBinFile.good())
     {
-        if(xmrstak::params::inst().AMDCache){
+        if(xmrstak::params::inst().AMDCache)
             printer::inst()->print_msg(L1,"OpenCL device %u - Precompiled code %s not found. Compiling ...",ctx->deviceIdx, cache_file.c_str());
-            ctx->Program[ii] = clCreateProgramWithSource(opencl_ctx, 1, (const char**)&source_code, NULL, &ret);
-        }
+
+        ctx->Program[ii] = clCreateProgramWithSource(opencl_ctx, 1, (const char**)&source_code, NULL, &ret);
         if(ret != CL_SUCCESS)
         {
             printer::inst()->print_msg(L1,"Error %s when calling clCreateProgramWithSource on the OpenCL miner code", err_to_str(ret));
@@ -544,7 +544,7 @@ size_t InitOpenCLGpu(cl_context opencl_ctx, GpuContext* ctx, const char* source_
     }
     else
     {
-        printer::inst()->print_msg(L1, "OpenCL device %u - Load precompiled cod from file %s",ctx->deviceIdx, cache_file.c_str());
+        printer::inst()->print_msg(L1, "OpenCL device %u - Load precompiled code from file %s",ctx->deviceIdx, cache_file.c_str());
         std::ostringstream ss;
         ss << clBinFile.rdbuf();
         std::string s = ss.str();
@@ -945,7 +945,6 @@ size_t InitOpenCL(GpuContext* ctx, size_t num_gpus, size_t platform_idx)
         {
             size_t reduced_intensity = (ctx[i].rawIntensity / ctx[i].workSize) * ctx[i].workSize;
             ctx[i].rawIntensity = reduced_intensity;
-            const std::string backendName = xmrstak::params::inst().openCLVendor;
             printer::inst()->print_msg(L0, "WARNING %s: gpu %d intensity is not a multiple of 'worksize', auto reduce intensity to %d", backendName.c_str(), ctx[i].deviceIdx, int(reduced_intensity));
         }
 
@@ -1126,7 +1125,7 @@ size_t XMRSetJob(GpuContext* ctx, uint8_t* input, size_t input_len, uint64_t tar
 size_t XMRRunJob(GpuContext* ctx, cl_uint* HashOutput, xmrstak_algo miner_algo)
 {
     // switch to the kernel storage
-    int kernel_storage = ::jconf::inst()->GetCurrentCoinSelection().GetDescription(1).GetMiningAlgo() ? 0 : 1;
+    int kernel_storage = miner_algo == ::jconf::inst()->GetCurrentCoinSelection().GetDescription(1).GetMiningAlgo() ? 0 : 1;
 
     cl_int ret;
     cl_uint zero = 0;

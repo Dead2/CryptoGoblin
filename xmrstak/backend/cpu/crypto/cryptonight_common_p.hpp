@@ -49,7 +49,7 @@ static void cryptonight_monero_tweak(uint64_t* mem_out, __m128i tmp){
     uint8_t index;
     if(ALGO == cryptonight_monero || ALGO == cryptonight_aeon || ALGO == cryptonight_ipbc) {
         index = (((x >> 3) & 6) | (x & 1)) << 1;
-    } else if(ALGO == cryptonight_stellite) {
+    } else { // ALGO == cryptonight_stellite
         index = (((x >> 4) & 6) | (x & 1)) << 1;
     }
     vh ^= ((table >> index) & 0x3) << 28;
@@ -70,7 +70,7 @@ ALWAYS_INLINE FLATTEN inline static void soft_cryptonight_monero_tweak(uint64_t*
     uint8_t index;
     if(ALGO == cryptonight_monero || ALGO == cryptonight_aeon || ALGO == cryptonight_ipbc) {
         index = (((x >> 3) & 6) | (x & 1)) << 1;
-    } else if(ALGO == cryptonight_stellite) {
+    } else { // ALGO == cryptonight_stellite
         index = (((x >> 4) & 6) | (x & 1)) << 1;
     }
     vh ^= ((table >> index) & 0x3) << 28;
@@ -81,9 +81,12 @@ inline uint64_t int_sqrt33_1_double_precision(const uint64_t n0){
     __m128d x = _mm_castsi128_pd(_mm_add_epi64(_mm_cvtsi64_si128(n0 >> 12), _mm_set_epi64x(0, 1023ULL << 52)));
     x = _mm_sqrt_sd(_mm_setzero_pd(), x);
     uint64_t r = static_cast<uint64_t>(_mm_cvtsi128_si64(_mm_castpd_si128(x)));
+
     const uint64_t s = r >> 20;
     r >>= 19;
+
     uint64_t x2 = (s - (1022ULL << 32)) * (r - s - (1022ULL << 32) + 1);
+
 #ifdef __INTEL_COMPILER
     _addcarry_u64(_subborrow_u64(0, x2, n0, (unsigned __int64*)&x2), r, 0, (unsigned __int64*)&r);
 #elif defined(_MSC_VER) || (__GNUC__ >= 7)
@@ -141,4 +144,3 @@ inline void assign(uint64_t& output, const __m128i& input){
     output = _mm_cvtsi128_si64(input);
 }
 /** @} */
-

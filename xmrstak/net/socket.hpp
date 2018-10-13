@@ -3,7 +3,7 @@
 #include <atomic>
 #include "socks.hpp"
 
-#define MAXHOSTLEN 120
+#define MAXHOSTLEN 64
 
 class jpsock;
 

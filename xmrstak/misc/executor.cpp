@@ -134,7 +134,7 @@ bool executor::get_live_pools(std::vector<jpsock*>& eval_pools, bool is_dev)
 
             if(over_limit == pool_count)
             {
-                printer::inst()->print_msg(L0, "All pools are over give up limit. Exitting.");
+                printer::inst()->print_msg(L0, "All pools are over give up limit. Exiting.");
                 exit(0);
             }
 
@@ -424,8 +424,7 @@ void executor::on_miner_result(size_t pool_id, job_result& oResult)
         //Ignore errors silently
         if(pool->is_running() && pool->is_logged_in())
             pool->cmd_submit(oResult.sJobID, oResult.iNonce, oResult.bResult, backend_name,
-            backend_hashcount, total_hashcount, jconf::inst()->GetCurrentCoinSelection().GetDescription(0).GetMiningAlgo()
-        );
+                             backend_hashcount, total_hashcount, oResult.algorithm );
         return;
     }
 
@@ -437,8 +436,7 @@ void executor::on_miner_result(size_t pool_id, job_result& oResult)
 
     size_t t_start = get_timestamp_ms();
     bool bResult = pool->cmd_submit(oResult.sJobID, oResult.iNonce, oResult.bResult,
-        backend_name, backend_hashcount, total_hashcount, jconf::inst()->GetCurrentCoinSelection().GetDescription(1).GetMiningAlgo()
-    );
+                                    backend_name, backend_hashcount, total_hashcount, oResult.algorithm );
     size_t t_len = get_timestamp_ms() - t_start;
 
     if(t_len > 0xFFFF)
@@ -821,7 +819,7 @@ void executor::hashrate_report(std::string& out)
         }
     }
 
-    char num[32];
+    char num[48];
     double fTotal[3] = { 0.0, 0.0, 0.0};
     uint8_t activeBackends = 0;
 
@@ -1318,7 +1316,7 @@ void executor::http_json_report(std::string& out)
         if(i != 0) cn_error.append(1, ',');
 
         snprintf(buffer, sizeof(buffer), sJsonApiConnectionError,
-            int_port(duration_cast<seconds>(vMineResults[i].time.time_since_epoch()).count()),
+            int_port(duration_cast<seconds>(vSocketLog[i].time.time_since_epoch()).count()),
             vSocketLog[i].msg.c_str());
         cn_error.append(buffer);
     }

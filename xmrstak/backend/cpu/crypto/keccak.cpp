@@ -28,9 +28,8 @@ ALIGN(16) const uint64_t keccakf_rndc[24] =
 
 // update the state with given number of rounds
 
-template<int rounds>
-ALIGN(16) void keccakf(uint64_t st[25])
-{
+ALIGN(16) void keccakf_24(uint64_t st[25]){
+    #define rounds 24
     int i, j, round;
     uint64_t t, bc[5];
 
@@ -142,9 +141,8 @@ ALIGN(16) void keccakf(uint64_t st[25])
 // compute a keccak hash (md) of given byte length from "in"
 ALIGN(16) typedef uint64_t state_t[25];
 
-template<int mdlen>
-ALIGN(16) void keccak(const uint8_t *in, int inlen, uint8_t *md)
-{
+ALIGN(16) void keccak_200(const uint8_t *in, int inlen, uint8_t *md){
+    #define mdlen 200
     state_t st;
     uint8_t temp[144];
     int i, rsiz, rsizw;
@@ -157,7 +155,7 @@ ALIGN(16) void keccak(const uint8_t *in, int inlen, uint8_t *md)
     for ( ; inlen >= rsiz; inlen -= rsiz, in += rsiz) {
         for (i = 0; i < rsizw; i++)
             st[i] ^= ((uint64_t *) in)[i];
-        keccakf<KECCAK_ROUNDS>(st);
+        keccakf_24(st);
     }
 
     // last block and padding
@@ -169,13 +167,7 @@ ALIGN(16) void keccak(const uint8_t *in, int inlen, uint8_t *md)
     for (i = 0; i < rsizw; i++)
         st[i] ^= ((uint64_t *) temp)[i];
 
-    keccakf<KECCAK_ROUNDS>(st);
+    keccakf_24(st);
 
     memcpy(md, st, mdlen);
-}
-
-// Instantiate templated functions
-void keccak_dummy(const uint8_t *foo){
-    keccak<200>(foo, 42, (uint8_t *)foo);
-    keccakf<24>((uint64_t*)foo);
 }

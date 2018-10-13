@@ -179,16 +179,15 @@ void printer::print_msg(verbosity verbose, const char* fmt, ...)
 
     time_t now = time(nullptr);
     comp_localtime(&now, &stime);
-    strftime(buf, sizeof(buf), "[%F %T] ", &stime);
-    bpos = strlen(buf);
+    bpos = strftime(buf, 100, "[%F %T] ", &stime);
 
     va_list args;
     va_start(args, fmt);
-    vsnprintf(buf+bpos, sizeof(buf)-bpos, fmt, args);
+    vsnprintf(buf+bpos, sizeof(buf) - bpos - 2, fmt, args);
     va_end(args);
     bpos = strlen(buf);
 
-    if(bpos+2 >= sizeof(buf))
+    if(bpos >= (sizeof(buf) - 2))
         return;
 
     buf[bpos] = '\n';
