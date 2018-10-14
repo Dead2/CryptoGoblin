@@ -49,4 +49,4 @@ private:
     ::cpputil::RWLock jobLock;
 };
 
-} // namepsace xmrstak
+} // namespace xmrstak

@@ -66,4 +66,4 @@ void globalStates::switch_work(miner_work& pWork, pool_data& dat)
     jobLock.UnLock();
 }
 
-} // namepsace xmrstak
+} // namespace xmrstak

@@ -63,4 +63,4 @@ private:
 };
 
 } // namespace cpu
-} // namepsace xmrstak
+} // namespace xmrstak

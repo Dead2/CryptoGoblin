@@ -78,4 +78,4 @@ struct params
 
 };
 
-} // namepsace xmrstak
+} // namespace xmrstak

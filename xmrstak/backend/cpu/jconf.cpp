@@ -264,4 +264,4 @@ bool jconf::parse_config(const char* sFilename)
 }
 
 } // namespace cpu
-} // namepsace xmrstak
+} // namespace xmrstak

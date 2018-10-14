@@ -23,4 +23,4 @@ private:
     uint64_t** ppTimestamps;
 };
 
-} // namepsace xmrstak
+} // namespace xmrstak
