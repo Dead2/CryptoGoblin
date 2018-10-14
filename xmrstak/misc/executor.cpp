@@ -447,7 +447,7 @@ void executor::on_miner_result(size_t pool_id, job_result& oResult)
     {
         uint64_t* targets = (uint64_t*)oResult.bResult;
         log_result_ok(jpsock::t64_to_diff(targets[3]));
-        printer::inst()->print_msg(L3, GREEN("Result accepted by the pool."));
+        printer::inst()->print_msg(L3, GREEN("Result accepted."));
     }
     else
     {
@@ -921,7 +921,7 @@ char* time_format(char* buf, size_t len, std::chrono::system_clock::time_point t
 #else
     localtime_r(&ctime, &stime);
 #endif // __WIN32
-    strftime(buf, len, "%F %T", &stime);
+    strftime(buf, len, "%Y-%m-%d %H:%M:%S", &stime);
 
     return buf;
 }

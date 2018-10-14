@@ -179,7 +179,7 @@ void printer::print_msg(verbosity verbose, const char* fmt, ...)
 
     time_t now = time(nullptr);
     comp_localtime(&now, &stime);
-    bpos = strftime(buf, 100, "[%F %T] ", &stime);
+    bpos = strftime(buf, 100, "[%Y-%m-%d %H:%M:%S] ", &stime);
 
     va_list args;
     va_start(args, fmt);

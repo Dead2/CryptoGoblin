@@ -481,12 +481,11 @@ minethd::cn_hash_fun minethd::func_multi_selector(bool bHaveAes, bool bPrefetch,
     case cryptonight_stellite:
         algv = 7;
         break;
-#else
+#endif
     default:
         algv = 1;
         printer::inst()->print_msg(L0, RED("Unsupported algorithm selected, miner was only compiled with XMR support."));
         break;
-#endif
     }
 
     static const cn_hash_fun func_table[] = {

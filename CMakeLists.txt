@@ -132,7 +132,8 @@ if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
 
   if (CG_DEBUGFLAGS)
       set(CG_CFLAGS "${CG_CFLAGS} ${CG_DEBUGFLAGS}")
-  else()
+  endif()
+  if(CMAKE_BUILD_TYPE STREQUAL "Release")
       add_definitions("-DNDEBUG")
   endif()
 

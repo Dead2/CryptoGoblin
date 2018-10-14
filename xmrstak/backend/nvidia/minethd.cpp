@@ -24,12 +24,11 @@
 #include "minethd.hpp"
 #include "autoAdjust.hpp"
 #include "xmrstak/misc/console.hpp"
-#include "xmrstak/backend/cpu/crypto/cryptonight_aesni.h"
-#include "xmrstak/backend/cpu/crypto/cryptonight.h"
 #include "xmrstak/backend/cpu/minethd.hpp"
 #include "xmrstak/params.hpp"
 #include "xmrstak/misc/executor.hpp"
 #include "xmrstak/jconf.hpp"
+#include "xmrstak/cli/colors.hpp"
 #include "xmrstak/misc/environment.hpp"
 #include "xmrstak/backend/cpu/hwlocMemory.hpp"
 #include "xmrstak/backend/cryptonight.hpp"
@@ -308,11 +307,12 @@ void minethd::work_main()
                 *(uint32_t*)(bWorkBlob + 39) = foundNonce[i];
 
                 hash_fun(bWorkBlob, oWork.iWorkSize, bResult, &cpu_ctx);
-                if ( (*((uint64_t*)(bResult + 24))) < oWork.iTarget)
+                if ( (*((uint64_t*)(bResult + 24))) < oWork.iTarget){
                     executor::inst()->push_event(ex_event(job_result(oWork.sJobID, foundNonce[i], bResult, iThreadNo, miner_algo), oWork.iPoolId));
-                else
+                }else{
                     printer::inst()->print_msg(L3, RED("NVIDIA Result Invalid"));
                     executor::inst()->push_event(ex_event("NVIDIA Invalid Result", ctx.device_id, oWork.iPoolId));
+                }
             }
 
             iCount += h_per_round;
