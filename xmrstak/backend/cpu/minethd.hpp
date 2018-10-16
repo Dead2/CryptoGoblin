@@ -33,6 +33,9 @@ private:
     template<size_t N>
     static cn_hash_fun func_multi_selector(bool bHaveAes, bool bPrefetch, xmrstak_algo algo, const std::string& asm_version_str = "off");
 
+    template<uint8_t multiple>
+    static bool testrunner(xmrstak_algo algo, cryptonight_ctx **ctx);
+
     minethd(miner_work& pWork, size_t iNo, int iMultiway, bool prefetch, int64_t affinity, const std::string& asm_version);
 
     template<uint32_t N>
