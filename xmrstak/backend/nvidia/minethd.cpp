@@ -307,12 +307,10 @@ void minethd::work_main()
                 *(uint32_t*)(bWorkBlob + 39) = foundNonce[i];
 
                 hash_fun(bWorkBlob, oWork.iWorkSize, bResult, &cpu_ctx);
-                if ( (*((uint64_t*)(bResult + 24))) < oWork.iTarget){
+                if ( (*((uint64_t*)(bResult + 24))) < oWork.iTarget)
                     executor::inst()->push_event(ex_event(job_result(oWork.sJobID, foundNonce[i], bResult, iThreadNo, miner_algo), oWork.iPoolId));
-                }else{
-                    printer::inst()->print_msg(L3, RED("NVIDIA Result Invalid"));
+                else
                     executor::inst()->push_event(ex_event("NVIDIA Invalid Result", ctx.device_id, oWork.iPoolId));
-                }
             }
 
             iCount += h_per_round;
