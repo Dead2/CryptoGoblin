@@ -594,9 +594,15 @@ void executor::ex_main()
 
         // 2MB
         case cryptonight:
+            port = 3333 + tlsport;
+            break;
+
         case cryptonight_monero:
-        case cryptonight_monero_v8:
             port = 6040 + tlsport;
+            break;
+
+        case cryptonight_monero_v8:
+            port = 6050 + tlsport;
             break;
 
         default:
