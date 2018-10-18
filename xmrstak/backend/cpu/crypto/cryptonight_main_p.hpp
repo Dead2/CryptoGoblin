@@ -429,9 +429,9 @@ struct Cryptonight_hash_asm<1, asm_version>{
         keccak_200((const uint8_t *)input, len, ctx[0]->hash_state);
         cn_explode_scratchpad<ALGO, MEM, false>((__m128i*)ctx[0]->hash_state, (__m128i*)ctx[0]->long_state);
 
-        if (asm_version == 1)
+        if (asm_version == 0)
             cryptonight_v8_mainloop_ivybridge_asm(ctx[0]);
-        else
+        else if (asm_version == 1)
             cryptonight_v8_mainloop_ryzen_asm(ctx[0]);
 
         cn_implode_scratchpad<ALGO, MEM, false>((__m128i*)ctx[0]->long_state, (__m128i*)ctx[0]->hash_state);

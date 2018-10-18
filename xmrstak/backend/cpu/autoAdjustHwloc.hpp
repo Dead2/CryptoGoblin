@@ -69,7 +69,7 @@ public:
             {
                 conf += std::string("    { \"thread_mode\" : ");
                 conf += std::string((id & 0x8000000) != 0 ? "2" : "1");
-                conf += std::string(", \"prefetch\" : true,  \"asm\" : \"auto\", \"affine_to_cpu\" : ");
+                conf += std::string(", \"prefetch\" : true,  \"asm\" : \"off\", \"affine_to_cpu\" : ");
                 conf += std::to_string(id & 0x7FFFFFF);
                 conf += std::string(" },\n");
             }
@@ -78,7 +78,7 @@ public:
         {
             // \todo add fallback to default auto adjust
             conf += std::string("    { \"thread_mode\" : 1");
-            conf += std::string(", \"prefetch\" : true, \"asm\" : \"auto\", \"affine_to_cpu\" : false },\n");
+            conf += std::string(", \"prefetch\" : true, \"asm\" : \"off\", \"affine_to_cpu\" : false },\n");
             printer::inst()->print_msg(L0, "Autoconf FAILED: %s. Create config for a single thread.", err.what());
         }
 

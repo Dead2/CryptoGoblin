@@ -74,7 +74,7 @@ public:
 
                 conf += std::string("    { \"thread_mode\" : ");
                 conf += std::string(double_mode ? "2" : "1");
-                conf += std::string(", \"prefetch\" : true, \"asm\" : \"auto\", \"affine_to_cpu\" : ");
+                conf += std::string(", \"prefetch\" : true, \"asm\" : \"off\", \"affine_to_cpu\" : ");
                 conf += std::to_string(aff_id);
                 conf += std::string(" },\n");
 
