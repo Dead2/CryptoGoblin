@@ -108,20 +108,17 @@ xmrstak::coin_selection coins[] = {
     { "ipbc",                       {cryptonight_ipbc,      cryptonight_ipbc,       0u },  {cryptonight_aeon,       cryptonight_aeon,       0u },   nullptr },
     { "karbo",                      {cryptonight_monero,    cryptonight,            0u },  {cryptonight_monero,     cryptonight_monero,     0u },   nullptr },
     { "masari",                     {cryptonight_monero,    cryptonight,            5u },  {cryptonight_monero,     cryptonight_monero,     0u },   nullptr },
-    { "monero",                     {cryptonight_monero_v8, cryptonight_monero,     8u },  {cryptonight_monero_v8,  cryptonight_monero,     8u },   "pool.supportxmr.com:5555" },
-    { "monero7",                    {cryptonight_monero,    cryptonight_monero,     0u },  {cryptonight_monero,     cryptonight_monero,     0u },   "pool.supportxmr.com:5555" },
-    { "monero8",                    {cryptonight_monero_v8, cryptonight_monero,     8u },  {cryptonight_monero_v8,  cryptonight_monero,     8u },   "pool.supportxmr.com:5555" },
+    { "monero",                     {cryptonight_monero_v8, cryptonight_monero_v8,  0u },  {cryptonight_monero_v8,  cryptonight_monero_v8,  0u },   "pool.supportxmr.com:5555" },
+    { "monero7",                    {cryptonight_monero,    cryptonight_monero,     0u },  {cryptonight_monero,     cryptonight_monero,     0u },   nullptr },
+    { "monero8",                    {cryptonight_monero_v8, cryptonight_monero_v8,  0u },  {cryptonight_monero_v8,  cryptonight_monero_v8,  0u },   "pool.supportxmr.com:5555" },
     { "moneroV",                    {cryptonight_monero,    cryptonight_monero,     0u },  {cryptonight_monero,     cryptonight_monero,     0u },   nullptr },
     { "stellite",                   {cryptonight_stellite,  cryptonight_stellite,   0u },  {cryptonight_monero,     cryptonight_monero,     0u },   nullptr },
     { "sumokoin",                   {cryptonight_heavy,     cryptonight_heavy,      0u },  {cryptonight_heavy,      cryptonight_heavy,      0u },   nullptr },
     { "pinkstar",                   {cryptonight_aeon,      cryptonight_lite,       4u },  {cryptonight_aeon,       cryptonight_aeon,       0u },   nullptr }
 #else
-    { "cryptonight_v7",             {cryptonight_monero,    cryptonight_monero,     0u },  {cryptonight_monero,     cryptonight_monero,     0u },   nullptr },
     { "cryptonight_v8",             {cryptonight_monero_v8, cryptonight_monero_v8,  0u },  {cryptonight_monero_v8,  cryptonight_monero_v8,  0u },   nullptr },
-    { "monero",                     {cryptonight_monero_v8, cryptonight_monero,     8u },  {cryptonight_monero_v8,  cryptonight_monero,     8u },   "pool.supportxmr.com:5555" },
-    { "monero7",                    {cryptonight_monero,    cryptonight_monero,     0u },  {cryptonight_monero,     cryptonight_monero,     0u },   "pool.supportxmr.com:5555" },
-    { "monero8",                    {cryptonight_monero_v8, cryptonight_monero,     8u },  {cryptonight_monero_v8,  cryptonight_monero,     8u },   "pool.supportxmr.com:5555" },
-    { "moneroV",                    {cryptonight_monero,    cryptonight_monero,     0u },  {cryptonight_monero,     cryptonight_monero,     0u },   nullptr },
+    { "monero",                     {cryptonight_monero_v8, cryptonight_monero_v8,  8u },  {cryptonight_monero_v8,  cryptonight_monero_v8,  8u },   "pool.supportxmr.com:5555" },
+    { "monero8",                    {cryptonight_monero_v8, cryptonight_monero_v8,  8u },  {cryptonight_monero_v8,  cryptonight_monero_v8,  8u },   "pool.supportxmr.com:5555" },
 #endif
 };
 

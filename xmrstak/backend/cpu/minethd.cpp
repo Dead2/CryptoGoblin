@@ -271,10 +271,10 @@ struct testVal {
 };
 
 testVal oTestValues[] = {
-    { "This is a test This is a test This is a test", "\x1\x57\xc5\xee\x18\x8b\xbe\xc8\x97\x52\x85\xa3\x6\x4e\xe9\x20\x65\x21\x76\x72\xfd\x69\xa1\xae\xbd\x7\x66\xc7\xb5\x6e\xe0\xbd", 32, cryptonight_monero },
     { "This is a test This is a test This is a test", "\x35\x3f\xdc\x06\x8f\xd4\x7b\x03\xc0\x4b\x94\x31\xe0\x05\xe0\x0b\x68\xc2\x16\x8a\x3c\xc7\x33\x5c\x8b\x9b\x30\x81\x56\x59\x1a\x4f", 32, cryptonight_monero_v8 },
 #ifndef ONLY_XMR_ALGO
     { "This is a test", "\xa0\x84\xf0\x1d\x14\x37\xa0\x9c\x69\x85\x40\x1b\x60\xd4\x35\x54\xae\x10\x58\x02\xc5\xf5\xd8\xa9\xb3\x25\x36\x49\xc0\xbe\x66\x05", 32, cryptonight },
+    { "This is a test This is a test This is a test", "\x1\x57\xc5\xee\x18\x8b\xbe\xc8\x97\x52\x85\xa3\x6\x4e\xe9\x20\x65\x21\x76\x72\xfd\x69\xa1\xae\xbd\x7\x66\xc7\xb5\x6e\xe0\xbd", 32, cryptonight_monero },
     { "This is a test This is a test This is a test", "\x5a\x24\xa0\x29\xde\x1c\x39\x3f\x3d\x52\x7a\x2f\x9b\x39\xdc\x3d\xb3\xbc\x87\x11\x8b\x84\x52\x9b\x9f\x0\x88\x49\x25\x4b\x5\xce", 32, cryptonight_lite },
     { "This is a test This is a test This is a test", "\xfc\xa1\x7d\x44\x37\x70\x9b\x4a\x3b\xd7\x1e\xf3\xed\x21\xb4\x17\xca\x93\xdc\x86\x79\xce\x81\xdf\xd3\xcb\xdd\xa\x22\xd7\x58\xba", 32, cryptonight_aeon },
     { "This is a test This is a test This is a test", "\xbc\xe7\x48\xaf\xc5\x31\xff\xc9\x33\x7f\xcf\x51\x1b\xe3\x20\xa3\xaa\x8d\x4\x55\xf9\x14\x2a\x61\xe8\x38\xdf\xdc\x3b\x28\x3e\x0", 32, cryptonight_ipbc },
@@ -419,13 +419,13 @@ minethd::cn_hash_fun minethd::func_multi_selector(bool bHaveAes, bool bPrefetch,
     uint8_t algv;
     switch(algo)
     {
-    case cryptonight_monero:
+    case cryptonight_monero_v8:
         algv = 0;
         break;
-    case cryptonight_monero_v8:
+#ifndef ONLY_XMR_ALGO
+    case cryptonight_monero:
         algv = 1;
         break;
-#ifndef ONLY_XMR_ALGO
     case cryptonight_lite:
         algv = 2;
         break;
@@ -446,23 +446,23 @@ minethd::cn_hash_fun minethd::func_multi_selector(bool bHaveAes, bool bPrefetch,
         break;
 #endif
     default:
-        algv = 1;
+        algv = 0;
         printer::inst()->print_msg(L0, RED("Unsupported algorithm selected, miner was only compiled with XMR support."));
         break;
     }
 
     static const cn_hash_fun func_table[] = {
-        Cryptonight_hash<N>::template hash<cryptonight_monero, false, false>,
-        Cryptonight_hash<N>::template hash<cryptonight_monero, true, false>,
-        Cryptonight_hash<N>::template hash<cryptonight_monero, false, true>,
-        Cryptonight_hash<N>::template hash<cryptonight_monero, true, true>,
-
         Cryptonight_hash<N>::template hash<cryptonight_monero_v8, false, false>,
         Cryptonight_hash<N>::template hash<cryptonight_monero_v8, true, false>,
         Cryptonight_hash<N>::template hash<cryptonight_monero_v8, false, true>,
         Cryptonight_hash<N>::template hash<cryptonight_monero_v8, true, true>,
 
 #ifndef ONLY_XMR_ALGO
+        Cryptonight_hash<N>::template hash<cryptonight_monero, false, false>,
+        Cryptonight_hash<N>::template hash<cryptonight_monero, true, false>,
+        Cryptonight_hash<N>::template hash<cryptonight_monero, false, true>,
+        Cryptonight_hash<N>::template hash<cryptonight_monero, true, true>,
+
         Cryptonight_hash<N>::template hash<cryptonight_lite, false, false>,
         Cryptonight_hash<N>::template hash<cryptonight_lite, true, false>,
         Cryptonight_hash<N>::template hash<cryptonight_lite, false, true>,
