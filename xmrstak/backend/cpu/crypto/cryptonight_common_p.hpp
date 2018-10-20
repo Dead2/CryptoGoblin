@@ -77,7 +77,7 @@ ALWAYS_INLINE FLATTEN inline static void soft_cryptonight_monero_tweak(uint64_t*
     mem_out[1] = vh;
 }
 
-inline uint64_t int_sqrt33_1_double_precision(const uint64_t n0){
+FLATTEN inline uint64_t int_sqrt33_1_double_precision(const uint64_t n0){
     __m128d x = _mm_castsi128_pd(_mm_add_epi64(_mm_cvtsi64_si128(n0 >> 12), _mm_set_epi64x(0, 1023ULL << 52)));
     x = _mm_sqrt_sd(_mm_setzero_pd(), x);
     uint64_t r = static_cast<uint64_t>(_mm_cvtsi128_si64(_mm_castpd_si128(x)));
@@ -97,6 +97,36 @@ inline uint64_t int_sqrt33_1_double_precision(const uint64_t n0){
     if (x2 < n0) ++r;
 #endif
     return r;
+}
+
+FLATTEN inline uint64_t int_sqrt33_1_double_precision_dbl(const uint64_t n0A, const uint64_t n0B, uint64_t & retB){
+    __m128d x = _mm_castsi128_pd(_mm_add_epi64(_mm_set_epi64x(n0B >> 12, n0A >> 12), _mm_set_epi64x(1023ULL << 52, 1023ULL << 52)));
+    x = _mm_sqrt_pd(x);
+    uint64_t rA = (uint64_t)_mm_cvtsi128_si64(_mm_castpd_si128(x));
+    uint64_t rB = (uint64_t)_mm_cvtsi128_si64(_mm_castpd_si128(_mm_shuffle_pd(x,x,1)));
+
+    const uint64_t sA = rA >> 20;
+    rA >>= 19;
+    const uint64_t sB = rB >> 20;
+    rB >>= 19;
+
+    uint64_t x2A = (sA - (1022ULL << 32)) * (rA - sA - (1022ULL << 32) + 1);
+    uint64_t x2B = (sB - (1022ULL << 32)) * (rB - sB - (1022ULL << 32) + 1);
+
+#ifdef __INTEL_COMPILER
+    _addcarry_u64(_subborrow_u64(0, x2A, n0A, (unsigned __int64*)&x2A), rA, 0, (unsigned __int64*)&rA);
+    _addcarry_u64(_subborrow_u64(0, x2B, n0B, (unsigned __int64*)&x2B), rB, 0, (unsigned __int64*)&rB);
+#elif defined(_MSC_VER) || (__GNUC__ >= 7)
+    _addcarry_u64(_subborrow_u64(0, x2A, n0A, (unsigned long long int*)&x2A), rA, 0, (unsigned long long int*)&rA);
+    _addcarry_u64(_subborrow_u64(0, x2B, n0B, (unsigned long long int*)&x2B), rB, 0, (unsigned long long int*)&rB);
+#else
+    // GCC versions prior to 7 don't generate correct assembly for _subborrow_u64 -> _addcarry_u64 sequence
+    // Fallback to simpler code
+    if (x2A < n0A) ++rA;
+    if (x2B < n0B) ++rB;
+#endif
+    retB = rB;
+    return rA;
 }
 
 inline void set_float_rounding_mode(){
