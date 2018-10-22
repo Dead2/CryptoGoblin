@@ -448,7 +448,7 @@ size_t InitOpenCLGpu(cl_context opencl_ctx, GpuContext* ctx, const char* source_
     if(xmrstak::params::inst().AMDCache == false || !clBinFile.good())
     {
         if(xmrstak::params::inst().AMDCache)
-            printer::inst()->print_msg(L1,"OpenCL device %u - Precompiled code %s not found. Compiling ...",ctx->deviceIdx, cache_file.c_str());
+            printer::inst()->print_msg(L1,"OpenCL device %u - Precompiled code not found. Compiling to %s",ctx->deviceIdx, cache_file.c_str());
 
         ctx->Program[ii] = clCreateProgramWithSource(opencl_ctx, 1, (const char**)&source_code, NULL, &ret);
         if(ret != CL_SUCCESS)
@@ -544,7 +544,7 @@ size_t InitOpenCLGpu(cl_context opencl_ctx, GpuContext* ctx, const char* source_
             file_stream.open(cache_file, std::ofstream::out | std::ofstream::binary);
             file_stream.write(all_programs[dev_id], binary_sizes[dev_id]);
             file_stream.close();
-            printer::inst()->print_msg(L1, "OpenCL device %u - Precompiled code stored in file %s",ctx->deviceIdx, cache_file.c_str());
+            printer::inst()->print_msg(L1, "OpenCL device %u - Compiled code successfully stored to file.",ctx->deviceIdx);
         }
     }
     else

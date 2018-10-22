@@ -525,6 +525,7 @@ void executor::ex_main()
     telem = new xmrstak::telemetry(pvThreads->size());
 
     set_timestamp();
+    init_devtime();
     size_t pc = jconf::inst()->GetPoolCount();
     bool dev_tls = true;
     bool already_have_cli_pool = false;
@@ -692,12 +693,12 @@ void executor::ex_main()
             break;
 
         case EV_GPU_RES_ERROR:
-		{
-			std::string err_msg = std::string(ev.oGpuError.error_str) + " GPU ID " + std::to_string(ev.oGpuError.idx);
-			printer::inst()->print_msg(L0, err_msg.c_str());
-			log_result_error(std::move(err_msg));
-            break;
-		}
+            {
+                std::string err_msg = std::string(ev.oGpuError.error_str) + " GPU ID " + std::to_string(ev.oGpuError.idx);
+                printer::inst()->print_msg(L0, err_msg.c_str());
+                log_result_error(std::move(err_msg));
+                break;
+            }
 
         case EV_PERF_TICK:
             for (i = 0; i < pvThreads->size(); i++)

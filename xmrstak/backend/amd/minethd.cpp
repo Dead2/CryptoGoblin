@@ -195,7 +195,7 @@ void minethd::work_main()
              */
 
             while (globalStates::inst().iGlobalJobNo.load(std::memory_order_relaxed) == iJobNo)
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
             globalStates::inst().consume_work(oWork, iJobNo);
             continue;
@@ -237,8 +237,8 @@ void minethd::work_main()
             {
                 globalStates::inst().calc_start_nonce(pGpuCtx->Nonce, oWork.bNiceHash, h_per_round * 16);
                 // check if the job is still valid, there is a small possibility that the job is switched
-            if(globalStates::inst().iGlobalJobNo.load(std::memory_order_relaxed) != iJobNo)
-                break;
+                if(globalStates::inst().iGlobalJobNo.load(std::memory_order_relaxed) != iJobNo)
+                    break;
             }
 
 
@@ -265,9 +265,12 @@ void minethd::work_main()
             }
 
             iCount += pGpuCtx->rawIntensity;
-            uint64_t iStamp = get_timestamp_ms();
-            iHashCount.store(iCount, std::memory_order_relaxed);
-            iTimestamp.store(iStamp, std::memory_order_relaxed);
+            if((round_ctr & 0x1) == 0) //Store stats every second round
+            {
+                uint64_t iStamp = get_timestamp_ms();
+                iHashCount.store(iCount, std::memory_order_relaxed);
+                iTimestamp.store(iStamp, std::memory_order_relaxed);
+            }
             std::this_thread::yield();
         }
 
