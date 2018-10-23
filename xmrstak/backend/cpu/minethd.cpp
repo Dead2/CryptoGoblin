@@ -394,15 +394,15 @@ static std::string getAsmName(const uint32_t num_hashes)
     std::string asm_type = "off";
     if(num_hashes != 0)
     {
-    auto cpu_model = getModel();
+        auto cpu_model = getModel();
 
-    if(cpu_model.avx && cpu_model.aes)
-            {
-        if(cpu_model.type_name.find("Intel") != std::string::npos)
-            asm_type = "intel_avx";
-        else if(cpu_model.type_name.find("AMD") != std::string::npos && num_hashes == 1)
-            asm_type = "amd_avx";
-    }
+        if(cpu_model.avx && cpu_model.aes)
+        {
+            if(cpu_model.type_name.find("Intel") != std::string::npos)
+                asm_type = "intel_avx";
+            else if(cpu_model.type_name.find("AMD") != std::string::npos && num_hashes == 1)
+                asm_type = "amd_avx";
+        }
     }
     return asm_type;
 }
@@ -419,36 +419,36 @@ minethd::cn_hash_fun minethd::func_multi_selector(bool bHaveAes, bool bPrefetch,
     uint8_t algv;
     switch(algo)
     {
-    case cryptonight_monero_v8:
-        algv = 0;
-        break;
+        case cryptonight_monero_v8:
+            algv = 0;
+            break;
 #ifndef ONLY_XMR_ALGO
-    case cryptonight_monero:
-        algv = 1;
-        break;
-    case cryptonight_lite:
-        algv = 2;
-        break;
-    case cryptonight:
-        algv = 3;
-        break;
-    case cryptonight_heavy:
-        algv = 4;
-        break;
-    case cryptonight_aeon:
-        algv = 5;
-        break;
-    case cryptonight_ipbc:
-        algv = 6;
-        break;
-    case cryptonight_stellite:
-        algv = 7;
-        break;
+        case cryptonight_monero:
+            algv = 1;
+            break;
+        case cryptonight_lite:
+            algv = 2;
+            break;
+        case cryptonight:
+            algv = 3;
+            break;
+        case cryptonight_heavy:
+            algv = 4;
+            break;
+        case cryptonight_aeon:
+            algv = 5;
+            break;
+        case cryptonight_ipbc:
+            algv = 6;
+            break;
+        case cryptonight_stellite:
+            algv = 7;
+            break;
 #endif
-    default:
-        algv = 0;
-        printer::inst()->print_msg(L0, RED("Unsupported algorithm selected, miner was only compiled with XMR support."));
-        break;
+        default:
+            algv = 0;
+            printer::inst()->print_msg(L0, RED("Unsupported algorithm selected, miner was only compiled with XMR support."));
+            break;
     }
 
     static const cn_hash_fun func_table[] = {
@@ -527,7 +527,7 @@ minethd::cn_hash_fun minethd::func_multi_selector(bool bHaveAes, bool bPrefetch,
                         }
                         if(asm_version_str == "auto" && (selected_asm != "intel_avx" || selected_asm != "amd_avx"))
                                 printer::inst()->print_msg(L3, "Switch to assembler version for '%s' cpu's", selected_asm.c_str());
-            else if(selected_asm != "intel_avx" && selected_asm != "amd_avx") // unknown asm type
+                        else if(selected_asm != "intel_avx" && selected_asm != "amd_avx") // unknown asm type
                                 printer::inst()->print_msg(L1, "Assembler '%s' unknown, fallback to non asm version of cryptonight_v8", selected_asm.c_str());
                 }
         }
