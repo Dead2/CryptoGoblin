@@ -514,16 +514,27 @@ minethd::cn_hash_fun minethd::func_multi_selector(bool bHaveAes, bool bPrefetch,
                         if(selected_asm == "intel_avx")
                         {
                                 // Intel Ivy Bridge (Xeon v2, Core i7/i5/i3 3xxx, Pentium G2xxx, Celeron G1xxx)
-                                if(N == 1)
-                                        selected_function = Cryptonight_hash_asm<1u, 0u>::template hash<cryptonight_monero_v8>;
-                                else if(N == 2)
-                                        selected_function = Cryptonight_hash_asm<2u, 0u>::template hash<cryptonight_monero_v8>;
+                                if(N == 1){
+                                        if(bPrefetch)
+                                            selected_function = Cryptonight_hash_asm<1u, 0u>::template hash<cryptonight_monero_v8, true>;
+                                        else
+                                            selected_function = Cryptonight_hash_asm<1u, 0u>::template hash<cryptonight_monero_v8, false>;
+                                }else if(N == 2){
+                                        if(bPrefetch)
+                                            selected_function = Cryptonight_hash_asm<2u, 0u>::template hash<cryptonight_monero_v8, true>;
+                                        else
+                                            selected_function = Cryptonight_hash_asm<2u, 0u>::template hash<cryptonight_monero_v8, false>;
+                                }
+
                         }
                         // supports only 1 thread per hash
                         if(N == 1 && selected_asm == "amd_avx")
                         {
                                 // AMD Ryzen (1xxx and 2xxx series)
-                                selected_function = Cryptonight_hash_asm<1u, 1u>::template hash<cryptonight_monero_v8>;
+                                if(bPrefetch)
+                                    selected_function = Cryptonight_hash_asm<1u, 1u>::template hash<cryptonight_monero_v8, true>;
+                                else
+                                    selected_function = Cryptonight_hash_asm<1u, 1u>::template hash<cryptonight_monero_v8, false>;
                         }
                         if(asm_version_str == "auto" && (selected_asm != "intel_avx" || selected_asm != "amd_avx"))
                                 printer::inst()->print_msg(L3, "Switch to assembler version for '%s' cpu's", selected_asm.c_str());
