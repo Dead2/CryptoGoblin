@@ -265,12 +265,10 @@ void minethd::work_main()
             }
 
             iCount += pGpuCtx->rawIntensity;
-            if((round_ctr & 0x1) == 0) //Store stats every second round
-            {
-                uint64_t iStamp = get_timestamp_ms();
-                iHashCount.store(iCount, std::memory_order_relaxed);
-                iTimestamp.store(iStamp, std::memory_order_relaxed);
-            }
+            uint64_t iStamp = get_timestamp_ms();
+            iHashCount.store(iCount, std::memory_order_relaxed);
+            iTimestamp.store(iStamp, std::memory_order_relaxed);
+
             std::this_thread::yield();
         }
 

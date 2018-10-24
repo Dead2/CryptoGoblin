@@ -69,11 +69,11 @@ void executor::ex_clock_thd()
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(size_t(iTickTime)));
 
-        push_event(ex_event(EV_PERF_TICK));
-
-        //Eval pool choice every fourth tick
-        if((tick++ & 0x03) == 0)
+        //Eval pool choice and update stats every fourth tick
+        if((tick++ & 0x03) == 0){
             push_event(ex_event(EV_EVAL_POOL_CHOICE));
+            push_event(ex_event(EV_PERF_TICK));
+        }
 
         // Service timed events
         std::unique_lock<std::mutex> lck(timed_event_mutex);
@@ -705,17 +705,15 @@ void executor::ex_main()
                 telem->push_perf_value(i, pvThreads->at(i)->iHashCount.load(std::memory_order_relaxed),
                 pvThreads->at(i)->iTimestamp.load(std::memory_order_relaxed));
 
-            if((cnt++ & 0xF) == 0) //Every 16 ticks
+            if((cnt++ & 0x3) == 0) //Every 4 ticks (8 sec since PERF_TICK triggers only every 4 normal tick)
             {
                 double fHps = 0.0;
                 double fTelem;
                 bool normal = true;
-                char num[16];
-                char strbuf[64];
 
                 for (i = 0; i < pvThreads->size(); i++)
                 {
-                    fTelem = telem->calc_telemetry_data(10000, i);
+                    fTelem = telem->calc_telemetry_data(8000, i);
                     if(std::isnormal(fTelem))
                     {
                         fHps += fTelem;
@@ -727,11 +725,15 @@ void executor::ex_main()
                     }
                 }
 
-                if(normal && fHighestHps < fHps)
-                    fHighestHps = fHps;
+                if(normal){
+                    if(fHighestHps < fHps)
+                        fHighestHps = fHps;
 
-                snprintf(strbuf, sizeof(strbuf), "%sH/s %s %s", hps_format(fHps, num, sizeof(num)), XMR_STAK_NAME, XMR_STAK_VERSION);
-                printer::inst()->set_title(strbuf);
+                    char num[16];
+                    char strbuf[64];
+                    snprintf(strbuf, sizeof(strbuf), "%sH/s %s %s", hps_format(fHps, num, sizeof(num)), XMR_STAK_NAME, XMR_STAK_VERSION);
+                    printer::inst()->set_title(strbuf);
+                }
             }
             break;
 

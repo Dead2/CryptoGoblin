@@ -33,56 +33,57 @@ namespace xmrstak
 
 telemetry::telemetry(size_t iThd)
 {
-    ppHashCounts = new uint64_t*[iThd];
-    ppTimestamps = new uint64_t*[iThd];
+    ppHashCounts = new uint32_t*[iThd];
+    ppTimestamps = new uint32_t*[iThd];
     iBucketTop = new uint32_t[iThd];
     mtx = new std::mutex[iThd];
 
     for (size_t i = 0; i < iThd; i++)
     {
-        ppHashCounts[i] = new uint64_t[iBucketSize];
-        ppTimestamps[i] = new uint64_t[iBucketSize];
+        ppHashCounts[i] = new uint32_t[iBucketSize];
+        ppTimestamps[i] = new uint32_t[iBucketSize];
         iBucketTop[i] = 0;
-        memset(ppHashCounts[i], 0, sizeof(uint64_t) * iBucketSize);
-        memset(ppTimestamps[i], 0, sizeof(uint64_t) * iBucketSize);
+        memset(ppHashCounts[i], 0, sizeof(uint32_t) * iBucketSize);
+        memset(ppTimestamps[i], 0, sizeof(uint32_t) * iBucketSize);
     }
 }
 
 double telemetry::calc_telemetry_data(size_t iLastMillisec, size_t iThread)
 {
-
-
-    uint64_t iEarliestHashCnt = 0;
-    uint64_t iEarliestStamp = 0;
-    uint64_t iLatestStamp = 0;
-    uint64_t iLatestHashCnt = 0;
+    uint32_t iEarliestHashCnt = 0;
+    uint32_t iEarliestStamp = 0;
+    uint32_t iLatestStamp = 0;
+    uint32_t iLatestHashCnt = 0;
     bool bHaveFullSet = false;
 
     std::unique_lock<std::mutex> lk(mtx[iThread]);
-    uint64_t iTimeNow = get_timestamp_ms();
+    uint32_t iTimeNow = (uint32_t)get_timestamp_ms();
 
     //Start at 1, buckettop points to next empty
     for (size_t i = 1; i < iBucketSize; i++)
     {
         size_t idx = (iBucketTop[iThread] - i) & iBucketMask; //overflow expected here
+        uint32_t iTmpStamp = ppTimestamps[iThread][idx];
 
-        if (ppTimestamps[iThread][idx] == 0)
+        if (iTmpStamp == 0)
             break; //That means we don't have the data yet
+
+        uint32_t iTmpHashCnt = ppHashCounts[iThread][idx];
 
         if (iLatestStamp == 0)
         {
-            iLatestStamp = ppTimestamps[iThread][idx];
-            iLatestHashCnt = ppHashCounts[iThread][idx];
+            iLatestStamp = iTmpStamp;
+            iLatestHashCnt = iTmpHashCnt;
         }
 
-        if (iTimeNow - ppTimestamps[iThread][idx] > iLastMillisec)
+        if ((iTimeNow - iTmpStamp) > iLastMillisec)
         {
             bHaveFullSet = true;
             break; //We are out of the requested time period
         }
 
-        iEarliestStamp = ppTimestamps[iThread][idx];
-        iEarliestHashCnt = ppHashCounts[iThread][idx];
+        iEarliestStamp = iTmpStamp;
+        iEarliestHashCnt = iTmpHashCnt;
     }
     lk.unlock();
 
@@ -105,8 +106,8 @@ void telemetry::push_perf_value(size_t iThd, uint64_t iHashCount, uint64_t iTime
 {
     std::unique_lock<std::mutex> lk(mtx[iThd]);
     size_t iTop = iBucketTop[iThd];
-    ppHashCounts[iThd][iTop] = iHashCount;
-    ppTimestamps[iThd][iTop] = iTimestamp;
+    ppHashCounts[iThd][iTop] = (uint32_t)iHashCount;
+    ppTimestamps[iThd][iTop] = (uint32_t)iTimestamp;
 
     iBucketTop[iThd] = (iTop + 1) & iBucketMask;
 }

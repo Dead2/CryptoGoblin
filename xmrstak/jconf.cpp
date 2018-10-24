@@ -113,7 +113,7 @@ xmrstak::coin_selection coins[] = {
     { "monero8",                    {cryptonight_monero_v8, cryptonight_monero_v8,  0u },  {cryptonight_monero_v8,  cryptonight_monero_v8,  0u },   "pool.supportxmr.com:5555" },
     { "moneroV",                    {cryptonight_monero,    cryptonight_monero,     0u },  {cryptonight_monero_v8,  cryptonight_monero_v8,  0u },   nullptr },
     { "stellite",                   {cryptonight_stellite,  cryptonight_stellite,   0u },  {cryptonight_monero_v8,  cryptonight_monero_v8,  0u },   nullptr },
-    { "pinkstar",                   {cryptonight_aeon,      cryptonight_lite,       4u },  {cryptonight_aeon,       cryptonight_aeon,       0u },   nullptr }
+    { "pinkstar",                   {cryptonight_aeon,      cryptonight_lite,       4u },  {cryptonight_aeon,       cryptonight_aeon,       0u },   nullptr },
     { "qrl",                        {cryptonight_monero,    cryptonight_monero,     0u },  {cryptonight_monero_v8,  cryptonight_monero_v8,  0u },   nullptr },
 #else
     { "cryptonight_v8",             {cryptonight_monero_v8, cryptonight_monero_v8,  0u },  {cryptonight_monero_v8,  cryptonight_monero_v8,  0u },   nullptr },

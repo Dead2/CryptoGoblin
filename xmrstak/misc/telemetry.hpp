@@ -16,11 +16,11 @@ public:
 
 private:
     std::mutex* mtx;
-    constexpr static size_t iBucketSize = 2 << 11; //Power of 2 to simplify calculations
+    constexpr static size_t iBucketSize = 512; //Power of 2 to simplify calculations
     constexpr static size_t iBucketMask = iBucketSize - 1;
     uint32_t* iBucketTop;
-    uint64_t** ppHashCounts;
-    uint64_t** ppTimestamps;
+    uint32_t** ppHashCounts;
+    uint32_t** ppTimestamps;
 };
 
 } // namespace xmrstak

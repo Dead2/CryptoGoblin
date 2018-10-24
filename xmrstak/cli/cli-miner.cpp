@@ -397,6 +397,10 @@ int main(int argc, char *argv[])
     std::string separator("/");
     auto pos = pathWithName.rfind(separator);
 
+    char strbuf[24];
+    snprintf(strbuf, sizeof(strbuf), "%s %s", XMR_STAK_NAME, XMR_STAK_VERSION);
+    printer::inst()->set_title(strbuf);
+
 #if defined(_WIN32) && defined(VT100)
     HANDLE hStdout;
     DWORD handleMode;
