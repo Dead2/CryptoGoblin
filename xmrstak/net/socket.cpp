@@ -27,7 +27,9 @@
 #include "xmrstak/misc/console.hpp"
 #include "xmrstak/misc/executor.hpp"
 
+#ifndef _WIN32
 #include <netinet/ip.h>
+#endif
 
 #ifndef CONF_NO_TLS
 #include <openssl/ssl.h>
@@ -124,8 +126,10 @@ bool plain_socket::set_hostname(const char* sAddr)
     /* If it fails, it fails, we won't loose too much sleep over it */
     setsockopt(hSocket, IPPROTO_TCP, TCP_NODELAY, (char *) &flag, sizeof(int));
 
+#ifndef _WIN32
     flag = IPTOS_LOWDELAY;
     setsockopt(hSocket, IPPROTO_IP, IP_TOS, (char *) &flag, sizeof(int));
+#endif
 
     return true;
 }
@@ -260,8 +264,10 @@ bool tls_socket::set_hostname(const char* sAddr)
     /* If it fails, it fails, we won't loose too much sleep over it */
     setsockopt(BIO_get_fd(bio, nullptr), IPPROTO_TCP, TCP_NODELAY, (char *) &flag, sizeof(int));
 
+#ifndef _WIN32
     flag = IPTOS_LOWDELAY;
     setsockopt(BIO_get_fd(bio, nullptr), IPPROTO_IP, IP_TOS, (char *) &flag, sizeof(int));
+#endif
 
     if(BIO_set_conn_hostname(bio, sAddr) != 1)
     {
