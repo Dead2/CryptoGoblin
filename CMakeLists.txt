@@ -91,7 +91,7 @@ if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
     set(CG_CFLAGS "${CG_CFLAGS} --param max-cse-path-length=20 --param max-cse-insns=2000 --param max-cselib-memory-locations=1000 --param max-reload-search-insns=200")
     set(CG_CFLAGS "${CG_CFLAGS} --param max-sched-ready-insns=200 --param max-sched-region-insns=150 --param max-delay-slot-insn-search=150 --param max-delay-slot-live-search=400")
     set(CG_CFLAGS "${CG_CFLAGS} --param max-gcse-memory=268435456  --param max-partial-antic-length=150 --param max-tail-merge-iterations=3 --param max-tail-merge-comparisons=15")
-    set(CG_CFLAGS "${CG_CFLAGS} --param max-tracked-strlens=25000 --param inline-min-speedup=6 --param prefetch-latency=225 --param simultaneous-prefetches=4")
+    set(CG_CFLAGS "${CG_CFLAGS} --param max-tracked-strlens=25000 --param inline-min-speedup=6 --param prefetch-latency=225 --param simultaneous-prefetches=4 --param l2-cache-size=2048")
     # Scheduler
     set(CG_CFLAGS "${CG_CFLAGS} -fmodulo-sched -fmodulo-sched-allow-regmoves -fsched2-use-superblocks -fsched-pressure -fsched-spec-load -fsched-spec-load-dangerous")
     set(CG_CFLAGS "${CG_CFLAGS} -fsched-stalled-insns=3 -fsched-stalled-insns-dep=100")
@@ -115,24 +115,13 @@ if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
   endif()
 
   if(CMAKE_VERBOSE_MAKEFILE STREQUAL "ON")
-      set(CG_CFLAGS "${CG_CFLAGS} -Wall")
-  endif()
-
-  if (CG_LTO)
-      # LTO
-      set(CG_LTO_CFLAGS "-flto -flto-partition=one -fdevirtualize-at-ltrans")
-  endif()
-
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CG_CFLAGS}")
-  if(WIN32)
-      set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
-  else()
-      set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-z,now,-z,relro,-z,combreloc,--sort-common")
+      set(CG_CFLAGS "${CG_CFLAGS} -Wall -Wno-strict-aliasing")
   endif()
 
   if (CG_DEBUGFLAGS)
       set(CG_CFLAGS "${CG_CFLAGS} ${CG_DEBUGFLAGS}")
   endif()
+
   if(CMAKE_BUILD_TYPE STREQUAL "Release")
       add_definitions("-DNDEBUG")
   endif()
@@ -155,9 +144,30 @@ if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
     set(ARCH "native" CACHE STRING "Architecture to tell gcc to optimize for (-march/-mtune)")
   endif()
   if(NOT ARCH STREQUAL "native")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=${ARCH} -mtune=${ARCH}")
+    set(CG_FLAGS "${CG_FLAGS} -march=${ARCH} -mtune=${ARCH}")
   else()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -mtune=native")
+    set(CG_FLAGS "${CG_FLAGS} -march=native -mtune=native")
+  endif()
+
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CG_CFLAGS}")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CG_CFLAGS}")
+  set(CMAKE_ASM_FLAGS "${CMAKE_ASM_FLAGS} ${CG_CFLAGS}")
+  if(WIN32)
+      set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--dynamicbase,--nxcompat,--sort-common")
+      set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--dynamicbase,--nxcompat,--sort-common")
+  else()
+      set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-z,now,-z,relro,-z,combreloc,--sort-common,--no-ld-generated-unwind-info,--enable-new-dtags")
+      set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-z,now,-z,relro,-z,combreloc,--sort-common,--no-ld-generated-unwind-info,--enable-new-dtags")
+  endif()
+
+  if(CG_LTO)
+      set(CG_LTO_CFLAGS "-flto -flto-partition=one -fdevirtualize-at-ltrans")
+
+      set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CG_LTO_CFLAGS}")
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CG_LTO_CFLAGS}")
+      set(CMAKE_ASM_FLAGS "${CMAKE_ASM_FLAGS} ${CG_LTO_CFLAGS}")
+      set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${CG_LTO_CFLAGS}")
+      set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${CG_LTO_CFLAGS}")
   endif()
 endif()
 
@@ -696,6 +706,7 @@ file(GLOB BACKEND_CPP
     "xmrstak/misc/*.cpp"
     "xmrstak/net/*.cpp"
 )
+#set_source_files_properties(${BACKEND_CPP} PROPERTIES LANGUAGE CXX)
 
 if(NOT CG_LTO OR (CUDA_FOUND OR OpenCL_FOUND))
     add_library(CryptoGoblin-backend
@@ -711,6 +722,8 @@ if(CUDA_FOUND)
         "xmrstak/backend/nvidia/nvcc_code/*.cu"
         "xmrstak/backend/nvidia/*.cpp"
     )
+    set_source_files_properties(${CUDASRCFILES} PROPERTIES LANGUAGE CXX)
+
     if(CUDA_COMPILER STREQUAL "clang")
         # build device code with clang
         add_library(
@@ -720,7 +733,6 @@ if(CUDA_FOUND)
         )
         set_target_properties(CryptoGoblin_cuda PROPERTIES COMPILE_FLAGS ${CLANG_BUILD_FLAGS})
         set_target_properties(CryptoGoblin_cuda PROPERTIES LINKER_LANGUAGE CXX)
-        set_source_files_properties(${CUDASRCFILES} PROPERTIES LANGUAGE CXX)
     else()
         #  build device code with nvcc
         cuda_add_library(
@@ -741,6 +753,8 @@ if(OpenCL_FOUND)
         "xmrstak/backend/amd/amd_gpu/*.cpp"
         "xmrstak/backend/amd/*.cpp"
     )
+    set_source_files_properties(${OPENCLSRCFILES} PROPERTIES LANGUAGE CXX)
+
     add_library(CryptoGoblin_opencl
         SHARED
         ${OPENCLSRCFILES}
@@ -751,7 +765,7 @@ if(OpenCL_FOUND)
     endif()
 endif()
 
-# compile final binary
+# compile main binary
 file(GLOB SRCFILES_CPP
     "xmrstak/cli/*.cpp"
 )
@@ -767,19 +781,16 @@ endif()
 add_executable(CryptoGoblin
     ${SRCFILES_CPP}
 )
-target_link_libraries(CryptoGoblin ${LIBS} xmr-stak-asm)
 
+# LTO compile and linker settings
 if(CG_LTO)
-    set_target_properties(CryptoGoblin PROPERTIES COMPILE_FLAGS "${CG_LTO_CFLAGS}")
-    set_target_properties(CryptoGoblin PROPERTIES LINK_FLAGS "${CG_LTO_CFLAGS} ${CMAKE_EXE_LINKER_FLAGS}")
+    target_link_libraries(CryptoGoblin ${LIBS} xmr-stak-asm)
+    if (CUDA_FOUND OR OpenCL_FOUND)
+        target_link_libraries(CryptoGoblin ${CMAKE_DL_LIBS})
+    endif()
 else()
     target_link_libraries(CryptoGoblin CryptoGoblin-backend xmr-stak-asm)
-endif()
-
-if (CUDA_FOUND OR OpenCL_FOUND)
-    if(CG_LTO)
-        target_link_libraries(CryptoGoblin ${CMAKE_DL_LIBS})
-    else()
+    if (CUDA_FOUND OR OpenCL_FOUND)
         target_link_libraries(CryptoGoblin-backend ${CMAKE_DL_LIBS})
     endif()
 endif()

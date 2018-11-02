@@ -53,7 +53,7 @@ private:
     };
 
     inline void set_timestamp() { dev_timestamp = get_timestamp(); };
-    inline void init_devtime() { dev_timestamp = get_timestamp() - ((rand() % 96)*60); };
+    inline void init_devtime() { dev_timestamp = get_timestamp() - (((rand() % 59) + 30) * 60); };
 
     // In milliseconds, has to divide a second (1000ms) into an integer number
     constexpr static size_t iTickTime = 500;
