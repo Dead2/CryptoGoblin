@@ -79,7 +79,7 @@ inline uint2 fast_div_v2(const __local uint *RCP, ulong a, uint b)
 	 * https://github.com/fireice-uk/xmr-stak/issues/1922
 	 * This is a workaround for the broken compiler.
 	 */
-	ulong whyAMDwhy;
+	 ulong whyAMDwhy;
 	((uint*)&whyAMDwhy)[0] = as_uint2(k).s0;
 	((uint*)&whyAMDwhy)[1] = as_uint2(k).s1;
 	((uint*)&q)[1] = (whyAMDwhy < a) ? 1U : 0U;

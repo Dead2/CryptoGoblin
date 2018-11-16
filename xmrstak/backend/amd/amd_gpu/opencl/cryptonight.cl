@@ -26,7 +26,7 @@ R"===(
  * Build-in Function
  *     uintn  amd_bitalign (uintn src0, uintn src1, uintn src2)
  *   Description
- *     dst.s0 =  (uint) (((((long)src0.s0) << 32) | (long)src1.s0) >> (src2.s0 & 31))
+ *     dst.s0 =  (uint) (((((ulong)src0.s0) << 32) | (ulong)src1.s0) >> (src2.s0 & 31))
  *     similar operation applied to other components of the vectors.
  *
  * The implemented function is modified because the last is in our case always a scalar.
@@ -221,12 +221,6 @@ void keccakf1600_1(ulong *st)
             t = bc[0];
         }
 
-        //ulong tmp1 = st[0]; ulong tmp2 = st[1]; st[0] = bitselect(st[0] ^ st[2], st[0], st[1]); st[1] = bitselect(st[1] ^ st[3], st[1], st[2]); st[2] = bitselect(st[2] ^ st[4], st[2], st[3]); st[3] = bitselect(st[3] ^ tmp1, st[3], st[4]); st[4] = bitselect(st[4] ^ tmp2, st[4], tmp1);
-        //tmp1 = st[5]; tmp2 = st[6]; st[5] = bitselect(st[5] ^ st[7], st[5], st[6]); st[6] = bitselect(st[6] ^ st[8], st[6], st[7]); st[7] = bitselect(st[7] ^ st[9], st[7], st[8]); st[8] = bitselect(st[8] ^ tmp1, st[8], st[9]); st[9] = bitselect(st[9] ^ tmp2, st[9], tmp1);
-        //tmp1 = st[10]; tmp2 = st[11]; st[10] = bitselect(st[10] ^ st[12], st[10], st[11]); st[11] = bitselect(st[11] ^ st[13], st[11], st[12]); st[12] = bitselect(st[12] ^ st[14], st[12], st[13]); st[13] = bitselect(st[13] ^ tmp1, st[13], st[14]); st[14] = bitselect(st[14] ^ tmp2, st[14], tmp1);
-        //tmp1 = st[15]; tmp2 = st[16]; st[15] = bitselect(st[15] ^ st[17], st[15], st[16]); st[16] = bitselect(st[16] ^ st[18], st[16], st[17]); st[17] = bitselect(st[17] ^ st[19], st[17], st[18]); st[18] = bitselect(st[18] ^ tmp1, st[18], st[19]); st[19] = bitselect(st[19] ^ tmp2, st[19], tmp1);
-        //tmp1 = st[20]; tmp2 = st[21]; st[20] = bitselect(st[20] ^ st[22], st[20], st[21]); st[21] = bitselect(st[21] ^ st[23], st[21], st[22]); st[22] = bitselect(st[22] ^ st[24], st[22], st[23]); st[23] = bitselect(st[23] ^ tmp1, st[23], st[24]); st[24] = bitselect(st[24] ^ tmp2, st[24], tmp1);
-
         #pragma unroll 1
         for(int i = 0; i < 25; i += 5)
         {
@@ -246,34 +240,15 @@ void keccakf1600_1(ulong *st)
 }
 )==="
 R"===(
-void keccakf1600_2(ulong *st)
+
+void keccakf1600_2(__local ulong *st)
 {
     int i, round;
     ulong t, bc[5];
 
 	#pragma unroll 1
-    for(round = 0; round < 24; ++round)
+    for (round = 0; round < 24; ++round)
     {
-
-        // Theta
-        //bc[0] = st[0] ^ st[5] ^ st[10] ^ st[15] ^ st[20];
-        //bc[1] = st[1] ^ st[6] ^ st[11] ^ st[16] ^ st[21];
-        //bc[2] = st[2] ^ st[7] ^ st[12] ^ st[17] ^ st[22];
-        //bc[3] = st[3] ^ st[8] ^ st[13] ^ st[18] ^ st[23];
-        //bc[4] = st[4] ^ st[9] ^ st[14] ^ st[19] ^ st[24];
-
-		/*
-		#pragma unroll
-        for (i = 0; i < 5; ++i) {
-            t = bc[(i + 4) % 5] ^ rotate(bc[(i + 1) % 5], 1UL);
-            st[i     ] ^= t;
-            st[i +  5] ^= t;
-            st[i + 10] ^= t;
-            st[i + 15] ^= t;
-            st[i + 20] ^= t;
-        }
-		*/
-
 		bc[0] = st[0] ^ st[5] ^ st[10] ^ st[15] ^ st[20] ^ rotate(st[2] ^ st[7] ^ st[12] ^ st[17] ^ st[22], 1UL);
 		bc[1] = st[1] ^ st[6] ^ st[11] ^ st[16] ^ st[21] ^ rotate(st[3] ^ st[8] ^ st[13] ^ st[18] ^ st[23], 1UL);
 		bc[2] = st[2] ^ st[7] ^ st[12] ^ st[17] ^ st[22] ^ rotate(st[4] ^ st[9] ^ st[14] ^ st[19] ^ st[24], 1UL);
@@ -318,44 +293,6 @@ void keccakf1600_2(ulong *st)
             st[keccakf_piln[i]] = rotate(t, (ulong)keccakf_rotc[i]);
             t = bc[0];
         }
-
-
-
-		/*ulong tmp1 = st[1] ^ bc[0];
-
-        st[0] ^= bc[4];
-        st[1] = rotate(st[6] ^ bc[0], 44UL);
-        st[6] = rotate(st[9] ^ bc[3], 20UL);
-        st[9] = rotate(st[22] ^ bc[1], 61UL);
-        st[22] = rotate(st[14] ^ bc[3], 39UL);
-        st[14] = rotate(st[20] ^ bc[4], 18UL);
-        st[20] = rotate(st[2] ^ bc[1], 62UL);
-        st[2] = rotate(st[12] ^ bc[1], 43UL);
-        st[12] = rotate(st[13] ^ bc[2], 25UL);
-        st[13] = rotate(st[19] ^ bc[3], 8UL);
-        st[19] = rotate(st[23] ^ bc[2], 56UL);
-        st[23] = rotate(st[15] ^ bc[4], 41UL);
-        st[15] = rotate(st[4] ^ bc[3], 27UL);
-        st[4] = rotate(st[24] ^ bc[3], 14UL);
-        st[24] = rotate(st[21] ^ bc[0], 2UL);
-        st[21] = rotate(st[8] ^ bc[2], 55UL);
-        st[8] = rotate(st[16] ^ bc[0], 35UL);
-        st[16] = rotate(st[5] ^ bc[4], 36UL);
-        st[5] = rotate(st[3] ^ bc[2], 28UL);
-        st[3] = rotate(st[18] ^ bc[2], 21UL);
-        st[18] = rotate(st[17] ^ bc[1], 15UL);
-        st[17] = rotate(st[11] ^ bc[0], 10UL);
-        st[11] = rotate(st[7] ^ bc[1], 6UL);
-        st[7] = rotate(st[10] ^ bc[4], 3UL);
-        st[10] = rotate(tmp1, 1UL);
-		*/
-
-
-        //ulong tmp1 = st[0]; ulong tmp2 = st[1]; st[0] = bitselect(st[0] ^ st[2], st[0], st[1]); st[1] = bitselect(st[1] ^ st[3], st[1], st[2]); st[2] = bitselect(st[2] ^ st[4], st[2], st[3]); st[3] = bitselect(st[3] ^ tmp1, st[3], st[4]); st[4] = bitselect(st[4] ^ tmp2, st[4], tmp1);
-        //tmp1 = st[5]; tmp2 = st[6]; st[5] = bitselect(st[5] ^ st[7], st[5], st[6]); st[6] = bitselect(st[6] ^ st[8], st[6], st[7]); st[7] = bitselect(st[7] ^ st[9], st[7], st[8]); st[8] = bitselect(st[8] ^ tmp1, st[8], st[9]); st[9] = bitselect(st[9] ^ tmp2, st[9], tmp1);
-        //tmp1 = st[10]; tmp2 = st[11]; st[10] = bitselect(st[10] ^ st[12], st[10], st[11]); st[11] = bitselect(st[11] ^ st[13], st[11], st[12]); st[12] = bitselect(st[12] ^ st[14], st[12], st[13]); st[13] = bitselect(st[13] ^ tmp1, st[13], st[14]); st[14] = bitselect(st[14] ^ tmp2, st[14], tmp1);
-        //tmp1 = st[15]; tmp2 = st[16]; st[15] = bitselect(st[15] ^ st[17], st[15], st[16]); st[16] = bitselect(st[16] ^ st[18], st[16], st[17]); st[17] = bitselect(st[17] ^ st[19], st[17], st[18]); st[18] = bitselect(st[18] ^ tmp1, st[18], st[19]); st[19] = bitselect(st[19] ^ tmp2, st[19], tmp1);
-        //tmp1 = st[20]; tmp2 = st[21]; st[20] = bitselect(st[20] ^ st[22], st[20], st[21]); st[21] = bitselect(st[21] ^ st[23], st[21], st[22]); st[22] = bitselect(st[22] ^ st[24], st[22], st[23]); st[23] = bitselect(st[23] ^ tmp1, st[23], st[24]); st[24] = bitselect(st[24] ^ tmp2, st[24], tmp1);
 
         #pragma unroll
         for(int i = 0; i < 25; i += 5)
@@ -433,7 +370,7 @@ R"===(
 #   define IDX(x)	(((x) % MEM_CHUNK) + ((x) / MEM_CHUNK) * WORKSIZE * MEM_CHUNK)
 #endif
 
-inline ulong getIdx()
+inline uint getIdx()
 {
 #if(STRIDED_INDEX==0 || STRIDED_INDEX==1 || STRIDED_INDEX==2)
 	return get_global_id(0) - get_global_offset(0);
@@ -442,22 +379,21 @@ inline ulong getIdx()
 
 #define mix_and_propagate(xin) (xin)[(get_local_id(1)) % 8][get_local_id(0)] ^ (xin)[(get_local_id(1) + 1) % 8][get_local_id(0)]
 
-#define JOIN_DO(x,y) x##y
+        #define JOIN_DO(x,y) x##y
 #define JOIN(x,y) JOIN_DO(x,y)
 
-__attribute__((reqd_work_group_size(WORKSIZE, 8, 1)))
-__kernel void JOIN(cn0,ALGO)(__global ulong *input, __global uint4 *Scratchpad, __global ulong *states, ulong Threads)
+__attribute__((reqd_work_group_size(8, 8, 1)))
+__kernel void JOIN(cn0,ALGO)(__global ulong *input, __global uint4 *Scratchpad, __global ulong *states, uint Threads)
 {
-	ulong State[25];
 	uint ExpandedKey1[40];
 	__local uint AES0[256], AES1[256], AES2[256], AES3[256];
 	uint4 text;
 
-	const ulong gIdx = getIdx();
+    const uint gIdx = getIdx();
 
-	for(int i = get_local_id(1) * WORKSIZE + get_local_id(0);
+	for(int i = get_local_id(1) * 8 + get_local_id(0);
 		i < 256;
-		i += WORKSIZE * 8)
+		i += 8 * 8)
 	{
 		const uint tmp = AES0_C[i];
 		AES0[i] = tmp;
@@ -465,6 +401,8 @@ __kernel void JOIN(cn0,ALGO)(__global ulong *input, __global uint4 *Scratchpad, 
 		AES2[i] = rotate(tmp, 16U);
 		AES3[i] = rotate(tmp, 24U);
 	}
+
+    __local ulong State_buf[8 * 25];
 
 	barrier(CLK_LOCAL_MEM_FENCE);
 
@@ -480,45 +418,57 @@ __kernel void JOIN(cn0,ALGO)(__global ulong *input, __global uint4 *Scratchpad, 
 #elif(STRIDED_INDEX==1)
 		Scratchpad += gIdx;
 #elif(STRIDED_INDEX==2)
-		Scratchpad += get_group_id(0) * (MEMORY >> 4) * WORKSIZE + MEM_CHUNK * get_local_id(0);
+        Scratchpad += (gIdx / WORKSIZE) * (MEMORY >> 4) * WORKSIZE + MEM_CHUNK * (gIdx % WORKSIZE);
 #endif
 
-		((ulong8 *)State)[0] = vload8(0, input);
+        if (get_local_id(1) == 0)
+        {
+            __local ulong* State = State_buf + get_local_id(0) * 25;
+
+            ((__local ulong8 *)State)[0] = vload8(0, input);
 		State[8] = input[8];
 		State[9] = input[9];
 		State[10] = input[10];
 
-		((uint *)State)[9] &= 0x00FFFFFFU;
-		((uint *)State)[9] |= (((uint)get_global_id(0)) & 0xFF) << 24;
-		((uint *)State)[10] &= 0xFF000000U;
+            ((__local uint *)State)[9]  &= 0x00FFFFFFU;
+            ((__local uint *)State)[9]  |= (((uint)get_global_id(0)) & 0xFF) << 24;
+            ((__local uint *)State)[10] &= 0xFF000000U;
 		/* explicit cast to `uint` is required because some OpenCL implementations (e.g. NVIDIA)
 		 * handle get_global_id and get_global_offset as signed long long int and add
 		 * 0xFFFFFFFF... to `get_global_id` if we set on host side a 32bit offset where the first bit is `1`
 		 * (even if it is correct casted to unsigned on the host)
 		 */
-		((uint *)State)[10] |= (((uint)get_global_id(0) >> 8));
+            ((__local uint *)State)[10] |= (((uint)get_global_id(0) >> 8));
 
-		for(int i = 11; i < 25; ++i) State[i] = 0x00UL;
+            for (int i = 11; i < 25; ++i) {
+                State[i] = 0x00UL;
+            }
 
 		// Last bit of padding
 		State[16] = 0x8000000000000000UL;
 
 		keccakf1600_2(State);
+
+            #pragma unroll
+            for (int i = 0; i < 25; ++i) {
+                states[i] = State[i];
+            }
+        }
 	}
 
-	mem_fence(CLK_GLOBAL_MEM_FENCE);
-#if(COMP_MODE==1)
-	// do not use early return here
-	if(gIdx < Threads)
-#endif
-	{
-		#pragma unroll
-		for(int i = 0; i < 25; ++i) states[i] = State[i];
+    barrier(CLK_GLOBAL_MEM_FENCE);
 
+#   if (COMP_MODE == 1)
+	// do not use early return here
+    if (gIdx < Threads)
+#   endif
+	{
 		text = vload4(get_local_id(1) + 4, (__global uint *)(states));
 
 		#pragma unroll
-		for(int i = 0; i < 4; ++i) ((ulong *)ExpandedKey1)[i] = states[i];
+        for (int i = 0; i < 4; ++i) {
+            ((ulong *)ExpandedKey1)[i] = states[i];
+        }
 
 		AESExpandKey256(ExpandedKey1);
 	}
@@ -527,22 +477,30 @@ __kernel void JOIN(cn0,ALGO)(__global ulong *input, __global uint4 *Scratchpad, 
 
 // cryptonight_heavy
 #if (ALGO == 4)
-	__local uint4 xin[8][WORKSIZE];
+    {
+        __local uint4 xin[8][8];
 
-	/* Also left over threads perform this loop.
-	 * The left over thread results will be ignored
-	 */
-	#pragma unroll 16
-	for(size_t i=0; i < 16; i++)
-	{
+	    /* Also left over threads perform this loop.
+	     * The left over thread results will be ignored
+	     */
+	    #pragma unroll 16
+        for (size_t i = 0; i < 16; i++) {
 		#pragma unroll 10
-		for(int j = 0; j < 10; ++j)
-			text = AES_Round(AES0, AES1, AES2, AES3, text, ((uint4 *)ExpandedKey1)[j]);
-		barrier(CLK_LOCAL_MEM_FENCE);
-		xin[get_local_id(1)][get_local_id(0)] = text;
-		barrier(CLK_LOCAL_MEM_FENCE);
-		text = mix_and_propagate(xin);
-	}
+            for (int j = 0; j < 10; ++j) {
+                uint4 t = ((uint4 *)ExpandedKey1)[j];
+                t.s0 ^= AES0[BYTE(text.s0, 0)] ^ AES1[BYTE(text.s1, 1)] ^ AES2[BYTE(text.s2, 2)] ^ AES3[BYTE(text.s3, 3)];
+                t.s1 ^= AES0[BYTE(text.s1, 0)] ^ AES1[BYTE(text.s2, 1)] ^ AES2[BYTE(text.s3, 2)] ^ AES3[BYTE(text.s0, 3)];
+                t.s2 ^= AES0[BYTE(text.s2, 0)] ^ AES1[BYTE(text.s3, 1)] ^ AES2[BYTE(text.s0, 2)] ^ AES3[BYTE(text.s1, 3)];
+                t.s3 ^= AES0[BYTE(text.s3, 0)] ^ AES1[BYTE(text.s0, 1)] ^ AES2[BYTE(text.s1, 2)] ^ AES3[BYTE(text.s2, 3)];
+                text = t;
+            }
+
+		    barrier(CLK_LOCAL_MEM_FENCE);
+		    xin[get_local_id(1)][get_local_id(0)] = text;
+		    barrier(CLK_LOCAL_MEM_FENCE);
+		    text = mix_and_propagate(xin);
+	    }
+    }
 #endif
 
 #if(COMP_MODE==1)
@@ -552,17 +510,25 @@ __kernel void JOIN(cn0,ALGO)(__global ulong *input, __global uint4 *Scratchpad, 
 	{
 
 		#pragma unroll 2
-		for(int i = 0; i < (MEMORY >> 7); ++i)
-		{
-			#pragma unroll
-			for(int j = 0; j < 10; ++j)
-				text = AES_Round(AES0, AES1, AES2, AES3, text, ((uint4 *)ExpandedKey1)[j]);
+        for(int i = 0; i < (MEMORY >> 4); i += 8) {
+            #pragma unroll 10
+            for (int j = 0; j < 10; ++j) {
+                uint4 t = ((uint4 *)ExpandedKey1)[j];
+                t.s0 ^= AES0[BYTE(text.s0, 0)] ^ AES1[BYTE(text.s1, 1)] ^ AES2[BYTE(text.s2, 2)] ^ AES3[BYTE(text.s3, 3)];
+                t.s1 ^= AES0[BYTE(text.s1, 0)] ^ AES1[BYTE(text.s2, 1)] ^ AES2[BYTE(text.s3, 2)] ^ AES3[BYTE(text.s0, 3)];
+                t.s2 ^= AES0[BYTE(text.s2, 0)] ^ AES1[BYTE(text.s3, 1)] ^ AES2[BYTE(text.s0, 2)] ^ AES3[BYTE(text.s1, 3)];
+                t.s3 ^= AES0[BYTE(text.s3, 0)] ^ AES1[BYTE(text.s0, 1)] ^ AES2[BYTE(text.s1, 2)] ^ AES3[BYTE(text.s2, 3)];
+                text = t;
+            }
 
-			Scratchpad[IDX((i << 3) + get_local_id(1))] = text;
+            Scratchpad[IDX(i + get_local_id(1))] = text;
 		}
 	}
 	mem_fence(CLK_GLOBAL_MEM_FENCE);
 }
+
+)==="
+R"===(
 
 // cryptonight_monero_v8 && NVIDIA
 #if(ALGO==11 && defined(__NV_CL_C_VERSION))
@@ -573,7 +539,7 @@ __kernel void JOIN(cn0,ALGO)(__global ulong *input, __global uint4 *Scratchpad, 
 #endif
 
 __attribute__((reqd_work_group_size(WORKSIZE, 1, 1)))
-__kernel void JOIN(cn1,ALGO) (__global uint4 *Scratchpad, __global ulong *states, ulong Threads
+__kernel void JOIN(cn1,ALGO) (__global uint4 *Scratchpad, __global ulong *states, uint Threads
 // cryptonight_monero || cryptonight_aeon || cryptonight_ipbc || cryptonight_stellite
 #if(ALGO == 3 || ALGO == 5 || ALGO == 6 || ALGO == 7)
 , __global ulong *input
@@ -603,7 +569,7 @@ __kernel void JOIN(cn1,ALGO) (__global uint4 *Scratchpad, __global ulong *states
 	uint2 division_result;
 	uint sqrt_result;
 #endif
-	const ulong gIdx = getIdx();
+    const uint gIdx = getIdx();
 
 	for(int i = get_local_id(0); i < 256; i += WORKSIZE)
 	{
@@ -811,20 +777,16 @@ __kernel void JOIN(cn1,ALGO) (__global uint4 *Scratchpad, __global ulong *states
 )==="
 R"===(
 
-__attribute__((reqd_work_group_size(WORKSIZE, 8, 1)))
-__kernel void JOIN(cn2,ALGO) (__global uint4 *Scratchpad, __global ulong *states, __global uint *Branch0, __global uint *Branch1, __global uint *Branch2, __global uint *Branch3, ulong Threads)
+__attribute__((reqd_work_group_size(8, 8, 1)))
+__kernel void JOIN(cn2,ALGO) (__global uint4 *Scratchpad, __global ulong *states, __global uint *Branch0, __global uint *Branch1, __global uint *Branch2, __global uint *Branch3, uint Threads)
 {
 	__local uint AES0[256], AES1[256], AES2[256], AES3[256];
 	uint ExpandedKey2[40];
-	ulong State[25];
 	uint4 text;
 
-	const ulong gIdx = getIdx();
+    const uint gIdx = getIdx();
 
-	for(int i = get_local_id(1) * WORKSIZE + get_local_id(0);
-		i < 256;
-		i += WORKSIZE * 8)
-	{
+    for (int i = get_local_id(1) * 8 + get_local_id(0); i < 256; i += 8 * 8) {
 		const uint tmp = AES0_C[i];
 		AES0[i] = tmp;
 		AES1[i] = rotate(tmp, 8U);
@@ -845,7 +807,7 @@ __kernel void JOIN(cn2,ALGO) (__global uint4 *Scratchpad, __global ulong *states
 #elif(STRIDED_INDEX==1)
 		Scratchpad += gIdx;
 #elif(STRIDED_INDEX==2)
-		Scratchpad += get_group_id(0) * (MEMORY >> 4) * WORKSIZE + MEM_CHUNK * get_local_id(0);
+        Scratchpad += (gIdx / WORKSIZE) * (MEMORY >> 4) * WORKSIZE + MEM_CHUNK * (gIdx % WORKSIZE);
 #endif
 
 		#if defined(__Tahiti__) || defined(__Pitcairn__)
@@ -866,51 +828,51 @@ __kernel void JOIN(cn2,ALGO) (__global uint4 *Scratchpad, __global ulong *states
 	barrier(CLK_LOCAL_MEM_FENCE);
 
 #if (ALGO == 4)
-	__local uint4 xin[8][WORKSIZE];
+    __local uint4 xin1[8][8];
+    __local uint4 xin2[8][8];
+    __local uint4* xin1_store = &xin1[get_local_id(1)][get_local_id(0)];
+    __local uint4* xin1_load = &xin1[(get_local_id(1) + 1) % 8][get_local_id(0)];
+    __local uint4* xin2_store = &xin2[get_local_id(1)][get_local_id(0)];
+    __local uint4* xin2_load = &xin2[(get_local_id(1) + 1) % 8][get_local_id(0)];
+    *xin2_store = (uint4)(0, 0, 0, 0);
 #endif
 
-#if(COMP_MODE==1)
+#if(COMP_MODE == 1)
 	// do not use early return here
-	if(gIdx < Threads)
+    if (gIdx < Threads)
 #endif
 	{
 #if (ALGO == 4)
 		#pragma unroll 2
-		for(int i = 0; i < (MEMORY >> 7); ++i)
+        for(int i = 0, i1 = get_local_id(1); i < (MEMORY >> 7); ++i, i1 = (i1 + 16) % (MEMORY >> 4))
 		{
-			text ^= Scratchpad[IDX((i << 3) + get_local_id(1))];
+            text ^= Scratchpad[IDX(i1)];
+            barrier(CLK_LOCAL_MEM_FENCE);
+            text ^= *xin2_load;
 
 			#pragma unroll 10
 			for(int j = 0; j < 10; ++j)
 				text = AES_Round(AES0, AES1, AES2, AES3, text, ((uint4 *)ExpandedKey2)[j]);
 
+            *xin1_store = text;
 
+            text ^= Scratchpad[IDX(i1 + 8)];
 			barrier(CLK_LOCAL_MEM_FENCE);
-			xin[get_local_id(1)][get_local_id(0)] = text;
-			barrier(CLK_LOCAL_MEM_FENCE);
-			text = mix_and_propagate(xin);
-		}
-
-		#pragma unroll 2
-		for(int i = 0; i < (MEMORY >> 7); ++i)
-		{
-			text ^= Scratchpad[IDX((i << 3) + get_local_id(1))];
+            text ^= *xin1_load;
 
 			#pragma unroll 10
 			for(int j = 0; j < 10; ++j)
 				text = AES_Round(AES0, AES1, AES2, AES3, text, ((uint4 *)ExpandedKey2)[j]);
 
+            *xin2_store = text;
+        }
 
 			barrier(CLK_LOCAL_MEM_FENCE);
-			xin[get_local_id(1)][get_local_id(0)] = text;
-			barrier(CLK_LOCAL_MEM_FENCE);
-			text = mix_and_propagate(xin);
-		}
+        text ^= *xin2_load;
 
 #else
 		#pragma unroll 2
-		for(int i = 0; i < (MEMORY >> 7); ++i)
-		{
+        for (int i = 0; i < (MEMORY >> 7); ++i) {
 			text ^= Scratchpad[IDX((i << 3) + get_local_id(1))];
 
 			#pragma unroll 10
@@ -920,24 +882,26 @@ __kernel void JOIN(cn2,ALGO) (__global uint4 *Scratchpad, __global ulong *states
 #endif
 	}
 
-// cryptonight_heavy
 #if (ALGO == 4)
 	/* Also left over threads perform this loop.
 	 * The left over thread results will be ignored
 	 */
 	#pragma unroll 16
-	for(size_t i=0; i < 16; i++)
+    for(size_t i = 0; i < 16; i++)
 	{
 		#pragma unroll 10
-		for(int j = 0; j < 10; ++j)
+        for (int j = 0; j < 10; ++j) {
 			text = AES_Round(AES0, AES1, AES2, AES3, text, ((uint4 *)ExpandedKey2)[j]);
+        }
+
 		barrier(CLK_LOCAL_MEM_FENCE);
-		xin[get_local_id(1)][get_local_id(0)] = text;
+        *xin1_store = text;
 		barrier(CLK_LOCAL_MEM_FENCE);
-		text = mix_and_propagate(xin);
+        text ^= *xin1_load;
 	}
 #endif
 
+    __local ulong State_buf[8 * 25];
 #if(COMP_MODE==1)
 	// do not use early return here
 	if(gIdx < Threads)
@@ -955,13 +919,15 @@ __kernel void JOIN(cn2,ALGO) (__global uint4 *Scratchpad, __global ulong *states
 	{
 		if(!get_local_id(1))
 		{
+            __local ulong* State = State_buf + get_local_id(0) * 25;
+
 			for(int i = 0; i < 25; ++i) State[i] = states[i];
 
 			keccakf1600_2(State);
 
 			for(int i = 0; i < 25; ++i) states[i] = State[i];
 
-			ulong StateSwitch = State[0] & 3;
+            uint StateSwitch = State[0] & 3;
 			__global uint *destinationBranch1 = StateSwitch == 0 ? Branch0 : Branch1;
 			__global uint *destinationBranch2 = StateSwitch == 2 ? Branch2 : Branch3;
 			__global uint *destinationBranch = StateSwitch < 2 ? destinationBranch1 : destinationBranch2;
@@ -980,7 +946,7 @@ R"===(
 
 #define VSWAP4(x)	((((x) >> 24) & 0xFFU) | (((x) >> 8) & 0xFF00U) | (((x) << 8) & 0xFF0000U) | (((x) << 24) & 0xFF000000U))
 
-__kernel void Skein(__global ulong *states, __global uint *BranchBuf, __global uint *output, ulong Target, ulong Threads)
+__kernel void Skein(__global ulong *states, __global uint *BranchBuf, __global uint *output, ulong Target, uint Threads)
 {
 	const ulong idx = get_global_id(0) - get_global_offset(0);
 
@@ -1061,7 +1027,7 @@ __kernel void Skein(__global ulong *states, __global uint *BranchBuf, __global u
 	h7h ^= input[6]; \
 	h7l ^= input[7]
 
-__kernel void JH(__global ulong *states, __global uint *BranchBuf, __global uint *output, ulong Target, ulong Threads)
+__kernel void JH(__global ulong *states, __global uint *BranchBuf, __global uint *output, ulong Target, uint Threads)
 {
 	const uint idx = get_global_id(0) - get_global_offset(0);
 
@@ -1111,11 +1077,11 @@ __kernel void JH(__global ulong *states, __global uint *BranchBuf, __global uint
 				output[outIdx] = BranchBuf[idx] + (uint)get_global_offset(0);
 		}
 	}
-}
+    }
 
 #define SWAP4(x)	as_uint(as_uchar4(x).s3210)
 
-__kernel void Blake(__global ulong *states, __global uint *BranchBuf, __global uint *output, ulong Target, ulong Threads)
+__kernel void Blake(__global ulong *states, __global uint *BranchBuf, __global uint *output, ulong Target, uint Threads)
 {
 	const uint idx = get_global_id(0) - get_global_offset(0);
 
@@ -1189,9 +1155,9 @@ __kernel void Blake(__global ulong *states, __global uint *BranchBuf, __global u
 				output[outIdx] = BranchBuf[idx] + (uint)get_global_offset(0);
 		}
 	}
-}
+    }
 
-__kernel void Groestl(__global ulong *states, __global uint *BranchBuf, __global uint *output, ulong Target, ulong Threads)
+__kernel void Groestl(__global ulong *states, __global uint *BranchBuf, __global uint *output, ulong Target, uint Threads)
 {
 	const uint idx = get_global_id(0) - get_global_offset(0);
 
@@ -1250,6 +1216,6 @@ __kernel void Groestl(__global ulong *states, __global uint *BranchBuf, __global
 				output[outIdx] = BranchBuf[idx] + (uint)get_global_offset(0);
 		}
 	}
-}
+    }
 
 )==="
