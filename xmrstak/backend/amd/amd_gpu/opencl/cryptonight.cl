@@ -479,6 +479,8 @@ __kernel void JOIN(cn0,ALGO)(__global ulong *input, __global uint4 *Scratchpad, 
 #if (ALGO == 4)
     {
         __local uint4 xin[8][8];
+    {
+
 
 	    /* Also left over threads perform this loop.
 	     * The left over thread results will be ignored
@@ -796,6 +798,12 @@ __kernel void JOIN(cn2,ALGO) (__global uint4 *Scratchpad, __global ulong *states
 
 	barrier(CLK_LOCAL_MEM_FENCE);
 
+// cryptonight_heavy || cryptonight_haven || cryptonight_bittube2
+#if (ALGO == 4 || ALGO == 9 || ALGO == 10)
+    __local uint4 xin1[8][8];
+    __local uint4 xin2[8][8];
+#endif
+
 #if(COMP_MODE==1)
 	// do not use early return here
 	if(gIdx < Threads)
@@ -827,9 +835,8 @@ __kernel void JOIN(cn2,ALGO) (__global uint4 *Scratchpad, __global ulong *states
 
 	barrier(CLK_LOCAL_MEM_FENCE);
 
+// cryptonight_heavy
 #if (ALGO == 4)
-    __local uint4 xin1[8][8];
-    __local uint4 xin2[8][8];
     __local uint4* xin1_store = &xin1[get_local_id(1)][get_local_id(0)];
     __local uint4* xin1_load = &xin1[(get_local_id(1) + 1) % 8][get_local_id(0)];
     __local uint4* xin2_store = &xin2[get_local_id(1)][get_local_id(0)];
@@ -882,6 +889,7 @@ __kernel void JOIN(cn2,ALGO) (__global uint4 *Scratchpad, __global ulong *states
 #endif
 	}
 
+// cryptonight_heavy
 #if (ALGO == 4)
 	/* Also left over threads perform this loop.
 	 * The left over thread results will be ignored
