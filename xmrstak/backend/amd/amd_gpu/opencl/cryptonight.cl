@@ -957,7 +957,7 @@ __kernel void Skein(__global ulong *states, __global uint *BranchBuf, __global u
 	const ulong idx = get_global_id(0) - get_global_offset(0);
 
 	// do not use early return here
-	if(idx < Threads)
+    if(idx < BranchBuf[Threads])
 	{
 		states += 25 * BranchBuf[idx];
 
@@ -1038,7 +1038,7 @@ __kernel void JH(__global ulong *states, __global uint *BranchBuf, __global uint
 	const uint idx = get_global_id(0) - get_global_offset(0);
 
 	// do not use early return here
-	if(idx < Threads)
+    if(idx < BranchBuf[Threads])
 	{
 		states += 25 * BranchBuf[idx];
 
@@ -1092,7 +1092,7 @@ __kernel void Blake(__global ulong *states, __global uint *BranchBuf, __global u
 	const uint idx = get_global_id(0) - get_global_offset(0);
 
 	// do not use early return here
-	if(idx < Threads)
+    if(idx < BranchBuf[Threads])
 	{
 		states += 25 * BranchBuf[idx];
 
@@ -1168,7 +1168,7 @@ __kernel void Groestl(__global ulong *states, __global uint *BranchBuf, __global
 	const uint idx = get_global_id(0) - get_global_offset(0);
 
 	// do not use early return here
-	if(idx < Threads)
+    if(idx < BranchBuf[Threads])
 	{
 		states += 25 * BranchBuf[idx];
 
