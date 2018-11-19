@@ -563,7 +563,7 @@ __kernel void JOIN(cn1,ALGO) (__global uint4 *Scratchpad, __global ulong *states
 	ulong b[2];
 	uint4 b_x[1];
 #endif
-	__local uint AES0[256], AES1[256], AES2[256], AES3[256];
+    __local uint AES0[256], AES1[256];
 
 // cryptonight_monero_v8
 #if(ALGO==11)
@@ -578,8 +578,6 @@ __kernel void JOIN(cn1,ALGO) (__global uint4 *Scratchpad, __global ulong *states
 		const uint tmp = AES0_C[i];
 		AES0[i] = tmp;
 		AES1[i] = rotate(tmp, 8U);
-		AES2[i] = rotate(tmp, 16U);
-		AES3[i] = rotate(tmp, 24U);
 // cryptonight_monero_v8
 #if(ALGO==11)
 		RCP[i] = RCP_C[i];
@@ -652,7 +650,7 @@ __kernel void JOIN(cn1,ALGO) (__global uint4 *Scratchpad, __global ulong *states
 #endif
 
 			((uint4 *)c)[0] = SCRATCHPAD_CHUNK(0);
-			((uint4 *)c)[0] = AES_Round(AES0, AES1, AES2, AES3, ((uint4 *)c)[0], ((uint4 *)a)[0]);
+			((uint4 *)c)[0] = AES_Round2(AES0, AES1, ((uint4 *)c)[0], ((uint4 *)a)[0]);
 
 // cryptonight_monero_v8
 #if(ALGO==11)
