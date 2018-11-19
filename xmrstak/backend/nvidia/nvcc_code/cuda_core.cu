@@ -9,6 +9,7 @@
 
 #include "xmrstak/jconf.hpp"
 #include "xmrstak/backend/nvidia/nvcc_code/cuda_fast_int_math_v2.hpp"
+#include "xmrstak/backend/nvidia/nvcc_code/cuda_fast_div_heavy.hpp"
 
 
 #ifdef _WIN32
@@ -615,7 +616,7 @@ __global__ void cryptonight_core_gpu_phase2_quad( int threads, int bfactor, int 
 			{
 				int64_t n = loadGlobal64<uint64_t>( ( (uint64_t *) long_state ) + (( idx0 & MASK ) >> 3));
 				int32_t d = loadGlobal32<uint32_t>( (uint32_t*)(( (uint64_t *) long_state ) + (( idx0 & MASK) >> 3) + 1u ));
-				int64_t q = n / (d | 0x5);
+				int64_t q = fast_div_heavy(n, (d | 0x5));
 
 				if(sub&1)
 					storeGlobal64<uint64_t>( ( (uint64_t *) long_state ) + (( idx0 & MASK ) >> 3), n ^ q );
