@@ -101,6 +101,7 @@ xmrstak::coin_selection coins[] = {
     { "cryptonight_lite_v7",        {cryptonight_aeon,      cryptonight_aeon,       0u },  {cryptonight_aeon,       cryptonight_aeon,       0u },   nullptr },
     { "cryptonight_lite_v7_xor",    {cryptonight_ipbc,      cryptonight_ipbc,       0u },  {cryptonight_aeon,       cryptonight_aeon,       0u },   nullptr },
     { "cryptonight_masari",         {cryptonight_masari,    cryptonight_masari,     0u },  {cryptonight_heavy,      cryptonight_heavy,      0u },   nullptr },
+    { "cryptonight_superfast",      {cryptonight_superfast, cryptonight_superfast,  0u },  {cryptonight_heavy,      cryptonight_heavy,      0u },   nullptr },
     { "cryptonight_v7",             {cryptonight_monero,    cryptonight_monero,     0u },  {cryptonight_monero_v8,  cryptonight_monero_v8,  0u },   nullptr },
     { "cryptonight_v7_stellite",    {cryptonight_stellite,  cryptonight_stellite,   0u },  {cryptonight_monero_v8,  cryptonight_monero_v8,  0u },   nullptr },
     { "cryptonight_v8",             {cryptonight_monero_v8, cryptonight_monero_v8,  0u },  {cryptonight_monero_v8,  cryptonight_monero_v8,  0u },   nullptr },

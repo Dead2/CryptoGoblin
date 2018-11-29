@@ -85,7 +85,7 @@ ALIGN(64) FLATTEN2 void soft_cn_explode_scratchpad(const __m128i* input, __m128i
     xin6 = _mm_load_si128(input + 10);
     xin7 = _mm_load_si128(input + 11);
 
-    if(ALGO == cryptonight_heavy || ALGO == cryptonight_haven || ALGO == cryptonight_bittube2){
+    if(ALGO == cryptonight_heavy || ALGO == cryptonight_haven || ALGO == cryptonight_bittube2 || ALGO == cryptonight_superfast){
         for(size_t i=0; i < 16; i++){
             soft_aes_4round(&k0, &xin0, &xin1, &xin2, &xin3);
             soft_aes_4round(&k1, &xin0, &xin1, &xin2, &xin3);
@@ -221,11 +221,11 @@ ALIGN(64) FLATTEN2 void soft_cn_implode_scratchpad(const __m128i* input, __m128i
         soft_aes_4round(&k8, &xout4, &xout5, &xout6, &xout7);
         soft_aes_4round(&k9, &xout4, &xout5, &xout6, &xout7);
 
-        if(ALGO == cryptonight_heavy || ALGO == cryptonight_haven || ALGO == cryptonight_bittube2)
+        if(ALGO == cryptonight_heavy || ALGO == cryptonight_haven || ALGO == cryptonight_bittube2 || ALGO == cryptonight_superfast)
             mix_and_propagate(xout0, xout1, xout2, xout3, xout4, xout5, xout6, xout7);
     }
 
-    if(ALGO == cryptonight_heavy || ALGO == cryptonight_haven || ALGO == cryptonight_bittube2){
+    if(ALGO == cryptonight_heavy || ALGO == cryptonight_haven || ALGO == cryptonight_bittube2 || ALGO == cryptonight_superfast){
         for (size_t i = 0; i < MEM / sizeof(__m128i); i += 8){
             xout0 = _mm_xor_si128(_mm_load_si128(input + i + 0), xout0);
             xout1 = _mm_xor_si128(_mm_load_si128(input + i + 1), xout1);

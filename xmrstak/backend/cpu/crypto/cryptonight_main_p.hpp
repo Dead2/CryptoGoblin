@@ -220,7 +220,7 @@ extern "C" void cryptonight_v8_double_mainloop_sandybridge_asm(cryptonight_ctx* 
         \
         ((int64_t*)ptr0)[0] = u ^ q; \
         idx0 = d ^ q; \
-    } else if(ALGO == cryptonight_haven){ \
+    } else if(ALGO == cryptonight_haven || ALGO == cryptonight_superfast){ \
         ptr0 = (__m128i *)&l0[idx0 & MASK]; \
         int64_t u  = ((int64_t*)ptr0)[0]; \
         int32_t d  = ((int32_t*)ptr0)[2]; \

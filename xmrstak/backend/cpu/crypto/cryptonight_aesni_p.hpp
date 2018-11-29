@@ -95,7 +95,7 @@ ALIGN(64) FLATTEN2 void cn_explode_scratchpad(const __m128i* input, __m128i* out
     xin6 = _mm_load_si128(input + 10);
     xin7 = _mm_load_si128(input + 11);
 
-    if(ALGO == cryptonight_heavy || ALGO == cryptonight_haven || ALGO == cryptonight_bittube2){
+    if(ALGO == cryptonight_heavy || ALGO == cryptonight_haven || ALGO == cryptonight_bittube2 || ALGO == cryptonight_superfast){
         for(size_t i=0; i < 16; i++){
             aes_8round(k0, &xin0, &xin1, &xin2, &xin3, &xin4, &xin5, &xin6, &xin7);
             aes_8round(k1, &xin0, &xin1, &xin2, &xin3, &xin4, &xin5, &xin6, &xin7);
@@ -201,11 +201,11 @@ ALIGN(64) FLATTEN2 void cn_implode_scratchpad(const __m128i* input, __m128i* out
         aes_8round(k8, &xout0, &xout1, &xout2, &xout3, &xout4, &xout5, &xout6, &xout7);
         aes_8round(k9, &xout0, &xout1, &xout2, &xout3, &xout4, &xout5, &xout6, &xout7);
 
-        if(ALGO == cryptonight_heavy || ALGO == cryptonight_haven || ALGO == cryptonight_bittube2)
+        if(ALGO == cryptonight_heavy || ALGO == cryptonight_haven || ALGO == cryptonight_bittube2 || ALGO == cryptonight_superfast)
             mix_and_propagate(xout0, xout1, xout2, xout3, xout4, xout5, xout6, xout7);
     }
 
-    if(ALGO == cryptonight_heavy || ALGO == cryptonight_haven || ALGO == cryptonight_bittube2){
+    if(ALGO == cryptonight_heavy || ALGO == cryptonight_haven || ALGO == cryptonight_bittube2 || ALGO == cryptonight_superfast){
         for (size_t i = 0; i < MEM / sizeof(__m128i); i += 8){
             if(PREFETCH)
                 _mm_prefetch((const char*)input + i + 0, _MM_HINT_NTA);

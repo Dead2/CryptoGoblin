@@ -285,6 +285,8 @@ testVal oTestValues[] = {
     { "This is a test This is a test This is a test", "\xc7\xd4\x52\x9\x2b\x48\xa5\xaf\xae\x11\xaf\x40\x9a\x87\xe5\x88\xf0\x29\x35\xa3\x68\xd\xe3\x6b\xce\x43\xf6\xc8\xdf\xd3\xe3\x9", 32, cryptonight_haven },
     // TODO: Missing selftest for bittube2
     //{ "This is a test This is a test This is a test", "", 32, cryptonight_bittube2 },
+    // TODO: Missing selftest for cryptonight_superfast
+    //{ "This is a test This is a test This is a test", "", 32, cryptonight_superfast },
 #endif
 };
 
@@ -458,6 +460,9 @@ minethd::cn_hash_fun minethd::func_multi_selector(bool bHaveAes, bool bPrefetch,
         case cryptonight_monero_v8:
             algv = 10;
             break;
+        case cryptonight_superfast:
+            algv = 11;
+            break;
 #endif
         default:
             algv = 0;
@@ -525,7 +530,12 @@ minethd::cn_hash_fun minethd::func_multi_selector(bool bHaveAes, bool bPrefetch,
         Cryptonight_hash<N>::template hash<cryptonight_monero_v8, false, false>,
         Cryptonight_hash<N>::template hash<cryptonight_monero_v8, true, false>,
         Cryptonight_hash<N>::template hash<cryptonight_monero_v8, false, true>,
-        Cryptonight_hash<N>::template hash<cryptonight_monero_v8, true, true>
+        Cryptonight_hash<N>::template hash<cryptonight_monero_v8, true, true>,
+
+        Cryptonight_hash<N>::template hash<cryptonight_superfast, false, false>,
+        Cryptonight_hash<N>::template hash<cryptonight_superfast, true, false>,
+        Cryptonight_hash<N>::template hash<cryptonight_superfast, false, true>,
+        Cryptonight_hash<N>::template hash<cryptonight_superfast, true, true>
 #endif
     };
 

@@ -31,6 +31,7 @@ POOLCONF],
  *    cryptonight_lite_v7_stellite
  *    cryptonight_lite_v8
  *    cryptonight_heavy
+ *    cryptonight_superfast
  *
  *  Currencies:
  *    aeon
@@ -57,6 +58,7 @@ POOLCONF],
  *    cryptonight_lite_v8
  *    # 2MiB scratchpad memory
  *    cryptonight
+ *    cryptonight_superfast
  *    cryptonight_v7
  *    cryptonight_v8
  *    # 4MiB scratchpad memory
