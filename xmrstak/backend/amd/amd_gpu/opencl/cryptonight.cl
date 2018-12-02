@@ -426,8 +426,13 @@ __kernel void JOIN(cn0,ALGO)(__global ulong *input, __global uint4 *Scratchpad, 
         if (get_local_id(1) == 0)
         {
             __local ulong* State = State_buf + get_local_id(0) * 25;
-
+// NVIDIA
+#ifdef __NV_CL_C_VERSION
+			for(uint i = 0; i < 8; ++i)
+				State[i] = input[i];
+#else
             ((__local ulong8 *)State)[0] = vload8(0, input);
+#endif
 		State[8] = input[8];
 		State[9] = input[9];
 		State[10] = input[10];
