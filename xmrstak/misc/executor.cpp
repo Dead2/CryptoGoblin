@@ -1013,6 +1013,7 @@ void executor::connection_report(std::string& out)
         pool = pick_pool_by_id(last_usr_pool_id);
 
     out.append("CONNECTION REPORT\n");
+    out.append("Rig ID          : ").append(pool != nullptr ? pool->get_rigid() : "").append(1, '\n');
     out.append("Pool address    : ").append(pool != nullptr ? pool->get_pool_addr() : "<not connected>").append(1, '\n');
     out.append("Actual address  : ").append(pool->hostname).append(1, '\n');
     if(pool != nullptr && pool->is_running() && pool->is_logged_in())
@@ -1214,6 +1215,7 @@ void executor::http_connection_report(std::string& out)
     }
 
     snprintf(buffer, sizeof(buffer), sHtmlConnectionBodyHigh,
+        pool != nullptr ? pool->get_rigid() : "",
         pool != nullptr ? pool->get_pool_addr() : "not connected",
         cdate, ping_time);
     out.append(buffer);
