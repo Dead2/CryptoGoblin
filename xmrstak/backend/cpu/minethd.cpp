@@ -236,16 +236,18 @@ bool minethd::self_test()
     }
 
     bool bResult = true;
-    xmrstak_algo algo = xmrstak_algo::invalid_algo;
 
-    for(int algo_idx = 0; algo_idx < 2; ++algo_idx)
+    if(xmrstak_algo::invalid_algo == ::jconf::inst()->GetCurrentCoinSelection().GetDescription(0).GetMiningAlgoRoot() ||
+        xmrstak_algo::invalid_algo == ::jconf::inst()->GetCurrentCoinSelection().GetDescription(1).GetMiningAlgoRoot())
     {
-        if(algo_idx == 0)
-            algo = ::jconf::inst()->GetCurrentCoinSelection().GetDescription(1).GetMiningAlgo();
-        else
-            algo = ::jconf::inst()->GetCurrentCoinSelection().GetDescription(1).GetMiningAlgoRoot();
+        printer::inst()->print_msg(L0, "Root algorithm is not allowed to be invalid");
+        return false;
+    }
 
-        // New-style testing
+    auto neededAlgorithms = ::jconf::inst()->GetCurrentCoinSelection().GetAllAlgorithms();
+
+    // New-style testing
+    for(const auto algo : neededAlgorithms){
         bResult = bResult && testrunner<1>(algo, ctx);
         bResult = bResult && testrunner<2>(algo, ctx);
         bResult = bResult && testrunner<3>(algo, ctx);
