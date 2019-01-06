@@ -625,6 +625,7 @@ void executor::ex_main()
 
         case cryptonight_monero_v8:
         case cryptonight_monero:
+        case cryptonight_turtle:
             if(dev_tls)
                 pools.emplace_front(0, "donate.xmr-stak.net:8800", "", "", "", 0.0, true, true, "", false);
             else
