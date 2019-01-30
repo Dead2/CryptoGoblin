@@ -524,3 +524,25 @@ struct Cryptonight_hash_asm<2, 0>{
         }
     }
 };
+
+// Dummy templates
+template< >
+struct Cryptonight_hash_asm<3, 0>{
+    template<xmrstak_algo ALGO, bool PREFETCH>
+    static void hash(const void* input, size_t len, void* output, cryptonight_ctx** ctx){
+    }
+};
+
+template< >
+struct Cryptonight_hash_asm<4, 0>{
+    template<xmrstak_algo ALGO, bool PREFETCH>
+    static void hash(const void* input, size_t len, void* output, cryptonight_ctx** ctx){
+    }
+};
+template< >
+
+struct Cryptonight_hash_asm<5, 0>{
+    template<xmrstak_algo ALGO, bool PREFETCH>
+    static void hash(const void* input, size_t len, void* output, cryptonight_ctx** ctx){
+    }
+};

@@ -95,6 +95,7 @@ xmrstak::coin_selection coins[] = {
     { "bittube",                    {cryptonight_bittube2,  cryptonight_bittube2,   0u },  {cryptonight_heavy,      cryptonight_heavy,      0u },   "mining.bit.tube:13333" },
     { "cryptonight",                {cryptonight,           cryptonight,            0u },  {cryptonight_monero_v8,  cryptonight_monero_v8,  0u },   nullptr },
     { "cryptonight_bittube2",       {cryptonight_bittube2,  cryptonight_bittube2,   0u },  {cryptonight_monero_v8,  cryptonight_monero_v8,  0u },   nullptr },
+    { "cryptonight_gpu",            {cryptonight_gpu,       cryptonight_gpu,        0u },  {cryptonight_gpu,        cryptonight_gpu,        0u },   nullptr },
     { "cryptonight_haven",          {cryptonight_haven,     cryptonight_haven,      0u },  {cryptonight_heavy,      cryptonight_heavy,      0u },   nullptr },
     { "cryptonight_heavy",          {cryptonight_heavy,     cryptonight_heavy,      0u },  {cryptonight_heavy,      cryptonight_heavy,      0u },   nullptr },
     { "cryptonight_lite",           {cryptonight_lite,      cryptonight_lite,       0u },  {cryptonight_aeon,       cryptonight_aeon,       0u },   nullptr },

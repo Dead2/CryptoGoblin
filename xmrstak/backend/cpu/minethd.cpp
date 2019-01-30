@@ -22,6 +22,7 @@
   */
 
 #include "crypto/cryptonight_main_p.hpp"
+#include "crypto/cryptonight_gpu_p.hpp"
 
 #include "xmrstak/misc/console.hpp"
 #include "xmrstak/cli/colors.hpp"
@@ -290,6 +291,8 @@ testVal oTestValues[] = {
     //{ "This is a test This is a test This is a test", "", 32, cryptonight_bittube2 },
     // TODO: Missing selftest for cryptonight_superfast
     //{ "This is a test This is a test This is a test", "", 32, cryptonight_superfast },
+    // TODO: Missing selftest for cryptonight_testrunner
+    //{ "This is a test This is a test This is a test", "", 32, cryptonight_testrunner },
 #endif
 };
 
@@ -466,8 +469,11 @@ minethd::cn_hash_fun minethd::func_multi_selector(bool bHaveAes, bool bPrefetch,
         case cryptonight_superfast:
             algv = 11;
             break;
-        case cryptonight_turtle:
+        case cryptonight_gpu:
             algv = 12;
+            break;
+        case cryptonight_turtle:
+            algv = 13;
             break;
 #endif
         default:
@@ -542,6 +548,11 @@ minethd::cn_hash_fun minethd::func_multi_selector(bool bHaveAes, bool bPrefetch,
         Cryptonight_hash<N>::template hash<cryptonight_superfast, true, false>,
         Cryptonight_hash<N>::template hash<cryptonight_superfast, false, true>,
         Cryptonight_hash<N>::template hash<cryptonight_superfast, true, true>,
+
+        Cryptonight_hash_gpu::template hash<cryptonight_gpu, false, false>,
+        Cryptonight_hash_gpu::template hash<cryptonight_gpu, true, false>,
+        Cryptonight_hash_gpu::template hash<cryptonight_gpu, false, true>,
+        Cryptonight_hash_gpu::template hash<cryptonight_gpu, true, true>,
 
         Cryptonight_hash<N>::template hash<cryptonight_turtle, false, false>,
         Cryptonight_hash<N>::template hash<cryptonight_turtle, true, false>,
