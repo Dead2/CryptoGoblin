@@ -2,6 +2,7 @@
 #include <stddef.h>
 #include <inttypes.h>
 #include <type_traits>
+#include <string>
 
 enum xmrstak_algo
 {
@@ -20,7 +21,69 @@ enum xmrstak_algo
     cryptonight_superfast = 12,
     cryptonight_gpu = 13,
     cryptonight_turtle = 14
+    // please add the algorithm name to get_algo_name()
 };
+
+/** get name of the algorithm
+ *
+ * @param algo mining algorithm
+ */
+inline std::string get_algo_name(xmrstak_algo algo)
+{
+    std::string algo_name;
+    switch(algo)
+    {
+    case invalid_algo:
+        algo_name = "invalid_algo";
+        break;
+    case cryptonight_monero_v8:
+        algo_name = "cryptonight_v8";
+        break;
+#ifndef ONLY_XMR_ALGO
+    case cryptonight:
+        algo_name = "cryptonight";
+        break;
+    case cryptonight_lite:
+        algo_name = "cryptonight_lite";
+        break;
+    case cryptonight_monero:
+        algo_name = "cryptonight_v7";
+        break;
+    case cryptonight_aeon:
+        algo_name = "cryptonight_lite_v7";
+        break;
+    case cryptonight_stellite:
+        algo_name = "cryptonight_v7_stellite";
+        break;
+    case cryptonight_ipbc:
+        algo_name = "cryptonight_lite_v7_xor";
+        break;
+    case cryptonight_heavy:
+        algo_name = "cryptonight_heavy";
+        break;
+    case cryptonight_haven:
+        algo_name = "cryptonight_haven";
+        break;
+    case cryptonight_masari:
+        algo_name = "cryptonight_masari";
+        break;
+    case cryptonight_superfast:
+        algo_name = "cryptonight_superfast";
+        break;
+    case cryptonight_gpu:
+        algo_name = "cryptonight_gpu";
+        break;
+    case cryptonight_turtle:
+        algo_name = "cryptonight_turtle";
+        break;
+#endif
+    default:
+        algo_name = "unknown";
+        break;
+    }
+
+    return algo_name;
+}
 
 // define aeon settings
 constexpr size_t CRYPTONIGHT_LITE_MEMORY = 1 * 1024 * 1024;
