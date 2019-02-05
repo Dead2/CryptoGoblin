@@ -818,6 +818,7 @@ int main(int argc, char *argv[])
     printer::inst()->print_str(CYAN(" '") RED("Q") CYAN("' - quit\n"));
     printer::inst()->print_str(CYAN("-------------------------------------------------------------------)") "\n");
 
+    printer::inst()->print_msg(L0, "Mining coin: %s", ::jconf::inst()->GetCurrentCoinSelection().GetDescription(1).GetMiningAlgo().Name().c_str());
 
     if(params::inst().benchmark_block_version >= 0)
     {

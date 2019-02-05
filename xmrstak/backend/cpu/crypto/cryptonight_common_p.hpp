@@ -36,7 +36,7 @@ FLATTEN void mix_and_propagate(__m128i& x0, __m128i& x1, __m128i& x2, __m128i& x
     x7 = _mm_xor_si128(x7, tmp0);
 }
 
-template<xmrstak_algo ALGO>
+template<xmrstak_algo_id ALGO>
 static void cryptonight_monero_tweak(uint64_t* mem_out, __m128i tmp){
     mem_out[0] = _mm_cvtsi128_si64(tmp);
 
@@ -57,7 +57,7 @@ static void cryptonight_monero_tweak(uint64_t* mem_out, __m128i tmp){
     mem_out[1] = vh;
 }
 
-template<xmrstak_algo ALGO>
+template<xmrstak_algo_id ALGO>
 ALWAYS_INLINE FLATTEN inline static void soft_cryptonight_monero_tweak(uint64_t* mem_out, __m128i tmp){
     mem_out[0] = _mm_cvtsi128_si64(tmp);
 

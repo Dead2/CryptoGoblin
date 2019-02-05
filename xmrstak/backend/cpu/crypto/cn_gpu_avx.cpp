@@ -95,15 +95,18 @@ inline void double_comupte_wrap(const __m256& n0, const __m256& n1, const __m256
     out = _mm256_xor_si256(out, r);
 }
 
-template<uint32_t MASK>
-inline __m256i* scratchpad_ptr(uint8_t* lpad, uint32_t idx, size_t n) { return reinterpret_cast<__m256i*>(lpad + (idx & MASK) + n*16); }
 
-template<size_t ITER, uint32_t MASK>
-void cn_gpu_inner_avx(const uint8_t* spad, uint8_t* lpad)
+inline __m256i* scratchpad_ptr(uint8_t* lpad, uint32_t idx, size_t n, const uint32_t mask) { return reinterpret_cast<__m256i*>(lpad + (idx & mask) + n*16); }
+
+
+void cn_gpu_inner_avx(const uint8_t* spad, uint8_t* lpad, const xmrstak_algo& algo)
 {
+    const uint32_t ITER = algo.Iter();
+    const uint32_t mask = algo.Mask();
+
     uint32_t s = reinterpret_cast<const uint32_t*>(spad)[0] >> 8;
-    __m256i* idx0 = scratchpad_ptr<MASK>(lpad, s, 0);
-    __m256i* idx2 = scratchpad_ptr<MASK>(lpad, s, 2);
+    __m256i* idx0 = scratchpad_ptr(lpad, s, 0, mask);
+    __m256i* idx2 = scratchpad_ptr(lpad, s, 2, mask);
     __m256 sum0 = _mm256_setzero_ps();
 
     for(size_t i = 0; i < ITER; i++)
@@ -168,9 +171,7 @@ void cn_gpu_inner_avx(const uint8_t* spad, uint8_t* lpad)
         sum = _mm_div_ps(sum, _mm_set1_ps(64.0f));
         sum0 = _mm256_insertf128_ps(_mm256_castps128_ps256(sum), sum, 1);
         uint32_t n = _mm_cvtsi128_si32(v0);
-        idx0 = scratchpad_ptr<MASK>(lpad, n, 0);
-        idx2 = scratchpad_ptr<MASK>(lpad, n, 2);
+        idx0 = scratchpad_ptr(lpad, n, 0, mask);
+        idx2 = scratchpad_ptr(lpad, n, 2, mask);
     }
 }
-
-template void cn_gpu_inner_avx<CRYPTONIGHT_GPU_ITER, CRYPTONIGHT_GPU_MASK>(const uint8_t* spad, uint8_t* lpad);

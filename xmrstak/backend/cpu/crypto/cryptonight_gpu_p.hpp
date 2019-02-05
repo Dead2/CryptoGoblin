@@ -1,12 +1,13 @@
 #include "cn_gpu.hpp"
 
-template<size_t MEM, bool PREFETCH, xmrstak_algo ALGO>
-void cn_explode_scratchpad_gpu(const uint8_t* input, uint8_t* output)
+template<bool PREFETCH, xmrstak_algo_id ALGO>
+void cn_explode_scratchpad_gpu(const uint8_t* input, uint8_t* output, const xmrstak_algo& algo)
 {
     constexpr size_t hash_size = 200; // 25x8 bytes
     alignas(128) uint64_t hash[25];
+    const size_t mem = algo.Mem();
 
-    for (uint64_t i = 0; i < MEM / 512; i++)
+    for (uint64_t i = 0; i < mem / 512; i++)
     {
         memcpy(hash, input, hash_size);
         hash[0] ^= i;
@@ -37,22 +38,18 @@ struct Cryptonight_hash_gpu
 {
     static constexpr size_t N = 1;
 
-    template<xmrstak_algo ALGO, bool SOFT_AES, bool PREFETCH>
-    static void hash(const void* input, size_t len, void* output, cryptonight_ctx** ctx)
+    template<xmrstak_algo_id ALGO, bool SOFT_AES, bool PREFETCH>
+    static void hash(const void* input, size_t len, void* output, cryptonight_ctx** ctx, const xmrstak_algo& algo)
     {
-        constexpr size_t MASK = cn_select_mask<ALGO>();
-        constexpr size_t ITERATIONS = cn_select_iter<ALGO>();
-        constexpr size_t MEM = cn_select_memory<ALGO>();
-
         keccak_200((const uint8_t *)input, len, ctx[0]->hash_state);
-        cn_explode_scratchpad_gpu<MEM, PREFETCH, ALGO>(ctx[0]->hash_state, ctx[0]->long_state);
+        cn_explode_scratchpad_gpu<PREFETCH, ALGO>(ctx[0]->hash_state, ctx[0]->long_state, algo);
 
         if(cngpu_check_avx2())
-            cn_gpu_inner_avx<ITERATIONS, MASK>(ctx[0]->hash_state, ctx[0]->long_state);
+            cn_gpu_inner_avx(ctx[0]->hash_state, ctx[0]->long_state, algo);
         else
-            cn_gpu_inner_ssse3<ITERATIONS, MASK>(ctx[0]->hash_state, ctx[0]->long_state);
+            cn_gpu_inner_ssse3(ctx[0]->hash_state, ctx[0]->long_state, algo);
 
-        cn_implode_scratchpad<MEM, SOFT_AES, PREFETCH, ALGO>((__m128i*)ctx[0]->long_state, (__m128i*)ctx[0]->hash_state);
+        cn_implode_scratchpad<ALGO, PREFETCH>((__m128i*)ctx[0]->long_state, (__m128i*)ctx[0]->hash_state, algo);
         keccakf_24((uint64_t*)ctx[0]->hash_state);
         memcpy(output, ctx[0]->hash_state, 32);
     }

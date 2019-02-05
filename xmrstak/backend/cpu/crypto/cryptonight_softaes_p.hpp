@@ -61,9 +61,11 @@ FLATTEN static inline void soft_aes_genkey(const __m128i* memory, __m128i* k0, _
     *k9 = xout2;
 }
 
-template<xmrstak_algo ALGO, size_t MEM, bool PREFETCH>
+template<xmrstak_algo_id ALGO, bool PREFETCH>
 TARGETS("sse4.1,ssse3,default")
-ALIGN(64) FLATTEN2 void soft_cn_explode_scratchpad(const __m128i* input, __m128i* output){
+ALIGN(64) FLATTEN2 void soft_cn_explode_scratchpad(const __m128i* input, __m128i* output, const xmrstak_algo& algo){
+    constexpr bool HEAVY_MIX = ALGO == cryptonight_heavy || ALGO == cryptonight_haven || ALGO == cryptonight_bittube2 || ALGO == cryptonight_superfast;
+
     // This is more than we have registers, compiler will assign 2 keys on the stack
     __m128i xin0, xin1, xin2, xin3, xin4, xin5, xin6, xin7;
     __m128i k0, k1, k2, k3, k4, k5, k6, k7, k8, k9;
@@ -85,7 +87,7 @@ ALIGN(64) FLATTEN2 void soft_cn_explode_scratchpad(const __m128i* input, __m128i
     xin6 = _mm_load_si128(input + 10);
     xin7 = _mm_load_si128(input + 11);
 
-    if(ALGO == cryptonight_heavy || ALGO == cryptonight_haven || ALGO == cryptonight_bittube2 || ALGO == cryptonight_superfast){
+    if(HEAVY_MIX){
         for(size_t i=0; i < 16; i++){
             soft_aes_4round(&k0, &xin0, &xin1, &xin2, &xin3);
             soft_aes_4round(&k1, &xin0, &xin1, &xin2, &xin3);
@@ -113,6 +115,7 @@ ALIGN(64) FLATTEN2 void soft_cn_explode_scratchpad(const __m128i* input, __m128i
         }
     }
 
+    const size_t MEM = algo.Mem();
     for (size_t i = 0; i < MEM / sizeof(__m128i); i += 8){
         soft_aes_4round(&k0, &xin0, &xin1, &xin2, &xin3);
         soft_aes_4round(&k1, &xin0, &xin1, &xin2, &xin3);
@@ -155,9 +158,11 @@ ALIGN(64) FLATTEN2 void soft_cn_explode_scratchpad(const __m128i* input, __m128i
     }
 }
 
-template<xmrstak_algo ALGO, size_t MEM, bool PREFETCH>
+template<xmrstak_algo_id ALGO, bool PREFETCH>
 TARGETS("sse4.1,ssse3,default")
-ALIGN(64) FLATTEN2 void soft_cn_implode_scratchpad(const __m128i* input, __m128i* output){
+ALIGN(64) FLATTEN2 void soft_cn_implode_scratchpad(const __m128i* input, __m128i* output, const xmrstak_algo& algo){
+    constexpr bool HEAVY_MIX = ALGO == cryptonight_heavy || ALGO == cryptonight_haven || ALGO == cryptonight_bittube2 || ALGO == cryptonight_superfast;
+
     // This is more than we have registers, compiler will assign 2 keys on the stack
     __m128i xout0, xout1, xout2, xout3, xout4, xout5, xout6, xout7;
     __m128i k0, k1, k2, k3, k4, k5, k6, k7, k8, k9;
@@ -184,6 +189,7 @@ ALIGN(64) FLATTEN2 void soft_cn_implode_scratchpad(const __m128i* input, __m128i
     xout6 = _mm_load_si128(output + 10);
     xout7 = _mm_load_si128(output + 11);
 
+    const size_t MEM = algo.Mem();
     for (size_t i = 0; i < MEM / sizeof(__m128i); i += 8){
         xout0 = _mm_xor_si128(_mm_load_si128(input + i + 0), xout0);
         xout1 = _mm_xor_si128(_mm_load_si128(input + i + 1), xout1);
@@ -221,11 +227,11 @@ ALIGN(64) FLATTEN2 void soft_cn_implode_scratchpad(const __m128i* input, __m128i
         soft_aes_4round(&k8, &xout4, &xout5, &xout6, &xout7);
         soft_aes_4round(&k9, &xout4, &xout5, &xout6, &xout7);
 
-        if(ALGO == cryptonight_heavy || ALGO == cryptonight_haven || ALGO == cryptonight_bittube2 || ALGO == cryptonight_superfast)
+        if(HEAVY_MIX)
             mix_and_propagate(xout0, xout1, xout2, xout3, xout4, xout5, xout6, xout7);
     }
 
-    if(ALGO == cryptonight_heavy || ALGO == cryptonight_haven || ALGO == cryptonight_bittube2 || ALGO == cryptonight_superfast){
+    if(HEAVY_MIX){
         for (size_t i = 0; i < MEM / sizeof(__m128i); i += 8){
             xout0 = _mm_xor_si128(_mm_load_si128(input + i + 0), xout0);
             xout1 = _mm_xor_si128(_mm_load_si128(input + i + 1), xout1);

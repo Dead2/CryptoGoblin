@@ -94,17 +94,18 @@ inline void single_comupte_wrap(__m128 n0, __m128 n1, __m128 n2,  __m128 n3, flo
     out = _mm_xor_si128(out, r);
 }
 
-template<uint32_t MASK>
-inline __m128i* scratchpad_ptr(uint8_t* lpad, uint32_t idx, size_t n) { return reinterpret_cast<__m128i*>(lpad + (idx & MASK) + n*16); }
+inline __m128i* scratchpad_ptr(uint8_t* lpad, uint32_t idx, size_t n, const uint32_t mask) { return reinterpret_cast<__m128i*>(lpad + (idx & mask) + n*16); }
 
-template<size_t ITER, uint32_t MASK>
-void cn_gpu_inner_ssse3(const uint8_t* spad, uint8_t* lpad)
+void cn_gpu_inner_ssse3(const uint8_t* spad, uint8_t* lpad, const xmrstak_algo& algo)
 {
+    const uint32_t ITER = algo.Iter();
+    const uint32_t mask = algo.Mask();
+
     uint32_t s = reinterpret_cast<const uint32_t*>(spad)[0] >> 8;
-    __m128i* idx0 = scratchpad_ptr<MASK>(lpad, s, 0);
-    __m128i* idx1 = scratchpad_ptr<MASK>(lpad, s, 1);
-    __m128i* idx2 = scratchpad_ptr<MASK>(lpad, s, 2);
-    __m128i* idx3 = scratchpad_ptr<MASK>(lpad, s, 3);
+    __m128i* idx0 = scratchpad_ptr(lpad, s, 0, mask);
+    __m128i* idx1 = scratchpad_ptr(lpad, s, 1, mask);
+    __m128i* idx2 = scratchpad_ptr(lpad, s, 2, mask);
+    __m128i* idx3 = scratchpad_ptr(lpad, s, 3, mask);
     __m128 sum0 = _mm_setzero_ps();
 
     for(size_t i = 0; i < ITER; i++)
@@ -172,11 +173,9 @@ void cn_gpu_inner_ssse3(const uint8_t* spad, uint8_t* lpad)
         // vs is now between 0 and 1
         sum0 = _mm_div_ps(sum0, _mm_set1_ps(64.0f));
         uint32_t n = _mm_cvtsi128_si32(v0);
-        idx0 = scratchpad_ptr<MASK>(lpad, n, 0);
-        idx1 = scratchpad_ptr<MASK>(lpad, n, 1);
-        idx2 = scratchpad_ptr<MASK>(lpad, n, 2);
-        idx3 = scratchpad_ptr<MASK>(lpad, n, 3);
+        idx0 = scratchpad_ptr(lpad, n, 0, mask);
+        idx1 = scratchpad_ptr(lpad, n, 1, mask);
+        idx2 = scratchpad_ptr(lpad, n, 2, mask);
+        idx3 = scratchpad_ptr(lpad, n, 3, mask);
     }
 }
-
-template void cn_gpu_inner_ssse3<CRYPTONIGHT_GPU_ITER, CRYPTONIGHT_GPU_MASK>(const uint8_t* spad, uint8_t* lpad);

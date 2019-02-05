@@ -238,13 +238,6 @@ bool minethd::self_test()
 
     bool bResult = true;
 
-    if(xmrstak_algo::invalid_algo == ::jconf::inst()->GetCurrentCoinSelection().GetDescription(0).GetMiningAlgoRoot() ||
-        xmrstak_algo::invalid_algo == ::jconf::inst()->GetCurrentCoinSelection().GetDescription(1).GetMiningAlgoRoot())
-    {
-        printer::inst()->print_msg(L0, "Root algorithm is not allowed to be invalid");
-        return false;
-    }
-
     auto neededAlgorithms = ::jconf::inst()->GetCurrentCoinSelection().GetAllAlgorithms();
 
     // New-style testing
@@ -316,8 +309,8 @@ void printhex(const char *label, char *buffer, uint16_t len){
 }
 
 template<uint8_t MULTIPLE>
-bool minethd::testrunner(xmrstak_algo algo, cryptonight_ctx **ctx){
-    testVal currTest = getSelftestValues(algo);
+bool minethd::testrunner(const xmrstak_algo& algo, cryptonight_ctx **ctx){
+    testVal currTest = getSelftestValues(algo.Id());
     cn_hash_fun hashf;
     unsigned char out[32 * MULTIPLE];
 
@@ -335,12 +328,12 @@ bool minethd::testrunner(xmrstak_algo algo, cryptonight_ctx **ctx){
 
     // Without prefetch
     hashf = func_multi_selector<MULTIPLE>(::jconf::inst()->HaveHardwareAes(), false, algo);
-    hashf(testString, testStringLen, out, ctx);
+    hashf(testString, testStringLen, out, ctx, algo);
     bool bResult = memcmp(out, testResult, testResultLen) == 0;
 
     // With prefetch
     hashf = func_multi_selector<MULTIPLE>(::jconf::inst()->HaveHardwareAes(), true, algo);
-    hashf(testString, testStringLen, out, ctx);
+    hashf(testString, testStringLen, out, ctx, algo);
     bResult = bResult &&  memcmp(out, testResult, testResultLen) == 0;
 
     if (!bResult){
@@ -351,6 +344,7 @@ bool minethd::testrunner(xmrstak_algo algo, cryptonight_ctx **ctx){
 
     return bResult;
 }
+
 
 std::vector<iBackend*> minethd::thread_starter(uint32_t threadOffset, miner_work& pWork)
 {
@@ -421,7 +415,7 @@ static std::string getAsmName(const uint32_t num_hashes)
 }
 
 template<size_t N>
-minethd::cn_hash_fun minethd::func_multi_selector(bool bHaveAes, bool bPrefetch, xmrstak_algo algo, const std::string& asm_version_str)
+minethd::cn_hash_fun minethd::func_multi_selector(bool bHaveAes, bool bPrefetch, const xmrstak_algo& algo, const std::string& asm_version_str)
 {
     static_assert(N >= 1, "number of threads must be >= 1" );
 
@@ -430,31 +424,35 @@ minethd::cn_hash_fun minethd::func_multi_selector(bool bHaveAes, bool bPrefetch,
     // function as a two digit binary
 
     uint8_t algv;
-    switch(algo)
+    switch(algo.Id())
     {
+#ifdef ONLY_XMR_ALGO
         case cryptonight_monero_v8:
             algv = 0;
             break;
-#ifndef ONLY_XMR_ALGO
+#else
         case cryptonight_monero:
-            algv = 1;
+            algv = 0;
             break;
         case cryptonight_lite:
-            algv = 2;
+            algv = 1;
             break;
         case cryptonight:
-            algv = 3;
+            algv = 2;
             break;
         case cryptonight_heavy:
-            algv = 4;
+            algv = 3;
             break;
         case cryptonight_aeon:
-            algv = 5;
+            algv = 4;
             break;
         case cryptonight_ipbc:
-            algv = 6;
+            algv = 5;
             break;
         case cryptonight_stellite:
+            algv = 6;
+            break;
+        case cryptonight_masari:
             algv = 7;
             break;
         case cryptonight_haven:
@@ -483,12 +481,13 @@ minethd::cn_hash_fun minethd::func_multi_selector(bool bHaveAes, bool bPrefetch,
     }
 
     static const cn_hash_fun func_table[] = {
+#ifdef ONLY_XMR_ALGO
         Cryptonight_hash<N>::template hash<cryptonight_monero_v8, false, false>,
         Cryptonight_hash<N>::template hash<cryptonight_monero_v8, true, false>,
         Cryptonight_hash<N>::template hash<cryptonight_monero_v8, false, true>,
         Cryptonight_hash<N>::template hash<cryptonight_monero_v8, true, true>,
 
-#ifndef ONLY_XMR_ALGO
+#else ONLY_XMR_ALGO
         Cryptonight_hash<N>::template hash<cryptonight_monero, false, false>,
         Cryptonight_hash<N>::template hash<cryptonight_monero, true, false>,
         Cryptonight_hash<N>::template hash<cryptonight_monero, false, true>,
@@ -573,7 +572,7 @@ minethd::cn_hash_fun minethd::func_multi_selector(bool bHaveAes, bool bPrefetch,
 
     if(selected_asm != "off"){
         // Intel asm
-        if(N <= 2 && ((algo == cryptonight_monero_v8) || (algo == cryptonight_turtle)) && bHaveAes && selected_asm == "intel_avx"){
+        if(N <= 2 && ((algo == cryptonight_monero_v8) || (algo == cryptonight_turtle)) && algo.Mem() == CN_MEMORY && algo.Iter() == CN_ITER && bHaveAes && selected_asm == "intel_avx"){
             if(bPrefetch)
                 selected_function = Cryptonight_hash_asm<N, 0u>::template hash<cryptonight_monero_v8, true>;
             else
@@ -581,7 +580,7 @@ minethd::cn_hash_fun minethd::func_multi_selector(bool bHaveAes, bool bPrefetch,
         }
 
         // AMD asm
-        if(N == 1 && ((algo == cryptonight_monero_v8) || (algo == cryptonight_turtle)) && bHaveAes && selected_asm == "amd_avx"){
+        if(N == 1 && ((algo == cryptonight_monero_v8) || (algo == cryptonight_turtle)) && algo.Mem() == CN_MEMORY && algo.Iter() == CN_ITER && bHaveAes && selected_asm == "amd_avx"){
             if(bPrefetch)
                 selected_function = Cryptonight_hash_asm<N, 0u>::template hash<cryptonight_monero_v8, true>;
             else
@@ -596,7 +595,7 @@ minethd::cn_hash_fun minethd::func_multi_selector(bool bHaveAes, bool bPrefetch,
     return selected_function;
 }
 
-minethd::cn_hash_fun minethd::func_selector(bool bHaveAes, bool bPrefetch, xmrstak_algo algo)
+minethd::cn_hash_fun minethd::func_selector(bool bHaveAes, bool bPrefetch, const xmrstak_algo& algo)
 {
     return func_multi_selector<1>(bHaveAes, bPrefetch, algo);
 }
@@ -748,7 +747,7 @@ void minethd::multiway_work_main()
             for (size_t i = 0; i < N; i++)
                 *piNonce[i] = iNonce++;
 
-            hash_fun_multi(bWorkBlob, oWork.iWorkSize, bHashOut, ctx);
+            hash_fun_multi(bWorkBlob, oWork.iWorkSize, bHashOut, ctx, miner_algo);
 
             for (size_t i = 0; i < N; i++)
             {

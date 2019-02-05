@@ -11,6 +11,7 @@
 #include <atomic>
 #include <future>
 
+
 namespace xmrstak
 {
 namespace cpu
@@ -22,19 +23,19 @@ public:
     static std::vector<iBackend*> thread_starter(uint32_t threadOffset, miner_work& pWork);
     static bool self_test();
 
-    typedef void (*cn_hash_fun)(const void*, size_t, void*, cryptonight_ctx**);
+    typedef void (*cn_hash_fun)(const void*, size_t, void*, cryptonight_ctx**, const xmrstak_algo&);
 
-    static cn_hash_fun func_selector(bool bHaveAes, bool bPrefetch, xmrstak_algo algo);
+    static cn_hash_fun func_selector(bool bHaveAes, bool bPrefetch, const xmrstak_algo& algo);
     static bool thd_setaffinity(std::thread::native_handle_type h, uint64_t cpu_id);
 
     static cryptonight_ctx* minethd_alloc_ctx();
 
 private:
     template<size_t N>
-    static cn_hash_fun func_multi_selector(bool bHaveAes, bool bPrefetch, xmrstak_algo algo, const std::string& asm_version_str = "off");
+    static cn_hash_fun func_multi_selector(bool bHaveAes, bool bPrefetch, const xmrstak_algo& algo, const std::string& asm_version_str = "off");
 
-    template<uint8_t multiple>
-    static bool testrunner(xmrstak_algo algo, cryptonight_ctx **ctx);
+    template<uint8_t N>
+    static bool testrunner(const xmrstak_algo& algo, cryptonight_ctx **ctx);
 
     minethd(miner_work& pWork, size_t iNo, int iMultiway, bool prefetch, int64_t affinity, const std::string& asm_version);
 
