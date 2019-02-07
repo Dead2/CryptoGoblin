@@ -38,7 +38,7 @@ extern "C" void cryptonight_v8_double_mainloop_sandybridge_asm(cryptonight_ctx* 
 
 #define CN_MONERO_V8_SHUFFLE_0(n, l0, idx0, ax0, bx0, bx1) \
     /* Shuffle the other 3x16 byte chunks in the current 64-byte cache line */ \
-    if(ALGO == cryptonight_monero_v8 || ALGO == cryptonight_turtle){ \
+    if(ALGO == cryptonight_monero_v8){ \
         const uint64_t idx2 = idx0 & MASK; \
         const __m128i chunk1 = _mm_load_si128((__m128i *)&l0[idx2 ^ 0x10]); \
         const __m128i chunk2 = _mm_load_si128((__m128i *)&l0[idx2 ^ 0x20]); \
@@ -50,7 +50,7 @@ extern "C" void cryptonight_v8_double_mainloop_sandybridge_asm(cryptonight_ctx* 
 
 #define CN_MONERO_V8_SHUFFLE_1(n, l0, idx1, ax0, bx0, bx1, lo, hi) \
     /* Shuffle the other 3x16 byte chunks in the current 64-byte cache line */ \
-    if(ALGO == cryptonight_monero_v8 || ALGO == cryptonight_turtle) \
+    if(ALGO == cryptonight_monero_v8) \
     { \
         const uint64_t idx2 = idx1 & MASK; \
         const __m128i chunk1 = _mm_xor_si128(_mm_load_si128((__m128i *)&l0[idx2 ^ 0x10]), _mm_set_epi64x(lo, hi)); \
@@ -139,7 +139,7 @@ extern "C" void cryptonight_v8_double_mainloop_sandybridge_asm(cryptonight_ctx* 
             _mm_prefetch((const char*)&l0[idx0 & MASK], _MM_HINT_T0); \
         ax0 = _mm_set_epi64x(h0[1] ^ h0[5], idx0); \
         bx0 = _mm_set_epi64x(h0[3] ^ h0[7], h0[2] ^ h0[6]); \
-        if(ALGO == cryptonight_monero_v8 || ALGO == cryptonight_turtle){ \
+        if(ALGO == cryptonight_monero_v8){ \
             bx1 = _mm_set_epi64x(h0[9] ^ h0[11], h0[8] ^ h0[10]); \
             division_result_xmm = _mm_cvtsi64_si128(h0[12]); \
             assign(sqrt_result, h0[13]); \
@@ -173,7 +173,7 @@ extern "C" void cryptonight_v8_double_mainloop_sandybridge_asm(cryptonight_ctx* 
     ptr1 = (uint64_t *)&l0[idx1 & MASK]; \
     if(PREFETCH) \
         _mm_prefetch((const char*)ptr1, _MM_HINT_T0); \
-    if(ALGO != cryptonight_monero_v8 || ALGO == cryptonight_turtle) \
+    if(ALGO != cryptonight_monero_v8) \
         bx0 = cx; \
     cl = ptr1[0];
 
@@ -190,7 +190,7 @@ extern "C" void cryptonight_v8_double_mainloop_sandybridge_asm(cryptonight_ctx* 
         ah0 += lo; \
         al0 += hi; \
     } \
-    if(ALGO == cryptonight_monero_v8 || ALGO == cryptonight_turtle){ \
+    if(ALGO == cryptonight_monero_v8){ \
         bx1 = bx0; \
         bx0 = cx; \
     } \
@@ -319,7 +319,7 @@ struct Cryptonight_hash<1>{
         for(size_t i = 0; i < ITERATIONS; i++){
             REPEAT_1(8, CN_STEP1, monero_const, l0, ax0, bx0, idx0, ptr0, cx, bx1);
             REPEAT_1(9, CN_STEP2, monero_const, l0, ax0, bx0, idx1, ptr0, ptr1, cx, cl);
-            if(ALGO == cryptonight_monero_v8 || ALGO == cryptonight_turtle){
+            if(ALGO == cryptonight_monero_v8){
                 CN_MONERO_V8_DIV(cx0, cx_640, sqrt_result0, division_result0, division_result_xmm0, cl0);
                 CN_MONERO_V8_DIV_FIN(cx_640, sqrt_result0, division_result0);
             }
@@ -349,7 +349,7 @@ struct Cryptonight_hash<2>{
         for(size_t i = 0; i < ITERATIONS; i++){
             REPEAT_2(8, CN_STEP1, monero_const, l0, ax0, bx0, idx0, ptr0, cx, bx1);
             REPEAT_2(9, CN_STEP2, monero_const, l0, ax0, bx0, idx1, ptr0, ptr1, cx, cl);
-            if(ALGO == cryptonight_monero_v8 || ALGO == cryptonight_turtle){
+            if(ALGO == cryptonight_monero_v8){
                 CN_MONERO_V8_DIV(cx0, cx_640, sqrt_result0, division_result0, division_result_xmm0, cl0);
                 CN_MONERO_V8_DIV(cx1, cx_641, sqrt_result1, division_result1, division_result_xmm1, cl1);
                 CN_MONERO_V8_DIV_FIN_DBL(cx_640, sqrt_result0, division_result0, cx_641, sqrt_result1, division_result1);
@@ -380,7 +380,7 @@ struct Cryptonight_hash<3>{
         for(size_t i = 0; i < ITERATIONS; i++){
             REPEAT_3(8, CN_STEP1, monero_const, l0, ax0, bx0, idx0, ptr0, cx, bx1);
             REPEAT_3(9, CN_STEP2, monero_const, l0, ax0, bx0, idx1, ptr0, ptr1, cx, cl);
-            if(ALGO == cryptonight_monero_v8 || ALGO == cryptonight_turtle){
+            if(ALGO == cryptonight_monero_v8){
                 CN_MONERO_V8_DIV(cx0, cx_640, sqrt_result0, division_result0, division_result_xmm0, cl0);
                 CN_MONERO_V8_DIV(cx1, cx_641, sqrt_result1, division_result1, division_result_xmm1, cl1);
                 CN_MONERO_V8_DIV(cx2, cx_642, sqrt_result2, division_result2, division_result_xmm2, cl2);
@@ -414,7 +414,7 @@ struct Cryptonight_hash<4>{
         for(size_t i = 0; i < ITERATIONS; i++){
             REPEAT_4(8, CN_STEP1, monero_const, l0, ax0, bx0, idx0, ptr0, cx, bx1);
             REPEAT_4(9, CN_STEP2, monero_const, l0, ax0, bx0, idx1, ptr0, ptr1, cx, cl);
-            if(ALGO == cryptonight_monero_v8 || ALGO == cryptonight_turtle){
+            if(ALGO == cryptonight_monero_v8){
                 CN_MONERO_V8_DIV(cx0, cx_640, sqrt_result0, division_result0, division_result_xmm0, cl0);
                 CN_MONERO_V8_DIV(cx1, cx_641, sqrt_result1, division_result1, division_result_xmm1, cl1);
                 CN_MONERO_V8_DIV(cx2, cx_642, sqrt_result2, division_result2, division_result_xmm2, cl2);
@@ -449,7 +449,7 @@ struct Cryptonight_hash<5>{
         for(size_t i = 0; i < ITERATIONS; i++) {
             REPEAT_5(8, CN_STEP1, monero_const, l0, ax0, bx0, idx0, ptr0, cx, bx1);
             REPEAT_5(9, CN_STEP2, monero_const, l0, ax0, bx0, idx1, ptr0, ptr1, cx, cl);
-            if(ALGO == cryptonight_monero_v8 || ALGO == cryptonight_turtle){
+            if(ALGO == cryptonight_monero_v8){
                 CN_MONERO_V8_DIV(cx0, cx_640, sqrt_result0, division_result0, division_result_xmm0, cl0);
                 CN_MONERO_V8_DIV(cx1, cx_641, sqrt_result1, division_result1, division_result_xmm1, cl1);
                 CN_MONERO_V8_DIV(cx2, cx_642, sqrt_result2, division_result2, division_result_xmm2, cl2);
