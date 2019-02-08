@@ -107,6 +107,7 @@ xmrstak::coin_selection coins[] = {
     { "cryptonight_v7_stellite", {POW(cryptonight_stellite),    POW(cryptonight_stellite),  0u },  {POW(cryptonight_monero_v8), POW(cryptonight_monero_v8), 0u }, nullptr },
     { "cryptonight_v8",          {POW(cryptonight_monero_v8),   POW(cryptonight_monero_v8), 0u },  {POW(cryptonight_monero_v8), POW(cryptonight_monero_v8), 0u }, nullptr },
     { "cryptonight_v8_half",     {POW(cryptonight_v8_half),     POW(cryptonight_v8_half),   0u },  {POW(cryptonight_monero_v8), POW(cryptonight_monero_v8), 0u }, nullptr },
+    { "cryptonight_v8_zelerius", {POW(cryptonight_v8_zelerius), POW(cryptonight_v8_zelerius),0u }, {POW(cryptonight_monero_v8), POW(cryptonight_monero_v8), 0u }, nullptr },
     { "freehaven",               {POW(cryptonight_superfast),   POW(cryptonight_superfast), 0u },  {POW(cryptonight_monero_v8), POW(cryptonight_monero_v8), 0u }, nullptr },
     { "graft",                   {POW(cryptonight_monero_v8),   POW(cryptonight_monero_v8), 0u },  {POW(cryptonight_monero_v8), POW(cryptonight_monero_v8), 0u }, nullptr },
     { "haven",                   {POW(cryptonight_haven),       POW(cryptonight_haven),     0u },  {POW(cryptonight_heavy),     POW(cryptonight_heavy),     0u }, nullptr },
@@ -118,6 +119,7 @@ xmrstak::coin_selection coins[] = {
     { "ryo",                     {POW(cryptonight_gpu),         POW(cryptonight_gpu),       0u },  {POW(cryptonight_gpu),       POW(cryptonight_heavy),     0u }, nullptr },
     { "turtlecoin",              {POW(cryptonight_turtle),      POW(cryptonight_turtle),    0u },  {POW(cryptonight_aeon),      POW(cryptonight_aeon),      0u }, nullptr },
     { "stellite",                {POW(cryptonight_v8_half),     POW(cryptonight_v8_half),   0u },  {POW(cryptonight_monero_v8), POW(cryptonight_monero_v8), 0u }, nullptr },
+    { "zelerius",                {POW(cryptonight_v8_zelerius), POW(cryptonight_v8_zelerius),0u }, {POW(cryptonight_monero_v8), POW(cryptonight_monero_v8), 0u }, nullptr },
 #else
     { "cryptonight_v8",          {POW(cryptonight_monero_v8),   POW(cryptonight_monero_v8), 0u },  {POW(cryptonight_monero_v8), POW(cryptonight_monero_v8), 0u }, nullptr },
     { "monero",                  {POW(cryptonight_monero_v8),   POW(cryptonight_monero_v8), 0u },  {POW(cryptonight_monero_v8), POW(cryptonight_monero_v8), 0u }, "pool.usxmrpool.com:3333" },
