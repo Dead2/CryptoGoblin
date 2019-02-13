@@ -105,7 +105,7 @@ extern "C" void cryptonight_v8_double_mainloop_sandybridge_asm(cryptonight_ctx* 
         return; \
     }
 
-#define CN_INIT(n, monero_const, l0, ax0, bx0, idx0, idx1, ptr0, ptr1, bx1, cx_64, sqrt_result, division_result_xmm, cl) \
+#define CN_INIT(n, monero_const, conc_var, l0, ax0, bx0, idx0, idx1, ptr0, ptr1, bx1, cx_64, sqrt_result, division_result_xmm, cl) \
     keccak_200((const uint8_t *)input + len * n, len, ctx[n]->hash_state); \
     uint64_t monero_const; \
     if(ALGO == cryptonight_monero || ALGO == cryptonight_aeon || ALGO == cryptonight_ipbc || ALGO == cryptonight_stellite || ALGO == cryptonight_masari || ALGO == cryptonight_bittube2){ \
@@ -130,6 +130,12 @@ extern "C" void cryptonight_v8_double_mainloop_sandybridge_asm(cryptonight_ctx* 
     __m128i division_result_xmm; \
     uint64_t cx_64; \
     uint64_t cl; \
+    __m128 conc_var; \
+    if(ALGO == cryptonight_conceal) \
+    {\
+        set_float_rounding_mode_conceal(); \
+        conc_var = _mm_setzero_ps(); \
+    }\
     GetOptimalSqrtType_t<N> sqrt_result; \
     /* END cryptonight_monero_v8 variables */ \
     { \
@@ -147,10 +153,12 @@ extern "C" void cryptonight_v8_double_mainloop_sandybridge_asm(cryptonight_ctx* 
         } \
     }
 
-#define CN_STEP1(n, monero_const, l0, ax0, bx0, idx0, ptr0, cx, bx1) \
+#define CN_STEP1(n, monero_const, conc_var, l0, ax0, bx0, idx0, ptr0, cx, bx1) \
     __m128i cx; \
     ptr0 = (__m128i *)&l0[idx0 & MASK]; \
     cx = _mm_load_si128(ptr0); \
+    if (ALGO == cryptonight_conceal) \
+        cryptonight_conceal_tweak(cx, conc_var); \
     if (ALGO == cryptonight_bittube2){\
         cx = aes_round_bittube2(cx, ax0); \
     }else{ \
@@ -313,11 +321,11 @@ struct Cryptonight_hash<1>{
         const uint32_t ITERATIONS = algo.Iter();
 
         CN_INIT_SINGLE;
-        REPEAT_1(13, CN_INIT, monero_const, l0, ax0, bx0, idx0, idx1, ptr0, ptr1, bx1, cx_64, sqrt_result, division_result_xmm, cl);
+        REPEAT_1(14, CN_INIT, monero_const, conc_var, l0, ax0, bx0, idx0, idx1, ptr0, ptr1, bx1, cx_64, sqrt_result, division_result_xmm, cl);
 
         // Optim - 90% time boundary
         for(size_t i = 0; i < ITERATIONS; i++){
-            REPEAT_1(8, CN_STEP1, monero_const, l0, ax0, bx0, idx0, ptr0, cx, bx1);
+            REPEAT_1(9, CN_STEP1, monero_const, conc_var, l0, ax0, bx0, idx0, ptr0, cx, bx1);
             REPEAT_1(9, CN_STEP2, monero_const, l0, ax0, bx0, idx1, ptr0, ptr1, cx, cl);
             if(ALGO == cryptonight_monero_v8){
                 CN_MONERO_V8_DIV(cx0, cx_640, sqrt_result0, division_result0, division_result_xmm0, cl0);
@@ -343,11 +351,11 @@ struct Cryptonight_hash<2>{
         const uint32_t ITERATIONS = algo.Iter();
 
         CN_INIT_SINGLE;
-        REPEAT_2(13, CN_INIT, monero_const, l0, ax0, bx0, idx0, idx1, ptr0, ptr1, bx1, cx_64, sqrt_result, division_result_xmm, cl);
+        REPEAT_2(14, CN_INIT, monero_const, conc_var, l0, ax0, bx0, idx0, idx1, ptr0, ptr1, bx1, cx_64, sqrt_result, division_result_xmm, cl);
 
         // Optim - 90% time boundary
         for(size_t i = 0; i < ITERATIONS; i++){
-            REPEAT_2(8, CN_STEP1, monero_const, l0, ax0, bx0, idx0, ptr0, cx, bx1);
+            REPEAT_2(9, CN_STEP1, monero_const, conc_var, l0, ax0, bx0, idx0, ptr0, cx, bx1);
             REPEAT_2(9, CN_STEP2, monero_const, l0, ax0, bx0, idx1, ptr0, ptr1, cx, cl);
             if(ALGO == cryptonight_monero_v8){
                 CN_MONERO_V8_DIV(cx0, cx_640, sqrt_result0, division_result0, division_result_xmm0, cl0);
@@ -374,11 +382,11 @@ struct Cryptonight_hash<3>{
         const uint32_t ITERATIONS = algo.Iter();
 
         CN_INIT_SINGLE;
-        REPEAT_3(13, CN_INIT, monero_const, l0, ax0, bx0, idx0, idx1, ptr0, ptr1, bx1, cx_64, sqrt_result, division_result_xmm, cl);
+        REPEAT_3(14, CN_INIT, monero_const, conc_var, l0, ax0, bx0, idx0, idx1, ptr0, ptr1, bx1, cx_64, sqrt_result, division_result_xmm, cl);
 
         // Optim - 90% time boundary
         for(size_t i = 0; i < ITERATIONS; i++){
-            REPEAT_3(8, CN_STEP1, monero_const, l0, ax0, bx0, idx0, ptr0, cx, bx1);
+            REPEAT_3(9, CN_STEP1, monero_const, conc_var, l0, ax0, bx0, idx0, ptr0, cx, bx1);
             REPEAT_3(9, CN_STEP2, monero_const, l0, ax0, bx0, idx1, ptr0, ptr1, cx, cl);
             if(ALGO == cryptonight_monero_v8){
                 CN_MONERO_V8_DIV(cx0, cx_640, sqrt_result0, division_result0, division_result_xmm0, cl0);
@@ -408,11 +416,11 @@ struct Cryptonight_hash<4>{
         const uint32_t ITERATIONS = algo.Iter();
 
         CN_INIT_SINGLE;
-        REPEAT_4(13, CN_INIT, monero_const, l0, ax0, bx0, idx0, idx1, ptr0, ptr1, bx1, cx_64, sqrt_result, division_result_xmm, cl);
+        REPEAT_4(14, CN_INIT, monero_const, conc_var, l0, ax0, bx0, idx0, idx1, ptr0, ptr1, bx1, cx_64, sqrt_result, division_result_xmm, cl);
 
         // Optim - 90% time boundary
         for(size_t i = 0; i < ITERATIONS; i++){
-            REPEAT_4(8, CN_STEP1, monero_const, l0, ax0, bx0, idx0, ptr0, cx, bx1);
+            REPEAT_4(9, CN_STEP1, monero_const, conc_var, l0, ax0, bx0, idx0, ptr0, cx, bx1);
             REPEAT_4(9, CN_STEP2, monero_const, l0, ax0, bx0, idx1, ptr0, ptr1, cx, cl);
             if(ALGO == cryptonight_monero_v8){
                 CN_MONERO_V8_DIV(cx0, cx_640, sqrt_result0, division_result0, division_result_xmm0, cl0);
@@ -443,11 +451,11 @@ struct Cryptonight_hash<5>{
         const uint32_t ITERATIONS = algo.Iter();
 
         CN_INIT_SINGLE;
-        REPEAT_5(13, CN_INIT, monero_const, l0, ax0, bx0, idx0, idx1, ptr0, ptr1, bx1, cx_64, sqrt_result, division_result_xmm, cl);
+        REPEAT_5(14, CN_INIT, monero_const, conc_var, l0, ax0, bx0, idx0, idx1, ptr0, ptr1, bx1, cx_64, sqrt_result, division_result_xmm, cl);
 
         // Optim - 90% time boundary
         for(size_t i = 0; i < ITERATIONS; i++) {
-            REPEAT_5(8, CN_STEP1, monero_const, l0, ax0, bx0, idx0, ptr0, cx, bx1);
+            REPEAT_5(9, CN_STEP1, monero_const, conc_var, l0, ax0, bx0, idx0, ptr0, cx, bx1);
             REPEAT_5(9, CN_STEP2, monero_const, l0, ax0, bx0, idx1, ptr0, ptr1, cx, cl);
             if(ALGO == cryptonight_monero_v8){
                 CN_MONERO_V8_DIV(cx0, cx_640, sqrt_result0, division_result0, division_result_xmm0, cl0);

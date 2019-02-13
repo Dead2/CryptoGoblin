@@ -11,6 +11,12 @@ ALWAYS_INLINE static inline uint64_t _xmr_umul128(uint64_t a, uint64_t b, uint64
 }
 #endif
 
+
+inline __m128 _mm_set1_ps_epi32(uint32_t x)
+{
+    return _mm_castsi128_ps(_mm_set1_epi32(x));
+}
+
 // This will shift and xor tmp1 into itself as 4 32-bit vals such as
 // sl_xor(a1 a2 a3 a4) = a1 (a2^a1) (a3^a2^a1) (a4^a3^a2^a1)
 ALWAYS_INLINE FLATTEN static inline __m128i sl_xor(__m128i tmp1){
@@ -76,6 +82,22 @@ ALWAYS_INLINE FLATTEN inline static void soft_cryptonight_monero_tweak(uint64_t*
     }
     vh ^= ((table >> index) & 0x3) << 28;
     mem_out[1] = vh;
+}
+
+inline void cryptonight_conceal_tweak(__m128i& cx, __m128& conc_var)
+{
+    __m128 r = _mm_cvtepi32_ps(cx);
+    __m128 c_old = conc_var;
+    r = _mm_add_ps(r, conc_var);
+    r = _mm_mul_ps(r, _mm_mul_ps(r, r));
+    r = _mm_and_ps(_mm_set1_ps_epi32(0x807FFFFF), r);
+    r = _mm_or_ps(_mm_set1_ps_epi32(0x40000000), r);
+    conc_var = _mm_add_ps(conc_var, r);
+
+    c_old = _mm_and_ps(_mm_set1_ps_epi32(0x807FFFFF), c_old);
+    c_old = _mm_or_ps(_mm_set1_ps_epi32(0x40000000), c_old);
+    __m128 nc = _mm_mul_ps(c_old, _mm_set1_ps(536870880.0f));
+    cx = _mm_xor_si128(cx, _mm_cvttps_epi32(nc));
 }
 
 inline __m128i aes_round_bittube2(const __m128i& val, const __m128i& key){
@@ -155,6 +177,15 @@ inline void set_float_rounding_mode(){
 #endif
 }
 
+inline void set_float_rounding_mode_conceal()
+{
+#ifdef _MSC_VER
+    _control87(RC_NEAR, MCW_RC);
+#else
+    std::fesetround(FE_TONEAREST);
+#endif
+}
+
 /** optimal type for sqrt
  *
  * Depending on the number of hashes calculated the optimal type for the sqrt value will be selected.
@@ -192,3 +223,4 @@ inline void assign(uint64_t& output, const __m128i& input){
     output = _mm_cvtsi128_si64(input);
 }
 /** @} */
+

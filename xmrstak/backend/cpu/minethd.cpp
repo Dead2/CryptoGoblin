@@ -470,6 +470,9 @@ minethd::cn_hash_fun minethd::func_multi_selector(bool bHaveAes, bool bPrefetch,
         case cryptonight_gpu:
             algv = 12;
             break;
+        case cryptonight_conceal:
+            algv = 13;
+            break;
 #endif
         default:
             algv = 0;
@@ -548,7 +551,12 @@ minethd::cn_hash_fun minethd::func_multi_selector(bool bHaveAes, bool bPrefetch,
         Cryptonight_hash_gpu::template hash<cryptonight_gpu, false, false>,
         Cryptonight_hash_gpu::template hash<cryptonight_gpu, true, false>,
         Cryptonight_hash_gpu::template hash<cryptonight_gpu, false, true>,
-        Cryptonight_hash_gpu::template hash<cryptonight_gpu, true, true>
+        Cryptonight_hash_gpu::template hash<cryptonight_gpu, true, true>,
+
+        Cryptonight_hash<N>::template hash<cryptonight_conceal, false, false>,
+        Cryptonight_hash<N>::template hash<cryptonight_conceal, true, false>,
+        Cryptonight_hash<N>::template hash<cryptonight_conceal, false, true>,
+        Cryptonight_hash<N>::template hash<cryptonight_conceal, true, true>
 #endif
     };
 

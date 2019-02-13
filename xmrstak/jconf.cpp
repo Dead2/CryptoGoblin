@@ -94,6 +94,7 @@ xmrstak::coin_selection coins[] = {
     { "bittube",                 {POW(cryptonight_bittube2),    POW(cryptonight_bittube2),  0u },  {POW(cryptonight_heavy),     POW(cryptonight_heavy),     0u }, "mining.bit.tube:13333" },
     { "cryptonight",             {POW(cryptonight),             POW(cryptonight),           0u },  {POW(cryptonight_monero_v8), POW(cryptonight_monero_v8), 0u }, nullptr },
     { "cryptonight_bittube2",    {POW(cryptonight_bittube2),    POW(cryptonight_bittube2),  0u },  {POW(cryptonight_heavy),     POW(cryptonight_heavy),     0u }, nullptr },
+    { "cryptonight_conceal",     {POW(cryptonight_conceal),     POW(cryptonight_conceal),   0u },  {POW(cryptonight_monero_v8), POW(cryptonight_monero_v8), 0u }, nullptr },
     { "cryptonight_gpu",         {POW(cryptonight_gpu),         POW(cryptonight_gpu),       0u },  {POW(cryptonight_gpu),       POW(cryptonight_gpu),       0u }, nullptr },
     { "cryptonight_haven",       {POW(cryptonight_haven),       POW(cryptonight_haven),     0u },  {POW(cryptonight_heavy),     POW(cryptonight_heavy),     0u }, nullptr },
     { "cryptonight_heavy",       {POW(cryptonight_heavy),       POW(cryptonight_heavy),     0u },  {POW(cryptonight_heavy),     POW(cryptonight_heavy),     0u }, nullptr },
