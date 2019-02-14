@@ -15,6 +15,13 @@ endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 
 # help to find cuda on systems with a software module system
 list(APPEND CMAKE_PREFIX_PATH "$ENV{CUDA_ROOT}")
+
+# help to find AMD OCL SDK Light (replaced APP SDK)
+list(APPEND CMAKE_PREFIX_PATH "$ENV{OCL_ROOT}")
+
+# help to find AMD app SDK on systems with a software module system
+list(APPEND CMAKE_PREFIX_PATH "$ENV{AMDAPPSDKROOT}")
+
 # allow user to extent CMAKE_PREFIX_PATH via environment variable
 list(APPEND CMAKE_PREFIX_PATH "$ENV{CMAKE_PREFIX_PATH}")
 
@@ -336,11 +343,6 @@ else()
     add_definitions("-DCONF_NO_CUDA")
 endif()
 
-# help to find AMD app SDK on systems with a software module system
-list(APPEND CMAKE_PREFIX_PATH "$ENV{AMDAPPSDKROOT}")
-# allow user to extent CMAKE_PREFIX_PATH via environment variable
-list(APPEND CMAKE_PREFIX_PATH "$ENV{CMAKE_PREFIX_PATH}")
-
 ###############################################################################
 # Find OpenCL
 ###############################################################################
@@ -354,6 +356,7 @@ if(OpenCL_ENABLE)
             OpenCL/cl.h
         NO_DEFAULT_PATH
         PATHS
+            ENV "OCL_ROOT"
             ENV "OpenCL_ROOT"
             ENV AMDAPPSDKROOT
             ENV ATISTREAMSDKROOT
@@ -371,6 +374,7 @@ if(OpenCL_ENABLE)
             OpenCL.lib
         NO_DEFAULT_PATH
         PATHS
+            ENV "OCL_ROOT"
             ENV "OpenCL_ROOT"
             ENV AMDAPPSDKROOT
             ENV ATISTREAMSDKROOT
