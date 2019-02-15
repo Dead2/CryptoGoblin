@@ -117,7 +117,7 @@ xmrstak::coin_selection coins[] = {
     { "monero",                  {POW(cryptonight_monero_v8),   POW(cryptonight_monero_v8), 0u },  {POW(cryptonight_monero_v8), POW(cryptonight_monero_v8), 0u }, "pool.usxmrpool.com:3333" },
     { "plenteum",                {POW(cryptonight_turtle),      POW(cryptonight_turtle),    0u },  {POW(cryptonight_turtle),    POW(cryptonight_turtle),    0u }, nullptr },
     { "qrl",                     {POW(cryptonight_monero),      POW(cryptonight_monero),    0u },  {POW(cryptonight_monero_v8), POW(cryptonight_monero_v8), 0u }, nullptr },
-    { "ryo",                     {POW(cryptonight_gpu),         POW(cryptonight_gpu),       0u },  {POW(cryptonight_gpu),       POW(cryptonight_heavy),     0u }, nullptr },
+    { "ryo",                     {POW(cryptonight_gpu),         POW(cryptonight_gpu),       0u },  {POW(cryptonight_gpu),       POW(cryptonight_heavy),     0u }, "pool.ryo-currency.com:3333" },
     { "turtlecoin",              {POW(cryptonight_turtle),      POW(cryptonight_turtle),    0u },  {POW(cryptonight_aeon),      POW(cryptonight_aeon),      0u }, nullptr },
     { "stellite",                {POW(cryptonight_v8_half),     POW(cryptonight_v8_half),   0u },  {POW(cryptonight_monero_v8), POW(cryptonight_monero_v8), 0u }, nullptr },
     { "zelerius",                {POW(cryptonight_v8_zelerius), POW(cryptonight_v8_zelerius),0u }, {POW(cryptonight_monero_v8), POW(cryptonight_monero_v8), 0u }, nullptr },
