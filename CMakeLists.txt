@@ -190,6 +190,56 @@ if(CUDA_ENABLE)
     find_package(CUDA 7.5)
 
     if(CUDA_FOUND)
+        # required for monero's cryptonight_r
+        # libcuda
+        find_library(CUDA_LIB
+        NAMES
+            libcuda
+            cuda
+            cuda.lib
+        HINTS
+            ${CUDA_TOOLKIT_ROOT_DIR}
+            ${LIBCUDA_LIBRARY_DIR}
+            ${CUDA_TOOLKIT_ROOT_DIR}
+            /usr
+            /usr/local/cuda
+        PATH_SUFFIXES
+            lib64
+            lib/x64
+            /lib/Win32)
+        find_path(nvvvvv
+        NAMES
+            libnvrtc
+            nvrtc
+            nvrtc.lib
+        HINTS
+            ${CUDA_TOOLKIT_ROOT_DIR}
+            ${LIBNVRTC_LIBRARY_DIR}
+            ${CUDA_TOOLKIT_ROOT_DIR}
+            /usr
+            /usr/local/cuda
+        PATH_SUFFIXES
+            lib64
+            lib/x64
+            /lib/Win32)
+
+        #nvrtc
+        find_library(CUDA_NVRTC_LIB
+        NAMES
+            libnvrtc
+            nvrtc
+            nvrtc.lib
+        HINTS
+            ${CUDA_TOOLKIT_ROOT_DIR}
+            ${LIBNVRTC_LIBRARY_DIR}
+            ${CUDA_TOOLKIT_ROOT_DIR}
+            /usr
+            /usr/local/cuda
+        PATH_SUFFIXES
+            lib64
+            lib/x64
+            /lib/Win32)
+
         list(APPEND BACKEND_TYPES "nvidia")
         option(XMR-STAK_LARGEGRID "Support large CUDA block count > 128" ON)
         if(XMR-STAK_LARGEGRID)
@@ -321,16 +371,11 @@ if(CUDA_ENABLE)
                 set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS}" "-D_MWAITXINTRIN_H_INCLUDED")
             endif()
 
-            if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC" AND
-                (CUDA_VERSION VERSION_EQUAL 9.0 OR
-                CUDA_VERSION VERSION_EQUAL 9.1 OR
-                CUDA_VERSION VERSION_EQUAL 9.2 OR
-                CUDA_VERSION VERSION_EQUAL 10.0)
-            )
                 # workaround find_package(CUDA) is using the wrong path to the CXX host compiler
                 # overwrite the CUDA host compiler variable with the used CXX MSVC
+            # in linux where clang and gcc is installed it also helps to select the correct host compiler
                 set(CUDA_HOST_COMPILER ${CMAKE_CXX_COMPILER} CACHE FILEPATH "Host side compiler used by NVCC" FORCE)
-            endif()
+
         else()
             message(FATAL_ERROR "selected CUDA compiler '${CUDA_COMPILER}' is not supported")
         endif()
@@ -756,6 +801,7 @@ if(CUDA_FOUND)
             ${CUDASRCFILES}
         )
     endif()
+    set(CUDA_LIBRARIES ${CUDA_LIB} ${CUDA_NVRTC_LIB} ${CUDA_LIBRARIES})
     target_link_libraries(CryptoGoblin_cuda CryptoGoblin-backend xmr-stak-asm ${CUDA_LIBRARIES})
     if(WIN32 AND NOT (CMAKE_CXX_COMPILER_ID MATCHES "MSVC"))
         set_target_properties(CryptoGoblin_cuda PROPERTIES PREFIX "")

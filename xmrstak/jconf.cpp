@@ -104,6 +104,8 @@ xmrstak::coin_selection coins[] = {
     { "cryptonight_masari",      {POW(cryptonight_masari),      POW(cryptonight_masari),    0u },  {POW(cryptonight_monero_v8), POW(cryptonight_monero_v8), 0u }, nullptr },
     { "cryptonight_superfast",   {POW(cryptonight_superfast),   POW(cryptonight_superfast), 0u },  {POW(cryptonight_monero_v8), POW(cryptonight_monero_v8), 0u }, nullptr },
     { "cryptonight_turtle",      {POW(cryptonight_turtle),      POW(cryptonight_turtle),    0u },  {POW(cryptonight_turtle),    POW(cryptonight_turtle),    0u }, nullptr },
+    { "cryptonight_r",           {POW(cryptonight_r),           POW(cryptonight_r),         0u },  {POW(cryptonight_monero_v8), POW(cryptonight_monero_v8), 0u }, nullptr },
+    { "cryptonight_r_wow",       {POW(cryptonight_r_wow),       POW(cryptonight_r_wow),     0u },  {POW(cryptonight_monero_v8), POW(cryptonight_monero_v8), 0u }, nullptr },
     { "cryptonight_v7",          {POW(cryptonight_monero),      POW(cryptonight_monero),    0u },  {POW(cryptonight_monero_v8), POW(cryptonight_monero_v8), 0u }, nullptr },
     { "cryptonight_v7_stellite", {POW(cryptonight_stellite),    POW(cryptonight_stellite),  0u },  {POW(cryptonight_monero_v8), POW(cryptonight_monero_v8), 0u }, nullptr },
     { "cryptonight_v8",          {POW(cryptonight_monero_v8),   POW(cryptonight_monero_v8), 0u },  {POW(cryptonight_monero_v8), POW(cryptonight_monero_v8), 0u }, nullptr },
