@@ -52,6 +52,7 @@
 #include <cstring>
 #include <thread>
 #include <bitset>
+#include <unordered_map>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -415,7 +416,7 @@ static std::string getAsmName(const uint32_t num_hashes)
 }
 
 template<size_t N>
-minethd::cn_hash_fun minethd::func_multi_selector(bool bHaveAes, bool bPrefetch, const xmrstak_algo& algo, const std::string& asm_version_str)
+void minethd::func_multi_selector(minethd::cn_hash_fun& hash_fun, minethd::cn_on_new_job& on_new_job, bool bHaveAes, bool bPrefetch, const xmrstak_algo& algo, const std::string& asm_version_str)
 {
     static_assert(N >= 1, "number of threads must be >= 1" );
 
@@ -472,6 +473,9 @@ minethd::cn_hash_fun minethd::func_multi_selector(bool bHaveAes, bool bPrefetch,
             break;
         case cryptonight_conceal:
             algv = 13;
+            break;
+        case cryptonight_r:
+            algv = 14;
             break;
 #endif
         default:
@@ -556,7 +560,12 @@ minethd::cn_hash_fun minethd::func_multi_selector(bool bHaveAes, bool bPrefetch,
         Cryptonight_hash<N>::template hash<cryptonight_conceal, false, false>,
         Cryptonight_hash<N>::template hash<cryptonight_conceal, true, false>,
         Cryptonight_hash<N>::template hash<cryptonight_conceal, false, true>,
-        Cryptonight_hash<N>::template hash<cryptonight_conceal, true, true>
+        Cryptonight_hash<N>::template hash<cryptonight_conceal, true, true>,
+
+        Cryptonight_hash<N>::template hash<cryptonight_r, false, false>,
+        Cryptonight_hash<N>::template hash<cryptonight_r, true, false>,
+        Cryptonight_hash<N>::template hash<cryptonight_r, false, true>,
+        Cryptonight_hash<N>::template hash<cryptonight_r, true, true>
 #endif
     };
 
@@ -565,26 +574,26 @@ minethd::cn_hash_fun minethd::func_multi_selector(bool bHaveAes, bool bPrefetch,
     digit.set(1, bPrefetch);
 
     auto selected_function = func_table[ algv << 2 | digit.to_ulong() ];
+    hash_fun = func_table[ algv << 2 | digit.to_ulong() ];
 
     std::string selected_asm = asm_version_str;
     if(selected_asm == "auto")
         selected_asm = cpu::getAsmName(N);
 
-    if(selected_asm != "off"){
         // Intel asm
         if(N <= 2 && ((algo == cryptonight_monero_v8) || (algo == cryptonight_turtle)) && algo.Mem() == CN_MEMORY && algo.Iter() == CN_ITER && bHaveAes && selected_asm == "intel_avx"){
             if(bPrefetch)
-                selected_function = Cryptonight_hash_asm<N, 0u>::template hash<cryptonight_monero_v8, true>;
+                hash_fun = Cryptonight_hash_asm<N, 1u>::template hash<cryptonight_monero_v8, true>;
             else
-                selected_function = Cryptonight_hash_asm<N, 0u>::template hash<cryptonight_monero_v8, false>;
+                hash_fun = Cryptonight_hash_asm<N, 1u>::template hash<cryptonight_monero_v8, false>;
         }
 
         // AMD asm
         if(N == 1 && ((algo == cryptonight_monero_v8) || (algo == cryptonight_turtle)) && algo.Mem() == CN_MEMORY && algo.Iter() == CN_ITER && bHaveAes && selected_asm == "amd_avx"){
             if(bPrefetch)
-                selected_function = Cryptonight_hash_asm<N, 0u>::template hash<cryptonight_monero_v8, true>;
+                hash_fun = Cryptonight_hash_asm<1u, 0u>::template hash<cryptonight_monero_v8, true>;
             else
-                selected_function = Cryptonight_hash_asm<N, 0u>::template hash<cryptonight_monero_v8, false>;
+                hash_fun = Cryptonight_hash_asm<1u, 0u>::template hash<cryptonight_monero_v8, false>;
         }
 
         if(asm_version_str == "auto" && (selected_asm == "intel_avx" || selected_asm == "amd_avx"))
@@ -592,12 +601,24 @@ minethd::cn_hash_fun minethd::func_multi_selector(bool bHaveAes, bool bPrefetch,
         else if(selected_asm != "intel_avx" && selected_asm != "amd_avx")
             printer::inst()->print_msg(L1, "Assembler '%s' unknown, fallback to non asm version", selected_asm.c_str());
     }
-    return selected_function;
+
+    static const std::unordered_map<uint32_t, minethd::cn_on_new_job> on_new_job_map = {
+        {cryptonight_r, Cryptonight_R_generator<N>::template cn_on_new_job<cryptonight_r>},
+    };
+
+    auto it = on_new_job_map.find(algo.Id());
+    if (it != on_new_job_map.end())
+        on_new_job = it->second;
+    else
+        on_new_job = nullptr;
 }
 
 minethd::cn_hash_fun minethd::func_selector(bool bHaveAes, bool bPrefetch, const xmrstak_algo& algo)
 {
-    return func_multi_selector<1>(bHaveAes, bPrefetch, algo);
+    minethd::cn_hash_fun fun;
+    minethd::cn_on_new_job dm;
+    func_multi_selector<1>(fun, dm, bHaveAes, bPrefetch, algo);
+    return fun;
 }
 
 void minethd::work_main()
@@ -679,10 +700,12 @@ void minethd::multiway_work_main()
 
     // start with root algorithm and switch later if fork version is reached
     auto miner_algo = ::jconf::inst()->GetCurrentCoinSelection().GetDescription(1).GetMiningAlgoRoot();
-    cn_hash_fun hash_fun_multi = func_multi_selector<N>(::jconf::inst()->HaveHardwareAes(), bPrefetch, miner_algo, asm_version_str);
+    cn_hash_fun hash_fun_multi;
+    cn_on_new_job on_new_job;
     uint8_t version = 0;
     size_t lastPoolId = 0;
 
+    func_multi_selector<N>(hash_fun_multi, on_new_job, ::jconf::inst()->HaveHardwareAes(), bPrefetch, miner_algo, asm_version_str);
     while (bQuit == 0)
     {
         if (oWork.bStall)
@@ -714,16 +737,19 @@ void minethd::multiway_work_main()
             if(new_version >= coinDesc.GetMiningForkVersion())
             {
                 miner_algo = coinDesc.GetMiningAlgo();
-                hash_fun_multi = func_multi_selector<N>(::jconf::inst()->HaveHardwareAes(), bPrefetch, miner_algo, asm_version_str);
+                func_multi_selector<N>(hash_fun_multi, on_new_job, ::jconf::inst()->HaveHardwareAes(), bPrefetch, miner_algo, asm_version_str);
             }
             else
             {
                 miner_algo = coinDesc.GetMiningAlgoRoot();
-                hash_fun_multi = func_multi_selector<N>(::jconf::inst()->HaveHardwareAes(), bPrefetch, miner_algo, asm_version_str);
+                func_multi_selector<N>(hash_fun_multi, on_new_job, ::jconf::inst()->HaveHardwareAes(), bPrefetch, miner_algo, asm_version_str);
             }
             lastPoolId = oWork.iPoolId;
             version = new_version;
         }
+
+        if(on_new_job != nullptr)
+            on_new_job(oWork, ctx);
 
         while (globalStates::inst().iGlobalJobNo.load(std::memory_order_relaxed) == iJobNo)
         {

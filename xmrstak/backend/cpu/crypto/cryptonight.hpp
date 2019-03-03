@@ -14,15 +14,27 @@
 # include <intrin.h>
 #endif // __GNUC__
 
-typedef struct {
-    uint8_t hash_state[224];
+#include "variant4_random_math.h"
+
+struct extra_ctx_r
+{
+    uint64_t height = 0;
+    // the buffer must be able to hold NUM_INSTRUCTIONS_MAX and a termination instruction
+    V4_Instruction code[NUM_INSTRUCTIONS_MAX + 1];
+};
+
+struct cryptonight_ctx
+{
+    uint8_t hash_state[224]; // Need only 200, explicit align
     uint8_t* long_state;
     uint8_t ctx_info[24]; //Use some of the extra memory for flags (0=hugepages, 1=mlocked)
-} ALIGN(64) cryptonight_ctx;
+    extra_ctx_r cn_r_ctx;
+} ALIGN(64);
 
-typedef struct {
+struct alloc_msg
+{
     const char* warning;
-} alloc_msg;
+};
 
 size_t cryptonight_init(size_t use_fast_mem, size_t use_mlock, alloc_msg* msg);
 cryptonight_ctx* cryptonight_alloc_ctx(size_t use_fast_mem, size_t use_mlock, alloc_msg* msg);

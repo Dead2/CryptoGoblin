@@ -100,6 +100,23 @@ inline void cryptonight_conceal_tweak(__m128i& cx, __m128& conc_var)
     cx = _mm_xor_si128(cx, _mm_cvttps_epi32(nc));
 }
 
+template<size_t N>
+struct Cryptonight_R_generator
+{
+    template<xmrstak_algo_id ALGO>
+    static void cn_on_new_job(const xmrstak::miner_work& work, cryptonight_ctx** ctx)
+    {
+        //if(ctx[0]->cn_r_ctx.height == work.iBlockHeight)
+        //  return;
+
+        ctx[0]->cn_r_ctx.height = work.iBlockHeight;
+        v4_random_math_init<ALGO>(ctx[0]->cn_r_ctx.code, work.iBlockHeight);
+
+        for(size_t i=1; i < N; i++)
+            ctx[i]->cn_r_ctx = ctx[0]->cn_r_ctx;
+    }
+};
+
 inline __m128i aes_round_bittube2(const __m128i& val, const __m128i& key){
     alignas(16) uint32_t k[4];
     alignas(16) uint32_t x[4];

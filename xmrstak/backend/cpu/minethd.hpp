@@ -23,6 +23,7 @@ public:
     static std::vector<iBackend*> thread_starter(uint32_t threadOffset, miner_work& pWork);
     static bool self_test();
 
+    typedef void (*cn_on_new_job)(const miner_work&, cryptonight_ctx**);
     typedef void (*cn_hash_fun)(const void*, size_t, void*, cryptonight_ctx**, const xmrstak_algo&);
 
     static cn_hash_fun func_selector(bool bHaveAes, bool bPrefetch, const xmrstak_algo& algo);
@@ -30,10 +31,10 @@ public:
 
     static cryptonight_ctx* minethd_alloc_ctx();
 
-private:
     template<size_t N>
-    static cn_hash_fun func_multi_selector(bool bHaveAes, bool bPrefetch, const xmrstak_algo& algo, const std::string& asm_version_str = "off");
+    static void func_multi_selector(minethd::cn_hash_fun& hash_fun, minethd::cn_on_new_job& on_new_job, bool bHaveAes, bool bPrefetch, const xmrstak_algo& algo, const std::string& asm_version_str = "off");
 
+private:
     template<uint8_t N>
     static bool testrunner(const xmrstak_algo& algo, cryptonight_ctx **ctx);
 
