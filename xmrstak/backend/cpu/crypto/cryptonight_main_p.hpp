@@ -150,9 +150,9 @@ extern "C" void cryptonight_v8_double_mainloop_sandybridge_asm(cryptonight_ctx* 
     uint64_t cx_64; \
     uint64_t cl; \
     __m128 conc_var; \
-    if(ALGO == cryptonight_conceal) \
+    if(ALGO == cryptonight_conceal || ALGO == cryptonight_gpu) \
     {\
-        set_float_rounding_mode_conceal(); \
+        set_float_rounding_mode_nearest(); \
         conc_var = _mm_setzero_ps(); \
     }\
     GetOptimalSqrtType_t<N> sqrt_result; \

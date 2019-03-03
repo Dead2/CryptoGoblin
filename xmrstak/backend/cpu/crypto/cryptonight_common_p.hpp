@@ -194,7 +194,7 @@ inline void set_float_rounding_mode(){
 #endif
 }
 
-inline void set_float_rounding_mode_conceal()
+inline void set_float_rounding_mode_nearest()
 {
 #ifdef _MSC_VER
     _control87(RC_NEAR, MCW_RC);

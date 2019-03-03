@@ -116,7 +116,7 @@ xmrstak::coin_selection coins[] = {
     { "haven",                   {POW(cryptonight_haven),       POW(cryptonight_haven),     0u },  {POW(cryptonight_heavy),     POW(cryptonight_heavy),     0u }, nullptr },
     { "lethean",                 {POW(cryptonight_monero),      POW(cryptonight_monero),    0u },  {POW(cryptonight_monero_v8), POW(cryptonight_monero_v8), 0u }, nullptr },
     { "masari",                  {POW(cryptonight_v8_half),     POW(cryptonight_v8_half),   0u },  {POW(cryptonight_monero_v8), POW(cryptonight_monero_v8), 0u }, nullptr },
-    { "monero",                  {POW(cryptonight_monero_v8),   POW(cryptonight_monero_v8), 0u },  {POW(cryptonight_monero_v8), POW(cryptonight_monero_v8), 0u }, "pool.usxmrpool.com:3333" },
+    { "monero",                  {POW(cryptonight_r),           POW(cryptonight_monero_v8), 10u }, {POW(cryptonight_monero_v8), POW(cryptonight_monero_v8), 0u }, "pool.usxmrpool.com:3333" },
     { "plenteum",                {POW(cryptonight_turtle),      POW(cryptonight_turtle),    0u },  {POW(cryptonight_turtle),    POW(cryptonight_turtle),    0u }, nullptr },
     { "qrl",                     {POW(cryptonight_monero),      POW(cryptonight_monero),    0u },  {POW(cryptonight_monero_v8), POW(cryptonight_monero_v8), 0u }, nullptr },
     { "ryo",                     {POW(cryptonight_gpu),         POW(cryptonight_gpu),       0u },  {POW(cryptonight_gpu),       POW(cryptonight_heavy),     0u }, "pool.ryo-currency.com:3333" },
