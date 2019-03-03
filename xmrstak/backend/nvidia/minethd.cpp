@@ -172,6 +172,8 @@ std::vector<iBackend*>* minethd::thread_starter(uint32_t threadOffset, miner_wor
     size_t i, n = jconf::inst()->GetGPUThreadCount();
     pvThreads->reserve(n);
 
+    cuInit(0);
+
     jconf::thd_cfg cfg;
     for (i = 0; i < n; i++)
     {
@@ -225,7 +227,10 @@ void minethd::work_main()
 
     // start with root algorithm and switch later if fork version is reached
     auto miner_algo = ::jconf::inst()->GetCurrentCoinSelection().GetDescription(1).GetMiningAlgoRoot();
-    cn_hash_fun hash_fun = cpu::minethd::func_selector(::jconf::inst()->HaveHardwareAes(), true /*bNoPrefetch*/, miner_algo);
+
+    cn_hash_fun hash_fun;
+    cpu::minethd::cn_on_new_job set_job;
+    cpu::minethd::func_multi_selector<1>(hash_fun, set_job, ::jconf::inst()->HaveHardwareAes(), true /*bNoPrefetch*/, miner_algo);
 
     uint32_t iNonce;
 
@@ -254,16 +259,19 @@ void minethd::work_main()
             if(new_version >= coinDesc.GetMiningForkVersion())
             {
                 miner_algo = coinDesc.GetMiningAlgo();
-                hash_fun = cpu::minethd::func_selector(::jconf::inst()->HaveHardwareAes(), true /*bNoPrefetch*/, miner_algo);
+                cpu::minethd::func_multi_selector<1>(hash_fun, set_job, ::jconf::inst()->HaveHardwareAes(), true /*bNoPrefetch*/, miner_algo);
             }
             else
             {
                 miner_algo = coinDesc.GetMiningAlgoRoot();
-                hash_fun = cpu::minethd::func_selector(::jconf::inst()->HaveHardwareAes(), true /*bNoPrefetch*/, miner_algo);
+                cpu::minethd::func_multi_selector<1>(hash_fun, set_job, ::jconf::inst()->HaveHardwareAes(), true /*bNoPrefetch*/, miner_algo);
             }
             lastPoolId = oWork.iPoolId;
             version = new_version;
         }
+
+        if(set_job != nullptr)
+            set_job(oWork, &cpu_ctx);
 
         cryptonight_extra_cpu_set_data(&ctx, oWork.bWorkBlob, oWork.iWorkSize);
 
@@ -291,7 +299,7 @@ void minethd::work_main()
 
             cryptonight_extra_cpu_prepare(&ctx, iNonce, miner_algo);
 
-            cryptonight_core_cpu_hash(&ctx, miner_algo, iNonce);
+            cryptonight_core_cpu_hash(&ctx, miner_algo, iNonce, cpu_ctx->cn_r_ctx.height);
 
             cryptonight_extra_cpu_final(&ctx, iNonce, oWork.iTarget, &foundCount, foundNonce, miner_algo);
 
