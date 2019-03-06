@@ -237,7 +237,7 @@ extern "C" void cryptonight_v8_double_mainloop_sandybridge_asm(cryptonight_ctx* 
         ah0 += lo; \
         al0 += hi; \
     } \
-    if(ALGO == cryptonight_monero_v8 || ALGO == cryptonight_r || ALGO != cryptonight_r_wow){ \
+    if(ALGO == cryptonight_monero_v8 || ALGO == cryptonight_r || ALGO == cryptonight_r_wow){ \
         bx1 = bx0; \
         bx0 = cx; \
     } \
