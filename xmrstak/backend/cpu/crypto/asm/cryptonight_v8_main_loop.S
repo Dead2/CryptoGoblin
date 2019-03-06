@@ -1,4 +1,8 @@
-#define ALIGN .align
+#ifdef __APPLE__
+#   define ALIGN(x) .align 6
+#else
+#   define ALIGN(x) .align x
+#endif
 .intel_syntax noprefix
 #ifdef __APPLE__
 #   define FN_PREFIX(fn) _ ## fn
@@ -11,7 +15,7 @@
 .global FN_PREFIX(cryptonight_v8_mainloop_ryzen_asm)
 .global FN_PREFIX(cryptonight_v8_double_mainloop_sandybridge_asm)
 
-ALIGN 8
+ALIGN(64)
 FN_PREFIX(cryptonight_v8_mainloop_ivybridge_asm):
 	sub rsp, 48
 #ifdef __MINGW32__
@@ -22,8 +26,9 @@ FN_PREFIX(cryptonight_v8_mainloop_ivybridge_asm):
 #endif
 	add rsp, 48
 	ret 0
+	mov eax, 3735929054
 
-ALIGN 8
+ALIGN(64)
 FN_PREFIX(cryptonight_v8_mainloop_ryzen_asm):
 	sub rsp, 48
 #ifdef __MINGW32__
@@ -34,8 +39,9 @@ FN_PREFIX(cryptonight_v8_mainloop_ryzen_asm):
 #endif
 	add rsp, 48
 	ret 0
+	mov eax, 3735929054
 
-ALIGN 16
+ALIGN(64)
 FN_PREFIX(cryptonight_v8_double_mainloop_sandybridge_asm):
 	sub rsp, 48
 #ifdef __MINGW32__
@@ -47,3 +53,4 @@ FN_PREFIX(cryptonight_v8_double_mainloop_sandybridge_asm):
 #endif
 	add rsp, 48
 	ret 0
+	mov eax, 3735929054

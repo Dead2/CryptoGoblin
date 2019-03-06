@@ -20,22 +20,16 @@
 
 #include "../common.h"
 #include "xmrstak/backend/cryptonight.hpp"
-#include "../../miner_work.hpp"
 #include "cryptonight.hpp"
+#include "cryptonight_common_p.hpp"
 #include "cryptonight_aesni_p.hpp"
 #include "cryptonight_softaes_p.hpp"
-#include "cryptonight_common_p.hpp"
 #include "keccak.hpp"
 #include "extrahashes_p.hpp"
 
 #if !defined(_LP64) && !defined(_WIN64)
 #error You are trying to do a 32-bit build. This will all end in tears. I know it.
 #endif
-
-extern void(*const extra_hashes[4])(const void *, char *);
-extern "C" void cryptonight_v8_mainloop_ivybridge_asm(cryptonight_ctx* ctx0);
-extern "C" void cryptonight_v8_mainloop_ryzen_asm(cryptonight_ctx* ctx0);
-extern "C" void cryptonight_v8_double_mainloop_sandybridge_asm(cryptonight_ctx* ctx0, cryptonight_ctx* ctx1);
 
 #define CN_MONERO_V8_SHUFFLE_0(n, l0, idx0, ax0, bx0, bx1, cx) \
     /* Shuffle the other 3x16 byte chunks in the current 64-byte cache line */ \
@@ -523,29 +517,38 @@ struct Cryptonight_hash<5>{
 
 
 template<size_t N, size_t asm_version>
-struct Cryptonight_hash_asm;
-
-template<size_t asm_version>
-struct Cryptonight_hash_asm<1, asm_version>{
-    static constexpr size_t N = 1;
-
+struct Cryptonight_hash_asm {
     template<xmrstak_algo_id ALGO, bool PREFETCH>
     static void hash(const void* input, size_t len, void* output, cryptonight_ctx** ctx, const xmrstak_algo& algo){
-        keccak_200((const uint8_t *)input, len, ctx[0]->hash_state);
-        cn_explode_scratchpad<ALGO, PREFETCH>((__m128i*)ctx[0]->hash_state, (__m128i*)ctx[0]->long_state, algo);
+        for(size_t i = 0; i < N; ++i)
+        {
+            keccak_200((const uint8_t *)input + len * i, len, ctx[i]->hash_state);
+            cn_explode_scratchpad<ALGO, PREFETCH>((__m128i*)ctx[i]->hash_state, (__m128i*)ctx[i]->long_state, algo);
+        }
 
-        if (asm_version == 0)
-            cryptonight_v8_mainloop_ivybridge_asm(ctx[0]);
-        else if (asm_version == 1)
-            cryptonight_v8_mainloop_ryzen_asm(ctx[0]);
+        if(ALGO == cryptonight_r)
+        {
+            // API ATTRIBUTE is only required for cryptonight_r
+            typedef void ABI_ATTRIBUTE (*cn_r_mainloop_fun)(cryptonight_ctx *ctx);
+            for(size_t i = 0; i < N; ++i)
+                reinterpret_cast<cn_r_mainloop_fun>(ctx[0]->loop_fn)(ctx[i]); // use always loop_fn from ctx[0]!!
+        }
+        else
+        {
+            for(size_t i = 0; i < N; ++i)
+                ctx[0]->loop_fn(ctx[i]); // use always loop_fn from ctx[0]!!
+        }
 
-        cn_implode_scratchpad<ALGO, PREFETCH>((__m128i*)ctx[0]->long_state, (__m128i*)ctx[0]->hash_state, algo);
-        keccakf_24((uint64_t*)ctx[0]->hash_state);
-        extra_hashes[ctx[0]->hash_state[0] & 3](ctx[0]->hash_state, (char*)output);
+        for(size_t i = 0; i < N; ++i)
+        {
+            cn_implode_scratchpad<ALGO, PREFETCH>((__m128i*)ctx[i]->long_state, (__m128i*)ctx[i]->hash_state, algo);
+            keccakf_24((uint64_t*)ctx[i]->hash_state);
+            extra_hashes[ctx[i]->hash_state[0] & 3](ctx[i]->hash_state, (char*)output + 32 * i);
+        }
     }
 };
 
-// double hash only for intel
+// double hash with specialized asm only for intel
 template< >
 struct Cryptonight_hash_asm<2, 0>{
     static constexpr size_t N = 2;
@@ -557,7 +560,7 @@ struct Cryptonight_hash_asm<2, 0>{
             cn_explode_scratchpad<ALGO, PREFETCH>((__m128i*)ctx[i]->hash_state, (__m128i*)ctx[i]->long_state, algo);
         }
 
-        cryptonight_v8_double_mainloop_sandybridge_asm(ctx[0], ctx[1]);
+        reinterpret_cast<cn_double_mainloop_fun>(ctx[0]->loop_fn)(ctx[0], ctx[1]);
 
         for(size_t i = 0; i < N; ++i){
             /* Optim - 90% time boundary */
@@ -597,3 +600,89 @@ struct Cryptonight_hash_asm<5, asm_version>{
     static void hash(const void* input, size_t len, void* output, cryptonight_ctx** ctx, const xmrstak_algo& algo){
     }
 };
+
+
+namespace
+{
+
+template<typename T, typename U>
+static void patchCode(T dst, U src, const uint32_t iterations, const uint32_t mask)
+{
+    const uint8_t* p = reinterpret_cast<const uint8_t*>(src);
+
+    // Workaround for Visual Studio placing trampoline in debug builds.
+#   if defined(_MSC_VER)
+    if (p[0] == 0xE9) {
+        p += *(int32_t*)(p + 1) + 5;
+    }
+#   endif
+
+    size_t size = 0;
+    while (*(uint32_t*)(p + size) != 0xDEADC0DE) {
+        ++size;
+    }
+    size += sizeof(uint32_t);
+
+    memcpy((void*) dst, (const void*) src, size);
+
+    uint8_t* patched_data = reinterpret_cast<uint8_t*>(dst);
+    for (size_t i = 0; i + sizeof(uint32_t) <= size; ++i) {
+        switch (*(uint32_t*)(patched_data + i)) {
+        case CN_ITER:
+            *(uint32_t*)(patched_data + i) = iterations;
+            break;
+
+        case CN_MASK:
+            *(uint32_t*)(patched_data + i) = mask;
+            break;
+        }
+    }
+}
+
+template<size_t N>
+void patchAsmVariants(std::string selected_asm, cryptonight_ctx** ctx, const xmrstak_algo& algo)
+{
+    const uint32_t Iter = algo.Iter();
+    const uint32_t Mask = algo.Mask();
+
+    const int allocation_size = 65536;
+
+    if(ctx[0]->fun_data == nullptr)
+        ctx[0]->fun_data = static_cast<uint8_t*>(allocateExecutableMemory(allocation_size));
+    else
+        unprotectExecutableMemory(ctx[0]->fun_data, allocation_size);
+
+    cn_mainloop_fun src_code = nullptr;
+
+    if(selected_asm == "intel_avx")
+    {
+        // Intel Ivy Bridge (Xeon v2, Core i7/i5/i3 3xxx, Pentium G2xxx, Celeron G1xxx)
+        if(N == 2)
+            src_code = reinterpret_cast<cn_mainloop_fun>(cryptonight_v8_double_mainloop_sandybridge_asm);
+        else
+            src_code = cryptonight_v8_mainloop_ivybridge_asm;;
+    }
+    // supports only 1 thread per hash
+    if(selected_asm == "amd_avx")
+    {
+        // AMD Ryzen (1xxx and 2xxx series)
+        src_code = cryptonight_v8_mainloop_ryzen_asm;
+    }
+
+    if(src_code != nullptr && ctx[0]->fun_data != nullptr)
+    {
+        patchCode(ctx[0]->fun_data, src_code, Iter, Mask);
+        ctx[0]->loop_fn = reinterpret_cast<cn_mainloop_fun>(ctx[0]->fun_data);
+        for(size_t i = 1; i < N; ++i)
+            ctx[i]->loop_fn = ctx[0]->loop_fn;
+
+        if(selected_asm == "intel_avx" && N == 2)
+            ctx[0]->hash_fn = Cryptonight_hash_asm<2u, 0u>::template hash<cryptonight_monero_v8, true>;
+        else
+            ctx[0]->hash_fn = Cryptonight_hash_asm<N, 1u>::template hash<cryptonight_monero_v8, true>;
+
+        protectExecutableMemory(ctx[0]->fun_data, allocation_size);
+        flushInstructionCache(ctx[0]->fun_data, allocation_size);
+    }
+}
+} // namespace (anonymous)
