@@ -314,6 +314,7 @@ testVal oTestValues[] = {
     { "This is a test This is a test This is a test", "\xbf\x5f\xd\xf3\x5a\x65\x7c\x89\xb0\x41\xcf\xf0\xd\x46\x6a\xb6\x30\xf9\x77\x7f\xd9\xc6\x3\xd7\x3b\xd8\xf1\xb5\x4b\x49\xed\x28", 32, cryptonight_masari },
     { "This is a test This is a test This is a test", "\xc7\xd4\x52\x9\x2b\x48\xa5\xaf\xae\x11\xaf\x40\x9a\x87\xe5\x88\xf0\x29\x35\xa3\x68\xd\xe3\x6b\xce\x43\xf6\xc8\xdf\xd3\xe3\x9", 32, cryptonight_haven },
     { "This is a test This is a test This is a test", "\x30\x5f\x66\xfe\xbb\xf3\x60\x0e\xda\xbb\x60\xf7\xf1\xc9\xb9\x0a\x3a\xe8\x5a\x31\xd4\x76\xca\x38\x1d\x56\x18\xa6\xc6\x27\x60\xd7", 32, cryptonight_turtle },
+    { "This is a test This is a test This is a test", "\x32\xf7\x36\xec\x1d\x2f\x3f\xc5\x4c\x49\xbe\xb8\xa0\x47\x6c\xbf\xdd\x14\xc3\x51\xb9\xc6\xd7\x2c\x6f\x9f\xfc\xb5\x87\x5b\xe6\xb3", 32, cryptonight_v8_reversewaltz },
     // TODO: Missing selftest for bittube2
     //{ "This is a test This is a test This is a test", "", 32, cryptonight_bittube2 },
     // TODO: Missing selftest for cryptonight_superfast
@@ -511,6 +512,9 @@ void minethd::func_multi_selector(cryptonight_ctx** ctx, minethd::cn_on_new_job&
         case cryptonight_r:
             algv = 14;
             break;
+        case cryptonight_v8_reversewaltz:
+            algv = 15;
+            break;
 #endif
         default:
             algv = 0;
@@ -599,7 +603,12 @@ void minethd::func_multi_selector(cryptonight_ctx** ctx, minethd::cn_on_new_job&
         Cryptonight_hash<N>::template hash<cryptonight_r, false, false>,
         Cryptonight_hash<N>::template hash<cryptonight_r, true, false>,
         Cryptonight_hash<N>::template hash<cryptonight_r, false, true>,
-        Cryptonight_hash<N>::template hash<cryptonight_r, true, true>
+        Cryptonight_hash<N>::template hash<cryptonight_r, true, true>,
+
+        Cryptonight_hash<N>::template hash<cryptonight_v8_reversewaltz, false, false>,
+        Cryptonight_hash<N>::template hash<cryptonight_v8_reversewaltz, true, false>,
+        Cryptonight_hash<N>::template hash<cryptonight_v8_reversewaltz, false, true>,
+        Cryptonight_hash<N>::template hash<cryptonight_v8_reversewaltz, true, true>
 #endif
     };
 

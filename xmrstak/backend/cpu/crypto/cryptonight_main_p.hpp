@@ -43,6 +43,16 @@
         _mm_store_si128((__m128i *)&l0[idx2 ^ 0x30], _mm_add_epi64(chunk2, ax0)); \
         if (ALGO == cryptonight_r) \
             cx = _mm_xor_si128(_mm_xor_si128(cx, chunk3), _mm_xor_si128(chunk1, chunk2)); \
+    } \
+    if(ALGO == cryptonight_v8_reversewaltz) \
+    { \
+        const uint64_t idx2 = idx0 & MASK; \
+        const __m128i chunk3 = _mm_load_si128((__m128i *)&l0[idx2 ^ 0x10]); \
+        const __m128i chunk2 = _mm_load_si128((__m128i *)&l0[idx2 ^ 0x20]); \
+        const __m128i chunk1 = _mm_load_si128((__m128i *)&l0[idx2 ^ 0x30]); \
+        _mm_store_si128((__m128i *)&l0[idx2 ^ 0x10], _mm_add_epi64(chunk3, bx1)); \
+        _mm_store_si128((__m128i *)&l0[idx2 ^ 0x20], _mm_add_epi64(chunk1, bx0)); \
+        _mm_store_si128((__m128i *)&l0[idx2 ^ 0x30], _mm_add_epi64(chunk2, ax0)); \
     }
 
 #define CN_MONERO_V8_SHUFFLE_1(n, l0, idx1, ax0, bx0, bx1, lo, hi) \
@@ -55,6 +65,18 @@
         hi ^= ((uint64_t*)&chunk2)[0]; \
         lo ^= ((uint64_t*)&chunk2)[1]; \
         const __m128i chunk3 = _mm_load_si128((__m128i *)&l0[idx2 ^ 0x30]); \
+        _mm_store_si128((__m128i *)&l0[idx2 ^ 0x10], _mm_add_epi64(chunk3, bx1)); \
+        _mm_store_si128((__m128i *)&l0[idx2 ^ 0x20], _mm_add_epi64(chunk1, bx0)); \
+        _mm_store_si128((__m128i *)&l0[idx2 ^ 0x30], _mm_add_epi64(chunk2, ax0)); \
+    } \
+    if(ALGO == cryptonight_v8_reversewaltz) \
+    { \
+        const uint64_t idx2 = idx1 & MASK; \
+        const __m128i chunk3 = _mm_xor_si128(_mm_load_si128((__m128i *)&l0[idx2 ^ 0x10]), _mm_set_epi64x(lo, hi)); \
+        const __m128i chunk2 = _mm_load_si128((__m128i *)&l0[idx2 ^ 0x20]); \
+        hi ^= ((uint64_t*)&chunk2)[0]; \
+        lo ^= ((uint64_t*)&chunk2)[1]; \
+        const __m128i chunk1 = _mm_load_si128((__m128i *)&l0[idx2 ^ 0x30]); \
         _mm_store_si128((__m128i *)&l0[idx2 ^ 0x10], _mm_add_epi64(chunk3, bx1)); \
         _mm_store_si128((__m128i *)&l0[idx2 ^ 0x20], _mm_add_epi64(chunk1, bx0)); \
         _mm_store_si128((__m128i *)&l0[idx2 ^ 0x30], _mm_add_epi64(chunk2, ax0)); \
@@ -160,7 +182,7 @@
             _mm_prefetch((const char*)&l0[idx0 & MASK], _MM_HINT_T0); \
         ax0 = _mm_set_epi64x(h0[1] ^ h0[5], idx0); \
         bx0 = _mm_set_epi64x(h0[3] ^ h0[7], h0[2] ^ h0[6]); \
-        if(ALGO == cryptonight_monero_v8){ \
+        if(ALGO == cryptonight_monero_v8 || ALGO == cryptonight_v8_reversewaltz){ \
             bx1 = _mm_set_epi64x(h0[9] ^ h0[11], h0[8] ^ h0[10]); \
             division_result_xmm = _mm_cvtsi64_si128(h0[12]); \
             assign(sqrt_result, h0[13]); \
@@ -204,7 +226,7 @@
     ptr1 = (uint64_t *)&l0[idx1 & MASK]; \
     if(PREFETCH) \
         _mm_prefetch((const char*)ptr1, _MM_HINT_T0); \
-    if(ALGO != cryptonight_monero_v8 && ALGO != cryptonight_r && ALGO != cryptonight_r_wow) \
+    if(ALGO != cryptonight_monero_v8 && ALGO != cryptonight_r && ALGO != cryptonight_r_wow && ALGO != cryptonight_v8_reversewaltz) \
         bx0 = cx; \
     cl = ptr1[0];
 
@@ -231,7 +253,7 @@
         ah0 += lo; \
         al0 += hi; \
     } \
-    if(ALGO == cryptonight_monero_v8 || ALGO == cryptonight_r || ALGO == cryptonight_r_wow){ \
+    if(ALGO == cryptonight_monero_v8 || ALGO == cryptonight_r || ALGO == cryptonight_r_wow || ALGO == cryptonight_v8_reversewaltz){ \
         bx1 = bx0; \
         bx0 = cx; \
     } \
@@ -393,7 +415,7 @@ struct Cryptonight_hash<2>{
             REPEAT_2(9, CN_STEP1, monero_const, conc_var, l0, ax0, bx0, idx0, ptr0, cx, bx1);
             REPEAT_2(9, CN_STEP2, monero_const, l0, ax0, bx0, idx1, ptr0, ptr1, cx, cl);
             REPEAT_2(16, CN_STEP3_A, monero_const, l0, ax0, bx0, idx1, ptr1, lo, cl, ch, al0, ah0, cx, bx1, sqrt_result, division_result_xmm, cn_r_data);
-            if(ALGO == cryptonight_monero_v8){
+            if(ALGO == cryptonight_monero_v8 || ALGO == cryptonight_v8_reversewaltz){
                 CN_MONERO_V8_DIV(cx0, cx_640, sqrt_result0, division_result0, division_result_xmm0, cl0);
                 CN_MONERO_V8_DIV(cx1, cx_641, sqrt_result1, division_result1, division_result_xmm1, cl1);
                 CN_MONERO_V8_DIV_FIN_DBL(cx_640, sqrt_result0, division_result0, cx_641, sqrt_result1, division_result1);
@@ -425,7 +447,7 @@ struct Cryptonight_hash<3>{
             REPEAT_3(9, CN_STEP1, monero_const, conc_var, l0, ax0, bx0, idx0, ptr0, cx, bx1);
             REPEAT_3(9, CN_STEP2, monero_const, l0, ax0, bx0, idx1, ptr0, ptr1, cx, cl);
             REPEAT_3(16, CN_STEP3_A, monero_const, l0, ax0, bx0, idx1, ptr1, lo, cl, ch, al0, ah0, cx, bx1, sqrt_result, division_result_xmm, cn_r_data);
-            if(ALGO == cryptonight_monero_v8){
+            if(ALGO == cryptonight_monero_v8 || ALGO == cryptonight_v8_reversewaltz){
                 CN_MONERO_V8_DIV(cx0, cx_640, sqrt_result0, division_result0, division_result_xmm0, cl0);
                 CN_MONERO_V8_DIV(cx1, cx_641, sqrt_result1, division_result1, division_result_xmm1, cl1);
                 CN_MONERO_V8_DIV(cx2, cx_642, sqrt_result2, division_result2, division_result_xmm2, cl2);
@@ -460,7 +482,7 @@ struct Cryptonight_hash<4>{
             REPEAT_4(9, CN_STEP1, monero_const, conc_var, l0, ax0, bx0, idx0, ptr0, cx, bx1);
             REPEAT_4(9, CN_STEP2, monero_const, l0, ax0, bx0, idx1, ptr0, ptr1, cx, cl);
             REPEAT_4(16, CN_STEP3_A, monero_const, l0, ax0, bx0, idx1, ptr1, lo, cl, ch, al0, ah0, cx, bx1, sqrt_result, division_result_xmm, cn_r_data);
-            if(ALGO == cryptonight_monero_v8){
+            if(ALGO == cryptonight_monero_v8 || ALGO == cryptonight_v8_reversewaltz){
                 CN_MONERO_V8_DIV(cx0, cx_640, sqrt_result0, division_result0, division_result_xmm0, cl0);
                 CN_MONERO_V8_DIV(cx1, cx_641, sqrt_result1, division_result1, division_result_xmm1, cl1);
                 CN_MONERO_V8_DIV(cx2, cx_642, sqrt_result2, division_result2, division_result_xmm2, cl2);
@@ -496,7 +518,7 @@ struct Cryptonight_hash<5>{
             REPEAT_5(9, CN_STEP1, monero_const, conc_var, l0, ax0, bx0, idx0, ptr0, cx, bx1);
             REPEAT_5(9, CN_STEP2, monero_const, l0, ax0, bx0, idx1, ptr0, ptr1, cx, cl);
             REPEAT_5(16, CN_STEP3_A, monero_const, l0, ax0, bx0, idx1, ptr1, lo, cl, ch, al0, ah0, cx, bx1, sqrt_result, division_result_xmm, cn_r_data);
-            if(ALGO == cryptonight_monero_v8){
+            if(ALGO == cryptonight_monero_v8 || ALGO == cryptonight_v8_reversewaltz){
                 CN_MONERO_V8_DIV(cx0, cx_640, sqrt_result0, division_result0, division_result_xmm0, cl0);
                 CN_MONERO_V8_DIV(cx1, cx_641, sqrt_result1, division_result1, division_result_xmm1, cl1);
                 CN_MONERO_V8_DIV(cx2, cx_642, sqrt_result2, division_result2, division_result_xmm2, cl2);
