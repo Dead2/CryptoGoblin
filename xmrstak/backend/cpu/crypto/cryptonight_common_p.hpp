@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cfenv>
+#include "soft_aes.hpp"
 
 #if defined(__GNUC__)
 ALWAYS_INLINE static inline uint64_t _xmr_umul128(uint64_t a, uint64_t b, uint64_t* hi){
@@ -75,6 +76,23 @@ ALWAYS_INLINE FLATTEN inline static void soft_cryptonight_monero_tweak(uint64_t*
     }
     vh ^= ((table >> index) & 0x3) << 28;
     mem_out[1] = vh;
+}
+
+inline __m128i aes_round_bittube2(const __m128i& val, const __m128i& key){
+    alignas(16) uint32_t k[4];
+    alignas(16) uint32_t x[4];
+    _mm_store_si128((__m128i*)k, key);
+    _mm_store_si128((__m128i*)x, _mm_xor_si128(val, _mm_cmpeq_epi32(_mm_setzero_si128(), _mm_setzero_si128()))); // x = ~val
+    #define BYTE(p, i) ((unsigned char*)&p)[i]
+    k[0] ^= saes_table[0][BYTE(x[0], 0)] ^ saes_table[1][BYTE(x[1], 1)] ^ saes_table[2][BYTE(x[2], 2)] ^ saes_table[3][BYTE(x[3], 3)];
+    x[0] ^= k[0];
+    k[1] ^= saes_table[0][BYTE(x[1], 0)] ^ saes_table[1][BYTE(x[2], 1)] ^ saes_table[2][BYTE(x[3], 2)] ^ saes_table[3][BYTE(x[0], 3)];
+    x[1] ^= k[1];
+    k[2] ^= saes_table[0][BYTE(x[2], 0)] ^ saes_table[1][BYTE(x[3], 1)] ^ saes_table[2][BYTE(x[0], 2)] ^ saes_table[3][BYTE(x[1], 3)];
+    x[2] ^= k[2];
+    k[3] ^= saes_table[0][BYTE(x[3], 0)] ^ saes_table[1][BYTE(x[0], 1)] ^ saes_table[2][BYTE(x[1], 2)] ^ saes_table[3][BYTE(x[2], 3)];
+    #undef BYTE
+    return _mm_load_si128((__m128i*)k);
 }
 
 FLATTEN inline uint64_t int_sqrt33_1_double_precision(const uint64_t n0){

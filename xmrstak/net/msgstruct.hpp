@@ -11,11 +11,11 @@
 
 struct pool_job
 {
-    char		sJobID[64];
-    uint8_t		bWorkBlob[112];
-    uint64_t	iTarget;
-    uint32_t	iWorkLen;
-    uint32_t	iSavedNonce;
+    char        sJobID[64];
+    uint8_t     bWorkBlob[112];
+    uint64_t    iTarget;
+    uint32_t    iWorkLen;
+    uint32_t    iSavedNonce;
 
     pool_job() : iWorkLen(0), iSavedNonce(0) {}
     pool_job(const char* sJobID, uint64_t iTarget, const uint8_t* bWorkBlob, uint32_t iWorkLen) :

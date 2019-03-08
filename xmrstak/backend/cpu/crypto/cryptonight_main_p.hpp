@@ -100,7 +100,7 @@ extern "C" void cryptonight_v8_double_mainloop_sandybridge_asm(cryptonight_ctx* 
     }
 
 #define CN_INIT_SINGLE \
-    if((ALGO == cryptonight_monero || ALGO == cryptonight_aeon || ALGO == cryptonight_ipbc || ALGO == cryptonight_stellite) && len < 43){ \
+    if((ALGO == cryptonight_monero || ALGO == cryptonight_aeon || ALGO == cryptonight_ipbc || ALGO == cryptonight_stellite || ALGO == cryptonight_masari || ALGO == cryptonight_bittube2) && len < 43){ \
         memset(output, 0, 32 * N); \
         return; \
     }
@@ -108,7 +108,7 @@ extern "C" void cryptonight_v8_double_mainloop_sandybridge_asm(cryptonight_ctx* 
 #define CN_INIT(n, monero_const, l0, ax0, bx0, idx0, idx1, ptr0, ptr1, bx1, cx_64, sqrt_result, division_result_xmm, cl) \
     keccak_200((const uint8_t *)input + len * n, len, ctx[n]->hash_state); \
     uint64_t monero_const; \
-    if(ALGO == cryptonight_monero || ALGO == cryptonight_aeon || ALGO == cryptonight_ipbc || ALGO == cryptonight_stellite){ \
+    if(ALGO == cryptonight_monero || ALGO == cryptonight_aeon || ALGO == cryptonight_ipbc || ALGO == cryptonight_stellite || ALGO == cryptonight_masari || ALGO == cryptonight_bittube2){ \
         monero_const =  *reinterpret_cast<const uint64_t*>(reinterpret_cast<const uint8_t*>(input) + len * n + 35); \
         monero_const ^=  *(reinterpret_cast<const uint64_t*>(ctx[n]->hash_state) + 24); \
     } \
@@ -151,14 +151,18 @@ extern "C" void cryptonight_v8_double_mainloop_sandybridge_asm(cryptonight_ctx* 
     __m128i cx; \
     ptr0 = (__m128i *)&l0[idx0 & MASK]; \
     cx = _mm_load_si128(ptr0); \
-    if(SOFT_AES) \
-        cx = soft_aesenc(cx, ax0); \
-    else \
-        cx = _mm_aesenc_si128(cx, ax0); \
+    if (ALGO == cryptonight_bittube2){\
+        cx = aes_round_bittube2(cx, ax0); \
+    }else{ \
+        if(SOFT_AES) \
+            cx = soft_aesenc(cx, ax0); \
+        else \
+            cx = _mm_aesenc_si128(cx, ax0); \
+    } \
     CN_MONERO_V8_SHUFFLE_0(n, l0, idx0, ax0, bx0, bx1)
 
 #define CN_STEP2(n, monero_const, l0, ax0, bx0, idx1, ptr0, ptr1, cx, cl) \
-    if(ALGO == cryptonight_monero || ALGO == cryptonight_aeon || ALGO == cryptonight_ipbc || ALGO == cryptonight_stellite) \
+    if(ALGO == cryptonight_monero || ALGO == cryptonight_aeon || ALGO == cryptonight_ipbc || ALGO == cryptonight_stellite || ALGO == cryptonight_masari || ALGO == cryptonight_bittube2) \
         if(SOFT_AES) \
             soft_cryptonight_monero_tweak<ALGO>((uint64_t*)ptr0, _mm_xor_si128(bx0, cx)); \
         else \
@@ -195,8 +199,8 @@ extern "C" void cryptonight_v8_double_mainloop_sandybridge_asm(cryptonight_ctx* 
         _mm_prefetch((const char*)ptr1, _MM_HINT_T0)
 
 #define CN_STEP4(n, monero_const, l0, ax0, bx0, ptr1, lo, cl, ch, al0, ah0) \
-    if (ALGO == cryptonight_monero || ALGO == cryptonight_aeon || ALGO == cryptonight_ipbc || ALGO == cryptonight_stellite){ \
-        if (ALGO == cryptonight_ipbc) \
+    if (ALGO == cryptonight_monero || ALGO == cryptonight_aeon || ALGO == cryptonight_ipbc || ALGO == cryptonight_stellite || ALGO == cryptonight_masari || ALGO == cryptonight_bittube2){ \
+        if (ALGO == cryptonight_ipbc || ALGO == cryptonight_bittube2) \
             ptr1[1] = ah0 ^ monero_const ^ ptr1[0]; \
         else \
             ptr1[1] = ah0 ^ monero_const; \
@@ -208,7 +212,7 @@ extern "C" void cryptonight_v8_double_mainloop_sandybridge_asm(cryptonight_ctx* 
     ax0 = _mm_set_epi64x(ah0, al0);
 
 #define CN_STEP5(n, monero_const, l0, ax0, bx0, idx0, idx1, ptr0, al0) \
-    if(ALGO == cryptonight_heavy){ \
+    if(ALGO == cryptonight_heavy || ALGO == cryptonight_bittube2){ \
         ptr0 = (__m128i *)&l0[idx1 & MASK]; \
         int64_t u  = ((int64_t*)ptr0)[0]; \
         int32_t d  = ((int32_t*)ptr0)[2]; \
@@ -216,6 +220,14 @@ extern "C" void cryptonight_v8_double_mainloop_sandybridge_asm(cryptonight_ctx* 
         \
         ((int64_t*)ptr0)[0] = u ^ q; \
         idx0 = d ^ q; \
+    } else if(ALGO == cryptonight_haven){ \
+        ptr0 = (__m128i *)&l0[idx0 & MASK]; \
+        int64_t u  = ((int64_t*)ptr0)[0]; \
+        int32_t d  = ((int32_t*)ptr0)[2]; \
+        int64_t q = u / (d | 0x5); \
+        \
+        ((int64_t*)ptr0)[0] = u ^ q; \
+        idx0 = (~d) ^ q; \
     }else{ \
         idx0 = al0; \
     }

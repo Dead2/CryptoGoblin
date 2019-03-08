@@ -280,6 +280,11 @@ testVal oTestValues[] = {
     { "This is a test This is a test This is a test", "\xbc\xe7\x48\xaf\xc5\x31\xff\xc9\x33\x7f\xcf\x51\x1b\xe3\x20\xa3\xaa\x8d\x4\x55\xf9\x14\x2a\x61\xe8\x38\xdf\xdc\x3b\x28\x3e\x0", 32, cryptonight_ipbc },
     { "This is a test This is a test This is a test", "\xb9\x9d\x6c\xee\x50\x3c\x6f\xa6\x3f\x30\x69\x24\x4a\x0\x9f\xe4\xd4\x69\x3f\x68\x92\xa4\x5c\xc2\x51\xae\x46\x87\x7c\x6b\x98\xae", 32, cryptonight_stellite },
     { "This is a test This is a test This is a test", "\xf9\x44\x97\xce\xb4\xf0\xd9\x84\xb\x9b\xfc\x45\x94\x74\x55\x25\xcf\x26\x83\x16\x4f\xc\xf8\x2d\xf5\xf\x25\xff\x45\x28\x2e\x85", 32, cryptonight_heavy },
+    { "This is a test This is a test This is a test", "\xb9\x9d\x6c\xee\x50\x3c\x6f\xa6\x3f\x30\x69\x24\x4a\x0\x9f\xe4\xd4\x69\x3f\x68\x92\xa4\x5c\xc2\x51\xae\x46\x87\x7c\x6b\x98\xae", 32, cryptonight_stellite },
+    { "This is a test This is a test This is a test", "\xbf\x5f\xd\xf3\x5a\x65\x7c\x89\xb0\x41\xcf\xf0\xd\x46\x6a\xb6\x30\xf9\x77\x7f\xd9\xc6\x3\xd7\x3b\xd8\xf1\xb5\x4b\x49\xed\x28", 32, cryptonight_masari },
+    { "This is a test This is a test This is a test", "\xc7\xd4\x52\x9\x2b\x48\xa5\xaf\xae\x11\xaf\x40\x9a\x87\xe5\x88\xf0\x29\x35\xa3\x68\xd\xe3\x6b\xce\x43\xf6\xc8\xdf\xd3\xe3\x9", 32, cryptonight_haven },
+    // TODO: Missing selftest for bittube2
+    //{ "This is a test This is a test This is a test", "", 32, cryptonight_bittube2 },
 #endif
 };
 
@@ -444,6 +449,15 @@ minethd::cn_hash_fun minethd::func_multi_selector(bool bHaveAes, bool bPrefetch,
         case cryptonight_stellite:
             algv = 7;
             break;
+        case cryptonight_haven:
+            algv = 8;
+            break;
+        case cryptonight_bittube2:
+            algv = 9;
+            break;
+        case cryptonight_monero_v8:
+            algv = 10;
+            break;
 #endif
         default:
             algv = 0;
@@ -492,6 +506,26 @@ minethd::cn_hash_fun minethd::func_multi_selector(bool bHaveAes, bool bPrefetch,
         Cryptonight_hash<N>::template hash<cryptonight_stellite, true, false>,
         Cryptonight_hash<N>::template hash<cryptonight_stellite, false, true>,
         Cryptonight_hash<N>::template hash<cryptonight_stellite, true, true>,
+
+        Cryptonight_hash<N>::template hash<cryptonight_masari, false, false>,
+        Cryptonight_hash<N>::template hash<cryptonight_masari, true, false>,
+        Cryptonight_hash<N>::template hash<cryptonight_masari, false, true>,
+        Cryptonight_hash<N>::template hash<cryptonight_masari, true, true>,
+
+        Cryptonight_hash<N>::template hash<cryptonight_haven, false, false>,
+        Cryptonight_hash<N>::template hash<cryptonight_haven, true, false>,
+        Cryptonight_hash<N>::template hash<cryptonight_haven, false, true>,
+        Cryptonight_hash<N>::template hash<cryptonight_haven, true, true>,
+
+        Cryptonight_hash<N>::template hash<cryptonight_bittube2, false, false>,
+        Cryptonight_hash<N>::template hash<cryptonight_bittube2, true, false>,
+        Cryptonight_hash<N>::template hash<cryptonight_bittube2, false, true>,
+        Cryptonight_hash<N>::template hash<cryptonight_bittube2, true, true>,
+
+        Cryptonight_hash<N>::template hash<cryptonight_monero_v8, false, false>,
+        Cryptonight_hash<N>::template hash<cryptonight_monero_v8, true, false>,
+        Cryptonight_hash<N>::template hash<cryptonight_monero_v8, false, true>,
+        Cryptonight_hash<N>::template hash<cryptonight_monero_v8, true, true>
 #endif
     };
 
