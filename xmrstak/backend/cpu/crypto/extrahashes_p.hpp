@@ -23,10 +23,10 @@
 
 extern "C"
 {
-#include "c_groestl.h"
 #include "c_blake256.h"
 #include "c_skein.h"
 }
+#include "groestl.hpp"
 #include "jh.hpp"
 
 void do_blake_hash(const void* input, char* output) {
@@ -34,7 +34,7 @@ void do_blake_hash(const void* input, char* output) {
 }
 
 void do_groestl_hash(const void* input, char* output) {
-    groestl((const uint8_t*)input, 200 * 8, (uint8_t*)output);
+    xmr_groestl((const uint8_t*)input, (uint8_t*)output);
 }
 
 void do_jh_hash(const void* input, char* output) {

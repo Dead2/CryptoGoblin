@@ -5,7 +5,7 @@
 #include "donate-level.hpp"
 
 #define XMR_STAK_NAME "CryptoGoblin"
-#define XMR_STAK_VERSION "3.2.0"
+#define XMR_STAK_VERSION "3.3.0"
 
 extern const char ver_long[];
 extern const char ver_short[];

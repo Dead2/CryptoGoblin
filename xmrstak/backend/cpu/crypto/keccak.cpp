@@ -81,8 +81,7 @@ ALIGN(16) void keccakf_24(uint64_t st[25]){
         //  Chi
         // unrolled loop, where only last iteration is different
         j = 0;
-        bc[0] = st[j    ];
-        bc[1] = st[j + 1];
+        memcpy(&bc[0],&st[j],16);
 
         st[j    ] ^= (~st[j + 1]) & st[j + 2];
         st[j + 1] ^= (~st[j + 2]) & st[j + 3];
@@ -91,8 +90,7 @@ ALIGN(16) void keccakf_24(uint64_t st[25]){
         st[j + 4] ^= (~bc[0]) & bc[1];
 
         j = 5;
-        bc[0] = st[j    ];
-        bc[1] = st[j + 1];
+        memcpy(&bc[0],&st[j],16);
 
         st[j    ] ^= (~st[j + 1]) & st[j + 2];
         st[j + 1] ^= (~st[j + 2]) & st[j + 3];
@@ -101,8 +99,7 @@ ALIGN(16) void keccakf_24(uint64_t st[25]){
         st[j + 4] ^= (~bc[0]) & bc[1];
 
         j = 10;
-        bc[0] = st[j    ];
-        bc[1] = st[j + 1];
+        memcpy(&bc[0],&st[j],16);
 
         st[j    ] ^= (~st[j + 1]) & st[j + 2];
         st[j + 1] ^= (~st[j + 2]) & st[j + 3];
@@ -111,8 +108,7 @@ ALIGN(16) void keccakf_24(uint64_t st[25]){
         st[j + 4] ^= (~bc[0]) & bc[1];
 
         j = 15;
-        bc[0] = st[j    ];
-        bc[1] = st[j + 1];
+        memcpy(&bc[0],&st[j],16);
 
         st[j    ] ^= (~st[j + 1]) & st[j + 2];
         st[j + 1] ^= (~st[j + 2]) & st[j + 3];
@@ -121,11 +117,7 @@ ALIGN(16) void keccakf_24(uint64_t st[25]){
         st[j + 4] ^= (~bc[0]) & bc[1];
 
         j = 20;
-        bc[0] = st[j    ];
-        bc[1] = st[j + 1];
-        bc[2] = st[j + 2];
-        bc[3] = st[j + 3];
-        bc[4] = st[j + 4];
+        memcpy(&bc[0],&st[j],40);
 
         st[j    ] ^= (~bc[1]) & bc[2];
         st[j + 1] ^= (~bc[2]) & bc[3];
