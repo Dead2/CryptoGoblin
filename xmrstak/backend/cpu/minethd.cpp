@@ -285,6 +285,7 @@ testVal oTestValues[] = {
     { "This is a test This is a test This is a test", "\xb9\x9d\x6c\xee\x50\x3c\x6f\xa6\x3f\x30\x69\x24\x4a\x0\x9f\xe4\xd4\x69\x3f\x68\x92\xa4\x5c\xc2\x51\xae\x46\x87\x7c\x6b\x98\xae", 32, cryptonight_stellite },
     { "This is a test This is a test This is a test", "\xbf\x5f\xd\xf3\x5a\x65\x7c\x89\xb0\x41\xcf\xf0\xd\x46\x6a\xb6\x30\xf9\x77\x7f\xd9\xc6\x3\xd7\x3b\xd8\xf1\xb5\x4b\x49\xed\x28", 32, cryptonight_masari },
     { "This is a test This is a test This is a test", "\xc7\xd4\x52\x9\x2b\x48\xa5\xaf\xae\x11\xaf\x40\x9a\x87\xe5\x88\xf0\x29\x35\xa3\x68\xd\xe3\x6b\xce\x43\xf6\xc8\xdf\xd3\xe3\x9", 32, cryptonight_haven },
+    { "This is a test This is a test This is a test", "\x30\x5f\x66\xfe\xbb\xf3\x60\x0e\xda\xbb\x60\xf7\xf1\xc9\xb9\x0a\x3a\xe8\x5a\x31\xd4\x76\xca\x38\x1d\x56\x18\xa6\xc6\x27\x60\xd7", 32, cryptonight_turtle },
     // TODO: Missing selftest for bittube2
     //{ "This is a test This is a test This is a test", "", 32, cryptonight_bittube2 },
     // TODO: Missing selftest for cryptonight_superfast
@@ -328,15 +329,6 @@ bool minethd::testrunner(xmrstak_algo algo, cryptonight_ctx **ctx){
         strcat(testString, currTest.testString);
         strcat(testResult, currTest.testResult);
     }
-    else if (algo == cryptonight_turtle)
-        {
-        hashf = func_selector(::jconf::inst()->HaveHardwareAes(), false, xmrstak_algo::cryptonight_turtle);
-        hashf("This is a test This is a test This is a test", 44, out, ctx);
-        bResult = bResult && memcmp(out, "\x30\x5f\x66\xfe\xbb\xf3\x60\x0e\xda\xbb\x60\xf7\xf1\xc9\xb9\x0a\x3a\xe8\x5a\x31\xd4\x76\xca\x38\x1d\x56\x18\xa6\xc6\x27\x60\xd7", 32) == 0;
-        hashf = func_selector(::jconf::inst()->HaveHardwareAes(), true, xmrstak_algo::cryptonight_turtle);
-        hashf("This is a test This is a test This is a test", 44, out, ctx);
-        bResult = bResult && memcmp(out, "\x30\x5f\x66\xfe\xbb\xf3\x60\x0e\xda\xbb\x60\xf7\xf1\xc9\xb9\x0a\x3a\xe8\x5a\x31\xd4\x76\xca\x38\x1d\x56\x18\xa6\xc6\x27\x60\xd7", 32) == 0;
-        }
 
     // Without prefetch
     hashf = func_multi_selector<MULTIPLE>(::jconf::inst()->HaveHardwareAes(), false, algo);
@@ -555,6 +547,7 @@ minethd::cn_hash_fun minethd::func_multi_selector(bool bHaveAes, bool bPrefetch,
         Cryptonight_hash<N>::template hash<cryptonight_turtle, true, false>,
         Cryptonight_hash<N>::template hash<cryptonight_turtle, false, true>,
         Cryptonight_hash<N>::template hash<cryptonight_turtle, true, true>
+#endif
     };
 
     std::bitset<2> digit;
@@ -563,77 +556,32 @@ minethd::cn_hash_fun minethd::func_multi_selector(bool bHaveAes, bool bPrefetch,
 
     auto selected_function = func_table[ algv << 2 | digit.to_ulong() ];
 
+    std::string selected_asm = asm_version_str;
+    if(selected_asm == "auto")
+        selected_asm = cpu::getAsmName(N);
 
-        // check for asm optimized version for cryptonight_v8
-        if(N <= 2 && algo == cryptonight_monero_v8 && bHaveAes)
-        {
-                std::string selected_asm = asm_version_str;
-                if(selected_asm == "auto")
-                        selected_asm = cpu::getAsmName(N);
-
-                if(selected_asm != "off")
-                {
-                        if(selected_asm == "intel_avx")
-                        {
-                                // Intel Ivy Bridge (Xeon v2, Core i7/i5/i3 3xxx, Pentium G2xxx, Celeron G1xxx)
-                                if(N == 1){
-                                        if(bPrefetch)
-                                            selected_function = Cryptonight_hash_asm<1u, 0u>::template hash<cryptonight_monero_v8, true>;
-                                        else
-                                            selected_function = Cryptonight_hash_asm<1u, 0u>::template hash<cryptonight_monero_v8, false>;
-                                }else if(N == 2){
-                                        if(bPrefetch)
-                                            selected_function = Cryptonight_hash_asm<2u, 0u>::template hash<cryptonight_monero_v8, true>;
-                                        else
-                                            selected_function = Cryptonight_hash_asm<2u, 0u>::template hash<cryptonight_monero_v8, false>;
-                                }
-
-                        }
-                        // supports only 1 thread per hash
-                        if(N == 1 && selected_asm == "amd_avx")
-                        {
-                                // AMD Ryzen (1xxx and 2xxx series)
-                                if(bPrefetch)
-                                    selected_function = Cryptonight_hash_asm<1u, 1u>::template hash<cryptonight_monero_v8, true>;
-                                else
-                                    selected_function = Cryptonight_hash_asm<1u, 1u>::template hash<cryptonight_monero_v8, false>;
-                        }
-                        if(asm_version_str == "auto" && (selected_asm != "intel_avx" || selected_asm != "amd_avx"))
-                                printer::inst()->print_msg(L3, "Switch to assembler version for '%s' cpu's", selected_asm.c_str());
-                        else if(selected_asm != "intel_avx" && selected_asm != "amd_avx") // unknown asm type
-                                printer::inst()->print_msg(L1, "Assembler '%s' unknown, fallback to non asm version of cryptonight_v8", selected_asm.c_str());
-                }
+    if(selected_asm != "off"){
+        // Intel asm
+        if(N <= 2 && ((algo == cryptonight_monero_v8) || (algo == cryptonight_turtle)) && bHaveAes && selected_asm == "intel_avx"){
+            if(bPrefetch)
+                selected_function = Cryptonight_hash_asm<N, 0u>::template hash<cryptonight_monero_v8, true>;
+            else
+                selected_function = Cryptonight_hash_asm<N, 0u>::template hash<cryptonight_monero_v8, false>;
         }
 
-    if (N <= 2 && (algo == cryptonight_turtle) && bHaveAes)
-    {
-        std::string selected_asm = asm_version_str;
-        if (selected_asm == "auto")
-            selected_asm = cpu::getAsmName(N);
-
-        if (selected_asm != "off")
-        {
-            if (selected_asm == "intel_avx" && asm_version_str != "auto")
-            {
-                // Intel Ivy Bridge (Xeon v2, Core i7/i5/i3 3xxx, Pentium G2xxx, Celeron G1xxx)
-                if (N == 1)
-                    selected_function = Cryptonight_hash_asm<1u, 0u>::template hash<cryptonight_turtle>;
-                else if (N == 2)
-                    selected_function = Cryptonight_hash_asm<2u, 0u>::template hash<cryptonight_turtle>;
-            }
-            // supports only 1 thread per hash
-            if (N == 1 && selected_asm == "amd_avx")
-            {
-                // AMD Ryzen (1xxx and 2xxx series)
-                selected_function = Cryptonight_hash_asm<1u, 1u>::template hash<cryptonight_turtle>;
-            }
-            if (asm_version_str == "auto" && (selected_asm != "intel_avx" || selected_asm != "amd_avx"))
-                printer::inst()->print_msg(L3, "Switch to assembler version for '%s' cpu's", selected_asm.c_str());
-            else if (selected_asm != "intel_avx" && selected_asm != "amd_avx") // unknown asm type
-                printer::inst()->print_msg(L1, "Assembler '%s' unknown, fallback to non asm version of cryptonight_v8", selected_asm.c_str());
+        // AMD asm
+        if(N == 1 && ((algo == cryptonight_monero_v8) || (algo == cryptonight_turtle)) && bHaveAes && selected_asm == "amd_avx"){
+            if(bPrefetch)
+                selected_function = Cryptonight_hash_asm<N, 0u>::template hash<cryptonight_monero_v8, true>;
+            else
+                selected_function = Cryptonight_hash_asm<N, 0u>::template hash<cryptonight_monero_v8, false>;
         }
+
+        if(asm_version_str == "auto" && (selected_asm == "intel_avx" || selected_asm == "amd_avx"))
+            printer::inst()->print_msg(L3, "Switching to assembler version for '%s' cpu's", selected_asm.c_str());
+        else if(selected_asm != "intel_avx" && selected_asm != "amd_avx")
+            printer::inst()->print_msg(L1, "Assembler '%s' unknown, fallback to non asm version", selected_asm.c_str());
     }
-
     return selected_function;
 }
 
