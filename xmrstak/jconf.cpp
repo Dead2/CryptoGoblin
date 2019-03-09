@@ -293,12 +293,13 @@ bool jconf::check_cpu_features()
 {
     constexpr int AESNI_BIT = 1 << 25;
     constexpr int SSE2_BIT = 1 << 26;
+    constexpr int OSXSAVE_BIT = 1 << 27;
     int32_t cpu_info[4];
     bool bHaveSse2;
 
     cpuid(1, 0, cpu_info);
 
-    bHaveAes = (cpu_info[2] & AESNI_BIT) != 0;
+    bHaveAes = ((cpu_info[2] & AESNI_BIT) != 0 ) && ((cpu_info[2] & OSXSAVE_BIT) != 0);
     bHaveSse2 = (cpu_info[3] & SSE2_BIT) != 0;
 
     return bHaveSse2;
