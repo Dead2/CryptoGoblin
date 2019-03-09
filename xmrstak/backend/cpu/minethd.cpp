@@ -314,6 +314,7 @@ bool minethd::testrunner(const xmrstak_algo& algo, cryptonight_ctx **ctx){
     testVal currTest = getSelftestValues(algo.Id());
     cn_hash_fun hashf;
     unsigned char out[32 * MULTIPLE];
+    minethd::cn_on_new_job dm;
 
     uint16_t testStringLen = strlen(currTest.testString);
     uint16_t testResultLen = currTest.resultLen * MULTIPLE;
@@ -328,12 +329,12 @@ bool minethd::testrunner(const xmrstak_algo& algo, cryptonight_ctx **ctx){
     }
 
     // Without prefetch
-    hashf = func_multi_selector<MULTIPLE>(::jconf::inst()->HaveHardwareAes(), false, algo);
+    func_multi_selector<MULTIPLE>(hashf, dm, ::jconf::inst()->HaveHardwareAes(), false, algo);
     hashf(testString, testStringLen, out, ctx, algo);
     bool bResult = memcmp(out, testResult, testResultLen) == 0;
 
     // With prefetch
-    hashf = func_multi_selector<MULTIPLE>(::jconf::inst()->HaveHardwareAes(), true, algo);
+    func_multi_selector<MULTIPLE>(hashf, dm, ::jconf::inst()->HaveHardwareAes(), false, algo);
     hashf(testString, testStringLen, out, ctx, algo);
     bResult = bResult &&  memcmp(out, testResult, testResultLen) == 0;
 
@@ -573,11 +574,11 @@ void minethd::func_multi_selector(minethd::cn_hash_fun& hash_fun, minethd::cn_on
     digit.set(0, !bHaveAes);
     digit.set(1, bPrefetch);
 
-    auto selected_function = func_table[ algv << 2 | digit.to_ulong() ];
     hash_fun = func_table[ algv << 2 | digit.to_ulong() ];
 
     std::string selected_asm = asm_version_str;
     if(selected_asm == "auto")
+    {
         selected_asm = cpu::getAsmName(N);
 
         // Intel asm

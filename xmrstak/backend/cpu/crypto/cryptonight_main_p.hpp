@@ -20,6 +20,7 @@
 
 #include "../common.h"
 #include "xmrstak/backend/cryptonight.hpp"
+#include "../../miner_work.hpp"
 #include "cryptonight.hpp"
 #include "cryptonight_aesni_p.hpp"
 #include "cryptonight_softaes_p.hpp"
@@ -570,21 +571,28 @@ struct Cryptonight_hash_asm<2, 0>{
 
 // Dummy templates
 template< >
-struct Cryptonight_hash_asm<3, 0>{
+struct Cryptonight_hash_asm<2, 1>{
     template<xmrstak_algo_id ALGO, bool PREFETCH>
     static void hash(const void* input, size_t len, void* output, cryptonight_ctx** ctx, const xmrstak_algo& algo){
     }
 };
 
-template< >
-struct Cryptonight_hash_asm<4, 0>{
+template<size_t asm_version>
+struct Cryptonight_hash_asm<3, asm_version>{
     template<xmrstak_algo_id ALGO, bool PREFETCH>
     static void hash(const void* input, size_t len, void* output, cryptonight_ctx** ctx, const xmrstak_algo& algo){
     }
 };
-template< >
 
-struct Cryptonight_hash_asm<5, 0>{
+template<size_t asm_version>
+struct Cryptonight_hash_asm<4, asm_version>{
+    template<xmrstak_algo_id ALGO, bool PREFETCH>
+    static void hash(const void* input, size_t len, void* output, cryptonight_ctx** ctx, const xmrstak_algo& algo){
+    }
+};
+
+template<size_t asm_version>
+struct Cryptonight_hash_asm<5, asm_version>{
     template<xmrstak_algo_id ALGO, bool PREFETCH>
     static void hash(const void* input, size_t len, void* output, cryptonight_ctx** ctx, const xmrstak_algo& algo){
     }
