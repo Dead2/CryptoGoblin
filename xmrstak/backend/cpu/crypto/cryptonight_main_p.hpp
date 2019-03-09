@@ -233,7 +233,7 @@
 #define CN_STEP3_A(n, monero_const, l0, ax0, bx0, idx1, ptr1, lo, cl, ch, al0, ah0, cx, bx1, sqrt_result, division_result_xmm, cn_r_data) \
     uint64_t al0 = _mm_cvtsi128_si64(ax0); \
     uint64_t ah0 = ((uint64_t*)&ax0)[1]; \
-    CN_R_RANDOM_MATH(n, al0, ah0, cl, bx0, bx1, cn_r_data); \
+    CN_R_RANDOM_MATH(n, al0, ah0, cl, bx0, bx1, cn_r_data);
 
 #define CN_STEP3_B(n, monero_const, l0, ax0, bx0, idx1, ptr1, lo, cl, ch, al0, ah0, cx, bx1, sqrt_result, division_result_xmm) \
     uint64_t lo, ch; \
@@ -275,8 +275,9 @@
     ax0 = _mm_set_epi64x(ah0, al0);
 
 #define CN_STEP5(n, monero_const, l0, ax0, bx0, idx0, idx1, ptr0, al0) \
+    idx0 = al0; \
     if(ALGO == cryptonight_heavy || ALGO == cryptonight_bittube2){ \
-        ptr0 = (__m128i *)&l0[idx1 & MASK]; \
+        ptr0 = (__m128i *)&l0[idx0 & MASK]; \
         int64_t u  = ((int64_t*)ptr0)[0]; \
         int32_t d  = ((int32_t*)ptr0)[2]; \
         int64_t q = u / (d | 0x5); \
@@ -291,8 +292,6 @@
         \
         ((int64_t*)ptr0)[0] = u ^ q; \
         idx0 = (~d) ^ q; \
-    }else{ \
-        idx0 = al0; \
     }
 
 #define CN_FINALIZE(n) \
@@ -384,7 +383,7 @@ struct Cryptonight_hash<1>{
             REPEAT_1(9, CN_STEP1, monero_const, conc_var, l0, ax0, bx0, idx0, ptr0, cx, bx1);
             REPEAT_1(9, CN_STEP2, monero_const, l0, ax0, bx0, idx1, ptr0, ptr1, cx, cl);
             REPEAT_1(16, CN_STEP3_A, monero_const, l0, ax0, bx0, idx1, ptr1, lo, cl, ch, al0, ah0, cx, bx1, sqrt_result, division_result_xmm, cn_r_data);
-            if(ALGO == cryptonight_monero_v8){
+            if(ALGO == cryptonight_monero_v8 || ALGO == cryptonight_v8_reversewaltz){
                 CN_MONERO_V8_DIV(cx0, cx_640, sqrt_result0, division_result0, division_result_xmm0, cl0);
                 CN_MONERO_V8_DIV_FIN(cx_640, sqrt_result0, division_result0);
             }
@@ -708,3 +707,32 @@ void patchAsmVariants(std::string selected_asm, cryptonight_ctx** ctx, const xmr
     }
 }
 } // namespace (anonymous)
+
+template<size_t N>
+struct Cryptonight_R_generator
+{
+    template<xmrstak_algo_id ALGO>
+    static void cn_on_new_job(const xmrstak::miner_work& work, cryptonight_ctx** ctx)
+    {
+        if(ctx[0]->cn_r_ctx.height == work.iBlockHeight && ctx[0]->last_algo == POW(cryptonight_r))
+            return;
+
+        ctx[0]->last_algo = POW(cryptonight_r);
+
+        ctx[0]->cn_r_ctx.height = work.iBlockHeight;
+        int code_size = v4_random_math_init<ALGO>(ctx[0]->cn_r_ctx.code, work.iBlockHeight);
+        if(ctx[0]->asm_version != 0)
+        {
+            v4_compile_code(ctx[0], code_size);
+            ctx[0]->hash_fn = Cryptonight_hash_asm<N, 1u>::template hash<cryptonight_r, true>;
+        }
+
+        for(size_t i=1; i < N; i++)
+        {
+            ctx[i]->cn_r_ctx = ctx[0]->cn_r_ctx;
+            ctx[i]->loop_fn = ctx[0]->loop_fn;
+            ctx[i]->hash_fn = ctx[0]->hash_fn;
+        }
+    }
+};
+

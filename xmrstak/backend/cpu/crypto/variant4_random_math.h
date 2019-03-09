@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string.h>
+#include "../common.h"
 #include "../../cryptonight.hpp"
 #include "xmrstak/misc/console.hpp"
 
@@ -88,7 +89,7 @@ struct V4_Instruction
 //
 // This is about as fast as it can get without using low-level machine code generation
 template<typename v4_reg>
-static void v4_random_math(const struct V4_Instruction* code, v4_reg* r)
+FLATTEN3 static void v4_random_math(const struct V4_Instruction* code, v4_reg* r)
 {
     enum
     {

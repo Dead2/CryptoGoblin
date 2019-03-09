@@ -578,29 +578,24 @@ void executor::ex_main()
 
         switch(jconf::inst()->GetCurrentCoinSelection().GetDescription(0).GetMiningAlgo()) {
 
+        // 256KB
+        case cryptonight_turtle:
+            port = 6010 + tlsport;
+            break;
+
         // 1MB
-        case cryptonight_lite:
-        case cryptonight_ipbc:
         case cryptonight_aeon:
             port = 6020 + tlsport;
             break;
 
+        // 2MB
+        case cryptonight_r:
+            port = 6031 + tlsport;
+            break;
+
         // 4MB
         case cryptonight_heavy:
-            port = 6030 + tlsport;
-            break;
-
-        // 2MB
-        case cryptonight:
-            port = 6010 + tlsport;
-            break;
-
-        case cryptonight_monero:
-            port = 6040 + tlsport;
-            break;
-
-        case cryptonight_monero_v8:
-            port = 6050 + tlsport;
+            port = 6041 + tlsport;
             break;
 
         default:
