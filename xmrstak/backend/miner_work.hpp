@@ -15,7 +15,7 @@ namespace xmrstak
     struct miner_work
     {
         char        sJobID[64];
-        uint8_t     bWorkBlob[112];
+        uint8_t     bWorkBlob[128];
         uint32_t    iWorkSize;
         uint64_t    iTarget;
         bool        bNiceHash;
