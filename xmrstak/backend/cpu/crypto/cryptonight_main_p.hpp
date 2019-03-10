@@ -167,7 +167,7 @@
     uint64_t cx_64; \
     uint64_t cl; \
     __m128 conc_var; \
-    if(ALGO == cryptonight_conceal || ALGO == cryptonight_gpu) \
+    if(ALGO == cryptonight_conceal) \
     {\
         set_float_rounding_mode_nearest(); \
         conc_var = _mm_setzero_ps(); \

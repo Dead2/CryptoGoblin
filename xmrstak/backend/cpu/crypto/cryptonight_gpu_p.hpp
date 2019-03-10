@@ -41,6 +41,7 @@ struct Cryptonight_hash_gpu
     template<xmrstak_algo_id ALGO, bool SOFT_AES, bool PREFETCH>
     static void hash(const void* input, size_t len, void* output, cryptonight_ctx** ctx, const xmrstak_algo& algo)
     {
+        set_float_rounding_mode_nearest();
         keccak_200((const uint8_t *)input, len, ctx[0]->hash_state);
         cn_explode_scratchpad_gpu<PREFETCH, ALGO>(ctx[0]->hash_state, ctx[0]->long_state, algo);
 
