@@ -109,6 +109,7 @@ xmrstak::coin_selection coins[] = {
     { "cryptonight_v7",                 {POW(cryptonight_monero),           POW(cryptonight_monero),            0u }, {POW(cryptonight_r),          POW(cryptonight_r),         0u }, nullptr },
     { "cryptonight_v7_stellite",        {POW(cryptonight_stellite),         POW(cryptonight_stellite),          0u }, {POW(cryptonight_r),          POW(cryptonight_r),         0u }, nullptr },
     { "cryptonight_v8",                 {POW(cryptonight_monero_v8),        POW(cryptonight_monero_v8),         0u }, {POW(cryptonight_r),          POW(cryptonight_r),         0u }, nullptr },
+    { "cryptonight_v8_double",          {POW(cryptonight_v8_double),        POW(cryptonight_v8_double),         0u }, {POW(cryptonight_r),          POW(cryptonight_r),         0u }, nullptr },
     { "cryptonight_v8_half",            {POW(cryptonight_v8_half),          POW(cryptonight_v8_half),           0u }, {POW(cryptonight_r),          POW(cryptonight_r),         0u }, nullptr },
     { "cryptonight_v8_reversewaltz",    {POW(cryptonight_v8_reversewaltz),  POW(cryptonight_v8_reversewaltz),   0u }, {POW(cryptonight_r),          POW(cryptonight_r),         0u }, nullptr },
     { "cryptonight_v8_zelerius",        {POW(cryptonight_v8_zelerius),      POW(cryptonight_v8_zelerius),       0u }, {POW(cryptonight_r),          POW(cryptonight_r),         0u }, nullptr },
@@ -124,6 +125,7 @@ xmrstak::coin_selection coins[] = {
     { "turtlecoin",                     {POW(cryptonight_turtle),           POW(cryptonight_turtle),            0u }, {POW(cryptonight_aeon),       POW(cryptonight_aeon),      0u }, nullptr },
     { "stellite",                       {POW(cryptonight_v8_half),          POW(cryptonight_v8_half),           0u }, {POW(cryptonight_r),          POW(cryptonight_r),         0u }, nullptr },
     { "zelerius",                       {POW(cryptonight_v8_zelerius),      POW(cryptonight_v8_zelerius),       0u }, {POW(cryptonight_r),          POW(cryptonight_r),         0u }, nullptr },
+    { "xcash",                          {POW(cryptonight_v8_double),        POW(cryptonight_v8_double),         0u }, {POW(cryptonight_r),          POW(cryptonight_r),         0u }, nullptr },
 #else
     { "cryptonight_r",                  {POW(cryptonight_r),                POW(cryptonight_r),                 0u }, {POW(cryptonight_r),          POW(cryptonight_r),         0u }, nullptr },
     { "monero",                         {POW(cryptonight_r),                POW(cryptonight_r),                10u }, {POW(cryptonight_r),          POW(cryptonight_r),         0u }, "pool.supportxmr.com:5555" },
