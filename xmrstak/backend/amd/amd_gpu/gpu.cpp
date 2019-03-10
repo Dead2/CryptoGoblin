@@ -1208,7 +1208,7 @@ uint64_t interleaveAdjustDelay(GpuContext* ctx, const bool enableAutoAdjustment)
         {
             // do not notify the user anymore if we reach a good delay
             if(delay > maxDelay)
-                printer::inst()->print_msg(L1,"OpenCL Interleave %u|%u: %u/%.2lf ms - %.1lf",
+                printer::inst()->print_msg(L3,"OpenCL Interleave %u|%u: %u/%.2lf ms - %.1lf",
                     ctx->deviceIdx,
                     ctx->idWorkerOnDevice,
                     static_cast<uint32_t>(delay),

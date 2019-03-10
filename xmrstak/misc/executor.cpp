@@ -402,7 +402,7 @@ void executor::on_pool_have_job(size_t pool_id, pool_job& oPoolJob)
             printer::inst()->print_msg(L2, "Pool logged in.");
     }
     else
-        printer::inst()->print_msg(L3, "New block detected.");
+        printer::inst()->print_msg(L3, "New block detected: %llu", oPoolJob.iBlockHeight);
 }
 
 void executor::on_miner_result(size_t pool_id, job_result& oResult)
@@ -633,17 +633,17 @@ void executor::ex_main()
             else
                 pools.emplace_front(0, "donate.xmr-stak.net:4444", "", "", "", 0.0, true, false, "", true);
             break;
-    case cryptonight_r:
-        if(dev_tls)
-            pools.emplace_front(0, "donate.xmr-stak.net:8822", "", "", "", 0.0, true, true, "", false);
-        else
-            pools.emplace_front(0, "donate.xmr-stak.net:5522", "", "", "", 0.0, true, false, "", false);
-        break;
-    default:
+        case cryptonight_r:
             if(dev_tls)
-                pools.emplace_front(0, "donate.xmr-stak.net:6666", "", "", "", 0.0, true, true, "", false);
+                pools.emplace_front(0, "donate.xmr-stak.net:8822", "", "", "", 0.0, true, true, "", false);
             else
-                pools.emplace_front(0, "donate.xmr-stak.net:3333", "", "", "", 0.0, true, false, "", false);
+                pools.emplace_front(0, "donate.xmr-stak.net:5522", "", "", "", 0.0, true, false, "", false);
+            break;
+        default:
+            if(dev_tls)
+                pools.emplace_front(0, "donate.xmr-stak.net:6666", "", "", "", 0.0, true, true, "", true);
+            else
+                pools.emplace_front(0, "donate.xmr-stak.net:3333", "", "", "", 0.0, true, false, "", true);
             break;
         }
     }

@@ -874,8 +874,8 @@ int do_benchmark(int block_version, int wait_sec, int work_sec)
 
     printer::inst()->print_msg(L0, "Prepare benchmark for block version %d", block_version);
 
-    uint8_t work[112];
-    memset(work,0,112);
+    uint8_t work[128];
+    memset(work,0,128);
     work[0] = static_cast<uint8_t>(block_version);
 
     xmrstak::pool_data dat;
