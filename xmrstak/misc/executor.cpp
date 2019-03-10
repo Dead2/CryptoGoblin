@@ -24,6 +24,7 @@
 #include "xmrstak/jconf.hpp"
 #include "executor.hpp"
 #include "xmrstak/net/jpsock.hpp"
+#include "xmrstak/misc/jext.hpp"
 
 #include "telemetry.hpp"
 #include "xmrstak/backend/miner_work.hpp"
@@ -402,7 +403,7 @@ void executor::on_pool_have_job(size_t pool_id, pool_job& oPoolJob)
             printer::inst()->print_msg(L2, "Pool logged in.");
     }
     else
-        printer::inst()->print_msg(L3, "New block detected: %llu", oPoolJob.iBlockHeight);
+        printer::inst()->print_msg(L3, "New block detected: %llu", bswap_64(oPoolJob.iBlockHeight));
 }
 
 void executor::on_miner_result(size_t pool_id, job_result& oResult)
