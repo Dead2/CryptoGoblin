@@ -234,12 +234,14 @@ void win_exit(int code)
 #endif // _WIN32
 
 void printer::set_title(const char* str) {
-#if !defined(_WIN32) || (defined(_WIN32) && defined(VT100))
     char buf[128];
     snprintf(buf, sizeof(buf), TITLE("%s"), str);
 
+#if !defined(_WIN32) || (defined(_WIN32) && defined(VT100))
     std::unique_lock<std::mutex> lck(print_mutex);
     fputs(buf, stdout);
     fflush(stdout);
+#elif defined(_WIN32)
+    SetConsoleTitle(buf);
 #endif
 }

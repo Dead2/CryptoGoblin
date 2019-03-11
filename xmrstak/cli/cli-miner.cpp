@@ -407,11 +407,9 @@ int main(int argc, char *argv[])
     SetConsoleMode(hStdout, handleMode);
 #endif
 
-#ifdef VT100
     char strbuf[24];
     snprintf(strbuf, sizeof(strbuf), "%s %s", XMR_STAK_NAME, XMR_STAK_VERSION);
     printer::inst()->set_title(strbuf);
-#endif
 
     if(pos == std::string::npos)
     {
