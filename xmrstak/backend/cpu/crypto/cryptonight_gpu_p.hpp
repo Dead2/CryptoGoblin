@@ -50,7 +50,10 @@ struct Cryptonight_hash_gpu
         else
             cn_gpu_inner_ssse3(ctx[0]->hash_state, ctx[0]->long_state, algo);
 
-        cn_implode_scratchpad<ALGO, PREFETCH>((__m128i*)ctx[0]->long_state, (__m128i*)ctx[0]->hash_state, algo);
+        if(SOFT_AES)
+            cn_implode_scratchpad<ALGO, PREFETCH>((__m128i*)ctx[0]->long_state, (__m128i*)ctx[0]->hash_state, algo);
+        else
+            soft_cn_implode_scratchpad<ALGO, PREFETCH>((__m128i*)ctx[0]->long_state, (__m128i*)ctx[0]->hash_state, algo);
         keccakf_24((uint64_t*)ctx[0]->hash_state);
         memcpy(output, ctx[0]->hash_state, 32);
     }

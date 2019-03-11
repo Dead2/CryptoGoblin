@@ -16,6 +16,8 @@ namespace xmrstak
 {
 namespace cpu
 {
+    std::string getAsmName(const uint32_t num_hashes);
+
 
 class minethd : public iBackend
 {
@@ -35,7 +37,7 @@ public:
 
 private:
     template<uint8_t N>
-    static bool testrunner(const xmrstak_algo& algo, cryptonight_ctx **ctx);
+    static bool testrunner(const xmrstak_algo& algo, cryptonight_ctx **ctx, const std::string& selected_asm);
 
     minethd(miner_work& pWork, size_t iNo, int iMultiway, bool prefetch, int64_t affinity, const std::string& asm_version);
 
@@ -63,6 +65,7 @@ private:
 
     bool bQuit;
     bool bPrefetch;
+
     std::string asm_version_str = "off";
 };
 

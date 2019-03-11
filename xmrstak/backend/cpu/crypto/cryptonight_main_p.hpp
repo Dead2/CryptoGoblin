@@ -536,97 +536,48 @@ struct Cryptonight_hash<5>{
     }
 };
 
-
-template<size_t N, size_t asm_version>
+template<size_t N>
 struct Cryptonight_hash_asm {
     template<xmrstak_algo_id ALGO, bool PREFETCH>
     static void hash(const void* input, size_t len, void* output, cryptonight_ctx** ctx, const xmrstak_algo& algo){
         for(size_t i = 0; i < N; ++i)
         {
             keccak_200((const uint8_t *)input + len * i, len, ctx[i]->hash_state);
+            // Optim - 99% time boundary
             cn_explode_scratchpad<ALGO, PREFETCH>((__m128i*)ctx[i]->hash_state, (__m128i*)ctx[i]->long_state, algo);
+            // Optim - 90% time boundary
         }
 
-        if(ALGO == cryptonight_r)
-        {
-            // API ATTRIBUTE is only required for cryptonight_r
-            typedef void ABI_ATTRIBUTE (*cn_r_mainloop_fun)(cryptonight_ctx *ctx);
-            for(size_t i = 0; i < N; ++i)
-                reinterpret_cast<cn_r_mainloop_fun>(ctx[0]->loop_fn)(ctx[i]); // use always loop_fn from ctx[0]!!
-        }
-        else
-        {
-            for(size_t i = 0; i < N; ++i)
-                ctx[0]->loop_fn(ctx[i]); // use always loop_fn from ctx[0]!!
+        if (N == 1){
+            if(ALGO == cryptonight_r){
+                // ABI ATTRIBUTE is only required for cryptonight_r
+                typedef void ABI_ATTRIBUTE (*cn_r_mainloop_fun)(cryptonight_ctx *ctx);
+                for(size_t i = 0; i < N; ++i)
+                    reinterpret_cast<cn_r_mainloop_fun>(ctx[0]->loop_fn)(ctx[i]); // use always loop_fn from ctx[0]!!
+            }else{
+                for(size_t i = 0; i < N; ++i)
+                    ctx[0]->loop_fn(ctx[i]); // use always loop_fn from ctx[0]!!
+            }
+        }else if (N == 2){
+            if(ALGO == cryptonight_r){
+                // ABI ATTRIBUTE is only required for cryptonight_r
+                typedef void ABI_ATTRIBUTE (*cn_r_double_mainloop_fun)(cryptonight_ctx*, cryptonight_ctx*);
+                reinterpret_cast<cn_r_double_mainloop_fun>(ctx[0]->loop_fn)(ctx[0], ctx[1]);
+            }else{
+                reinterpret_cast<cn_double_mainloop_fun>(ctx[0]->loop_fn)(ctx[0], ctx[1]);
+            }
         }
 
         for(size_t i = 0; i < N; ++i)
         {
+            // Optim - 90% time boundary
             cn_implode_scratchpad<ALGO, PREFETCH>((__m128i*)ctx[i]->long_state, (__m128i*)ctx[i]->hash_state, algo);
+            // Optim - 99% time boundary
             keccakf_24((uint64_t*)ctx[i]->hash_state);
             extra_hashes[ctx[i]->hash_state[0] & 3](ctx[i]->hash_state, (char*)output + 32 * i);
         }
     }
 };
-
-// double hash with specialized asm only for intel
-template< >
-struct Cryptonight_hash_asm<2, 0>{
-    static constexpr size_t N = 2;
-    template<xmrstak_algo_id ALGO, bool PREFETCH>
-    static void hash(const void* input, size_t len, void* output, cryptonight_ctx** ctx, const xmrstak_algo& algo){
-        for(size_t i = 0; i < N; ++i){
-            keccak_200((const uint8_t *)input + len * i, len, ctx[i]->hash_state);
-            /* Optim - 99% time boundary */
-            cn_explode_scratchpad<ALGO, PREFETCH>((__m128i*)ctx[i]->hash_state, (__m128i*)ctx[i]->long_state, algo);
-        }
-
-        if(ALGO == cryptonight_r){
-            typedef void ABI_ATTRIBUTE (*cn_r_double_mainloop_fun)(cryptonight_ctx*, cryptonight_ctx*);
-            reinterpret_cast<cn_r_double_mainloop_fun>(ctx[0]->loop_fn)(ctx[0], ctx[1]);
-        }else{
-            reinterpret_cast<cn_double_mainloop_fun>(ctx[0]->loop_fn)(ctx[0], ctx[1]);
-        }
-
-        for(size_t i = 0; i < N; ++i){
-            /* Optim - 90% time boundary */
-            cn_implode_scratchpad<ALGO, PREFETCH>((__m128i*)ctx[i]->long_state, (__m128i*)ctx[i]->hash_state, algo);
-            /* Optim - 99% time boundary */
-            keccakf_24((uint64_t*)ctx[i]->hash_state);
-            extra_hashes[ctx[i]->hash_state[0] & 3](ctx[i]->hash_state, (char*)output + 32 * i);
-        }
-    }
-};
-
-// Dummy templates
-template< >
-struct Cryptonight_hash_asm<2, 1>{
-    template<xmrstak_algo_id ALGO, bool PREFETCH>
-    static void hash(const void* input, size_t len, void* output, cryptonight_ctx** ctx, const xmrstak_algo& algo){
-    }
-};
-
-template<size_t asm_version>
-struct Cryptonight_hash_asm<3, asm_version>{
-    template<xmrstak_algo_id ALGO, bool PREFETCH>
-    static void hash(const void* input, size_t len, void* output, cryptonight_ctx** ctx, const xmrstak_algo& algo){
-    }
-};
-
-template<size_t asm_version>
-struct Cryptonight_hash_asm<4, asm_version>{
-    template<xmrstak_algo_id ALGO, bool PREFETCH>
-    static void hash(const void* input, size_t len, void* output, cryptonight_ctx** ctx, const xmrstak_algo& algo){
-    }
-};
-
-template<size_t asm_version>
-struct Cryptonight_hash_asm<5, asm_version>{
-    template<xmrstak_algo_id ALGO, bool PREFETCH>
-    static void hash(const void* input, size_t len, void* output, cryptonight_ctx** ctx, const xmrstak_algo& algo){
-    }
-};
-
 
 namespace
 {
@@ -702,10 +653,7 @@ void patchAsmVariants(std::string selected_asm, cryptonight_ctx** ctx, const xmr
         for(size_t i = 1; i < N; ++i)
             ctx[i]->loop_fn = ctx[0]->loop_fn;
 
-        if(selected_asm == "intel_avx" && N == 2)
-            ctx[0]->hash_fn = Cryptonight_hash_asm<2u, 0u>::template hash<cryptonight_monero_v8, true>;
-        else
-            ctx[0]->hash_fn = Cryptonight_hash_asm<N, 1u>::template hash<cryptonight_monero_v8, true>;
+        ctx[0]->hash_fn = Cryptonight_hash_asm<N>::template hash<cryptonight_monero_v8, true>;
 
         protectExecutableMemory(ctx[0]->fun_data, allocation_size);
         flushInstructionCache(ctx[0]->fun_data, allocation_size);
@@ -729,10 +677,7 @@ struct Cryptonight_R_generator
         if(ctx[0]->asm_version != 0)
         {
             v4_compile_code(N, ctx[0], code_size);
-            if(N == 2)
-                ctx[0]->hash_fn = Cryptonight_hash_asm<2u, 0u>::template hash<cryptonight_r, true>;
-            else
-                ctx[0]->hash_fn = Cryptonight_hash_asm<N, 1u>::template hash<cryptonight_r, true>;
+            ctx[0]->hash_fn = Cryptonight_hash_asm<N>::template hash<cryptonight_r, true>;
         }
 
         for(size_t i=1; i < N; i++)

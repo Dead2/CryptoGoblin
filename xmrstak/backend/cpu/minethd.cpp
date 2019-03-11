@@ -32,6 +32,7 @@
 #include "xmrstak/backend/cpu/cpuType.hpp"
 #include "xmrstak/params.hpp"
 #include "jconf.hpp"
+#include "common.h"
 
 #include "xmrstak/misc/executor.hpp"
 #include "minethd.hpp"
@@ -271,24 +272,58 @@ bool minethd::self_test()
     }
 
     bool bResult = true;
+    bool asmResult = true;
 
     auto neededAlgorithms = ::jconf::inst()->GetCurrentCoinSelection().GetAllAlgorithms();
 
     // New-style testing
+    printer::inst()->print_msg(L0, YELLOW("Starting Hash self-tests."));
     for(const auto algo : neededAlgorithms){
-        bResult = bResult && testrunner<1>(algo, ctx);
-        //bResult = bResult && testrunner<2>(algo, ctx);
-        //bResult = bResult && testrunner<3>(algo, ctx);
-        //bResult = bResult && testrunner<4>(algo, ctx);
-        //bResult = bResult && testrunner<5>(algo, ctx);
+        bResult = bResult && testrunner<1>(algo, ctx, "off");
+        bResult = bResult && testrunner<2>(algo, ctx, "off");
+        bResult = bResult && testrunner<3>(algo, ctx, "off");
+        bResult = bResult && testrunner<4>(algo, ctx, "off");
+        bResult = bResult && testrunner<5>(algo, ctx, "off");
     }
+
+    if (bResult)
+        printer::inst()->print_msg(L0, GREEN("Hash self-test successful."));
+    else
+        printer::inst()->print_msg(L0, RED("Hash self-test failed."));
+
+    // Check whether any thread has ASM enabled
+    if(!jconf::inst()->parse_config())
+    {
+        win_exit();
+    }
+
+    bool test_asm = false;
+    size_t i, n = jconf::inst()->GetThreadCount();
+    jconf::thd_cfg cfg;
+    for (i = 0; i < n; i++){
+        jconf::inst()->GetThreadConfig(i, cfg);
+        if(cfg.asm_version_str != "off"){
+            test_asm = true;
+        }
+    }
+
+    // Test ASM "auto" if ASM was not disabled
+    std::string supported_asm = cpu::getAsmName(1);
+    if(test_asm && supported_asm != "off"){
+        printer::inst()->print_msg(L0, YELLOW("Starting ASM Hash self-tests."));
+        for(const auto algo : neededAlgorithms){
+            asmResult = bResult && testrunner<1>(algo, ctx, supported_asm);
+            asmResult = bResult && testrunner<2>(algo, ctx, supported_asm);
+        }
+    }
+
+    if (asmResult)
+        printer::inst()->print_msg(L0, GREEN("ASM Hash self-test successful."));
+    else
+        printer::inst()->print_msg(L0, RED("ASM Hash self-test failed, you might need to keep ASM disabled."));
 
     for (uint32_t i = 0; i < MAX_N; i++)
         cryptonight_free_ctx(ctx[i]);
-
-    if (bResult){
-        printer::inst()->print_msg(L0, "Cryptonight hash self-test successful.");
-    }
 
     return bResult;
 }
@@ -347,7 +382,7 @@ void printhex(const char *label, char *buffer, uint16_t len){
 }
 
 template<uint8_t MULTIPLE>
-bool minethd::testrunner(const xmrstak_algo& algo, cryptonight_ctx **ctx){
+bool minethd::testrunner(const xmrstak_algo& algo, cryptonight_ctx **ctx, const std::string& selected_asm){
     testVal currTest = getSelftestValues(algo.Id());
     unsigned char out[32 * MULTIPLE];
     minethd::cn_on_new_job set_job;
@@ -366,7 +401,7 @@ bool minethd::testrunner(const xmrstak_algo& algo, cryptonight_ctx **ctx){
     bool bResult;
     if(algo == POW(cryptonight_r))
     {
-        func_multi_selector<MULTIPLE>(ctx, set_job, ::jconf::inst()->HaveHardwareAes(), false, algo);
+        func_multi_selector<MULTIPLE>(ctx, set_job, ::jconf::inst()->HaveHardwareAes(), false, algo, selected_asm);
         miner_work work;
         work.iBlockHeight = 1806260;
         set_job(work, ctx);
@@ -374,12 +409,12 @@ bool minethd::testrunner(const xmrstak_algo& algo, cryptonight_ctx **ctx){
         bResult = memcmp(out, testResult, testResultLen) == 0;
     }else{
         // Without prefetch
-        func_multi_selector<MULTIPLE>(ctx, set_job, ::jconf::inst()->HaveHardwareAes(), false, algo);
+        func_multi_selector<MULTIPLE>(ctx, set_job, ::jconf::inst()->HaveHardwareAes(), false, algo, selected_asm);
         ctx[0]->hash_fn(testString, testStringLen, out, ctx, algo);
         bResult = memcmp(out, testResult, testResultLen) == 0;
 
         // With prefetch
-        func_multi_selector<MULTIPLE>(ctx, set_job, ::jconf::inst()->HaveHardwareAes(), true, algo);
+        func_multi_selector<MULTIPLE>(ctx, set_job, ::jconf::inst()->HaveHardwareAes(), true, algo, selected_asm);
         ctx[0]->hash_fn(testString, testStringLen, out, ctx, algo);
         bResult = bResult &&  memcmp(out, testResult, testResultLen) == 0;
     }
@@ -444,7 +479,7 @@ std::vector<iBackend*> minethd::thread_starter(uint32_t threadOffset, miner_work
  * @return asm type based on the number of hashes per thread the internal
  *             evaluated cpu type
  */
-static std::string getAsmName(const uint32_t num_hashes)
+std::string getAsmName(const uint32_t num_hashes)
 {
     std::string asm_type = "off";
     if(num_hashes != 0)
@@ -624,46 +659,49 @@ void minethd::func_multi_selector(cryptonight_ctx** ctx, minethd::cn_on_new_job&
 #endif
     };
 
-    std::bitset<2> digit;
-    digit.set(0, !bHaveAes);
-    digit.set(1, bPrefetch);
-
-    ctx[0]->hash_fn = func_table[ algv << 2 | digit.to_ulong() ];
+    std::string selected_asm = "off";
 
     // check for asm optimized version for cryptonight_v8
-    if(algo == cryptonight_monero_v8)
-    {
-        std::string selected_asm = asm_version_str;
-        if(selected_asm == "auto")
-                selected_asm = cpu::getAsmName(N);
+    if (N <= 2 && asm_version_str != "off"){
+        selected_asm = asm_version_str;
+        if(selected_asm == "auto" || selected_asm == "on")
+            selected_asm = cpu::getAsmName(N);
 
-        if(selected_asm != "off")
-        {
-            patchAsmVariants<N>(selected_asm, ctx, algo);
+#ifndef ONLY_XMR_ALGO
+        if(algo == cryptonight_monero_v8){
+            if(selected_asm == "intel_avx" || selected_asm == "amd_avx"){
+                printer::inst()->print_msg(L1, "Enabling cpu cryptonight_v8 asm", selected_asm.c_str());
+                patchAsmVariants<N>(selected_asm, ctx, algo);
+            }else{
+                printer::inst()->print_msg(L1, "Disabling cpu asm", selected_asm.c_str());
+            }
 
-            if(asm_version_str == "auto" && (selected_asm != "intel_avx" || selected_asm != "amd_avx"))
-                printer::inst()->print_msg(L3, "Switch to assembler version for '%s' cpu's", selected_asm.c_str());
-            else if(selected_asm != "intel_avx" && selected_asm != "amd_avx") // unknown asm type
-                printer::inst()->print_msg(L1, "Assembler '%s' unknown, fallback to non asm version of cryptonight_v8", selected_asm.c_str());
+        }else
+#endif
+        if(algo == cryptonight_r){
+            if(selected_asm == "intel_avx" || selected_asm == "amd_avx"){
+                printer::inst()->print_msg(L1, "Enabling cpu cryptonight_r asm", selected_asm.c_str());
+                for(size_t h = 0; h < N; ++h)
+                    ctx[h]->asm_version = selected_asm == "intel_avx" ? 1 : 2; // 1 == Intel; 2 == AMD
+            }else{
+                printer::inst()->print_msg(L1, "Disabling cpu asm", selected_asm.c_str());
+            }
         }
     }
-    else if(algo == cryptonight_r && asm_version_str != "off")
-    {
-        std::string selected_asm = asm_version_str;
-        if(selected_asm == "auto")
-                selected_asm = cpu::getAsmName(N);
-        if(selected_asm == "off")
-        {
-            for(int h = 0; h < N; ++h)
-                ctx[h]->asm_version = 0;
-        }
-        else
-        {
-            printer::inst()->print_msg(L0, "enable cryptonight_r asm '%s' cpu's", selected_asm.c_str());
-            for(size_t h = 0; h < N; ++h)
-                ctx[h]->asm_version = selected_asm == "intel_avx" ? 1 : 2; // 1 == Intel; 2 == AMD
-        }
+
+    // Fallback to non-asm version
+    if (selected_asm == "off"){
+        std::bitset<2> digit;
+        digit.set(0, !bHaveAes);
+        digit.set(1, bPrefetch);
+
+        ctx[0]->hash_fn = func_table[ algv << 2 | digit.to_ulong() ];
+
+        for(size_t h = 0; h < N; ++h)
+            ctx[h]->asm_version = 0;
+
     }
+
 
     for(size_t h = 1; h < N; ++h)
         ctx[h]->hash_fn = ctx[0]->hash_fn;
