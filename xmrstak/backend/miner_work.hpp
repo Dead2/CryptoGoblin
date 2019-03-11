@@ -40,7 +40,6 @@ namespace xmrstak
         {
             assert(iWorkSize <= sizeof(bWorkBlob));
             memcpy(bWorkBlob, from.bWorkBlob, iWorkSize);
-            memcpy(this->sJobID, sJobID, sizeof(miner_work::sJobID));
         }
 
         miner_work(miner_work const&) = delete;

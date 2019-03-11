@@ -889,11 +889,13 @@ int do_benchmark(int block_version, int wait_sec, int work_sec)
     /* AMD and NVIDIA is currently only supporting work sizes up to 128byte
      */
     printer::inst()->print_msg(L0, "Start a %d second benchmark...",work_sec);
-    xmrstak::globalStates::inst().switch_work(xmrstak::miner_work("", work, 128, 0, false, 0, 0), dat);
+    char jobid[64];
+    memset(jobid,0,64);
+    xmrstak::globalStates::inst().switch_work(xmrstak::miner_work(jobid, work, 128, 0, false, 0, 0), dat);
     uint64_t iStartStamp = get_timestamp_ms();
 
     std::this_thread::sleep_for(std::chrono::seconds(work_sec));
-    xmrstak::globalStates::inst().switch_work(xmrstak::miner_work("", work, 128, 0, false, 0, 0), dat);
+    xmrstak::globalStates::inst().switch_work(xmrstak::miner_work(jobid, work, 128, 0, false, 0, 0), dat);
 
     double fTotalHps = 0.0;
     for (uint32_t i = 0; i < pvThreads->size(); i++)
