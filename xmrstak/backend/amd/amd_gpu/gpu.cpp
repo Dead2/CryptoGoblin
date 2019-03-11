@@ -511,7 +511,7 @@ size_t InitOpenCLGpu(cl_context opencl_ctx, GpuContext* ctx, const char* source_
             KernelNames.push_back(std::string("cn00_cn_gpu") + std::to_string(miner_algo));
         }
 
-        for(int i = 0; i < KernelNames.size(); ++i)
+        for(size_t i = 0; i < KernelNames.size(); ++i)
     {
             ctx->Kernels[miner_algo][i] = clCreateKernel(ctx->Program[miner_algo], KernelNames[i].c_str(), &ret);
         if(ret != CL_SUCCESS)
@@ -649,8 +649,6 @@ std::vector<GpuContext> getAMDDevices(int index)
                 printer::inst()->print_msg(L1,"WARNING: %s when calling clGetDeviceInfo to get CL_DRIVER_VERSION for device %u.", err_to_str(clStatus), k);
                 continue;
             }
-
-            bool isHSAOpenCL = std::string(openCLDriverVer.data()).find("HSA") != std::string::npos;
 
             // if environment variable GPU_SINGLE_ALLOC_PERCENT is not set we can not allocate the full memory
             ctx.deviceIdx = k;
@@ -979,7 +977,7 @@ size_t XMRSetJob(GpuContext* ctx, uint8_t* input, size_t input_len, uint64_t tar
 
             // Precompile next program in background
             xmrstak::amd::CryptonightR_get_program(ctx, miner_algo, height + 1, PRECOMPILATION_DEPTH, true, old_kernel);
-            for (int i = 2; i <= PRECOMPILATION_DEPTH; ++i)
+            for (uint32_t i = 2; i <= PRECOMPILATION_DEPTH; ++i)
                 xmrstak::amd::CryptonightR_get_program(ctx, miner_algo, height + i, PRECOMPILATION_DEPTH, true, nullptr);
 
             printer::inst()->print_msg(LDEBUG, "Thread #%zu updated CryptonightR", ctx->deviceIdx);
@@ -1167,7 +1165,7 @@ uint64_t interleaveAdjustDelay(GpuContext* ctx, const bool enableAutoAdjustment)
         t0 = get_timestamp_ms();
         std::unique_lock<std::mutex> g(ctx->interleaveData->mutex);
 
-        int64_t delay = 0;
+        uint64_t delay = 0;
         double dt = 0.0;
 
         if(t0 > ctx->interleaveData->lastRunTimeStamp)
@@ -1205,7 +1203,7 @@ uint64_t interleaveAdjustDelay(GpuContext* ctx, const bool enableAutoAdjustment)
                 0.001
             );
         }
-        delay = std::max(int64_t(0), delay);
+        delay = std::max(uint64_t(0), delay);
 
         ctx->interleaveData->lastRunTimeStamp = t0 + delay;
 

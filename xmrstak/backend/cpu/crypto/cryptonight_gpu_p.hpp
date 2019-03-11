@@ -4,7 +4,7 @@ template<bool PREFETCH, xmrstak_algo_id ALGO>
 void cn_explode_scratchpad_gpu(const uint8_t* input, uint8_t* output, const xmrstak_algo& algo)
 {
     constexpr size_t hash_size = 200; // 25x8 bytes
-    alignas(128) uint64_t hash[25];
+    ALIGN(16) uint64_t hash[25];
     const size_t mem = algo.Mem();
 
     for (uint64_t i = 0; i < mem / 512; i++)
