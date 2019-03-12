@@ -1,6 +1,7 @@
 #pragma once
 
 #include "xmrstak/misc/environment.hpp"
+#include "xmrstak/misc/home_dir.hpp"
 
 #include <string>
 
@@ -33,6 +34,7 @@ struct params
     std::string configFile;
     std::string configFilePools;
     std::string configFileAMD;
+    std::string rootAMDCacheDir;
     std::string configFileNVIDIA;
     std::string configFileCPU;
 
@@ -68,8 +70,9 @@ struct params
         configFile("config.txt"),
         configFilePools("pools.txt"),
         configFileAMD("amd.txt"),
-        configFileNVIDIA("nvidia.txt"),
+        rootAMDCacheDir(get_home() + "/.openclcache/"),
         configFileCPU("cpu.txt"),
+        configFileNVIDIA("nvidia.txt"),
         useAMD(true),
         AMDCache(true),
         useNVIDIA(true),
