@@ -272,7 +272,6 @@ bool minethd::self_test()
     }
 
     bool bResult = true;
-    bool asmResult = true;
 
     auto neededAlgorithms = ::jconf::inst()->GetCurrentCoinSelection().GetAllAlgorithms();
 
@@ -310,17 +309,18 @@ bool minethd::self_test()
     // Test ASM "auto" if ASM was not disabled
     std::string supported_asm = cpu::getAsmName(1);
     if(test_asm && supported_asm != "off"){
+        bool asmResult = true;
         printer::inst()->print_msg(L0, YELLOW("Starting ASM Hash self-tests."));
         for(const auto algo : neededAlgorithms){
             asmResult = bResult && testrunner<1>(algo, ctx, supported_asm);
             asmResult = bResult && testrunner<2>(algo, ctx, supported_asm);
         }
-    }
 
-    if (asmResult)
-        printer::inst()->print_msg(L0, GREEN("ASM Hash self-test successful."));
-    else
-        printer::inst()->print_msg(L0, RED("ASM Hash self-test failed, you might need to keep ASM disabled."));
+        if (asmResult)
+            printer::inst()->print_msg(L0, GREEN("ASM Hash self-test successful."));
+        else
+            printer::inst()->print_msg(L0, RED("ASM Hash self-test failed, you might need to keep ASM disabled."));
+    }
 
     for (uint32_t i = 0; i < MAX_N; i++)
         cryptonight_free_ctx(ctx[i]);
