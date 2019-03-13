@@ -207,7 +207,8 @@ if(CUDA_ENABLE)
             lib64
             lib/x64
             lib/Win32
-            lib64/stubs)
+            lib64/stubs
+            lib)
 
         #nvrtc
         find_library(CUDA_NVRTC_LIB
@@ -224,7 +225,8 @@ if(CUDA_ENABLE)
         PATH_SUFFIXES
             lib64
             lib/x64
-            lib/Win32)
+            lib/Win32
+            lib)
 
         list(APPEND BACKEND_TYPES "nvidia")
         option(XMR-STAK_LARGEGRID "Support large CUDA block count > 128" ON)
