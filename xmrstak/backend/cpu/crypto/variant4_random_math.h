@@ -106,6 +106,9 @@ FLATTEN3 static void v4_random_math(const struct V4_Instruction* code, v4_reg* r
         case MUL: \
             *dst *= src; \
             break; \
+        case XOR: \
+            *dst ^= src; \
+            break; \
         case ADD: \
             *dst += src + op->C; \
             break; \
@@ -123,9 +126,6 @@ FLATTEN3 static void v4_random_math(const struct V4_Instruction* code, v4_reg* r
                 const uint32_t shift = src % REG_BITS; \
                 *dst = (*dst << shift) | (*dst >> ((REG_BITS - shift) % REG_BITS)); \
             } \
-            break; \
-        case XOR: \
-            *dst ^= src; \
             break; \
         case RET: \
             return; \
