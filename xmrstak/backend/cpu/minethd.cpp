@@ -291,10 +291,7 @@ bool minethd::self_test()
         printer::inst()->print_msg(L0, RED("Hash self-test failed."));
 
     // Check whether any thread has ASM enabled
-    if(!jconf::inst()->parse_config())
-    {
-        win_exit();
-    }
+    jconf::inst()->parse_config();
 
     bool test_asm = false;
     size_t i, n = jconf::inst()->GetThreadCount();
