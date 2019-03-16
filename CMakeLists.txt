@@ -158,13 +158,13 @@ if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
 
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CG_CFLAGS}")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CG_CFLAGS}")
-  set(CMAKE_ASM_FLAGS "${CMAKE_ASM_FLAGS} ${CG_CFLAGS}")
+  set(CMAKE_ASM_FLAGS "${CMAKE_ASM_FLAGS} ${CG_CFLAGS} -x assembler-with-cpp")
   if(WIN32)
-      set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--dynamicbase,--nxcompat,--sort-common")
-      set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--dynamicbase,--nxcompat,--sort-common")
+      set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--dynamicbase,--nxcompat,--sort-common,--no-insert-timestamp,--high-entropy-va")
+      set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--dynamicbase,--nxcompat,--sort-common,--no-insert-timestamp,--high-entropy-va")
   else()
-      set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-z,now,-z,relro,-z,combreloc,--sort-common,--no-ld-generated-unwind-info,--enable-new-dtags")
-      set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-z,now,-z,relro,-z,combreloc,--sort-common,--no-ld-generated-unwind-info,--enable-new-dtags")
+      set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-O1,-z,now,-z,relro,-z,combreloc,-z,common,-z,common-page-size=2097152,--sort-common,--no-ld-generated-unwind-info,--enable-new-dtags")
+      set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-O1,-z,now,-z,relro,-z,combreloc,-z,common,-z,common-page-size=209715,--sort-common,--no-ld-generated-unwind-info,--enable-new-dtags")
   endif()
 
   if(CG_LTO)
@@ -737,8 +737,6 @@ else()
     enable_language(ASM)
     set_property(SOURCE "xmrstak/backend/cpu/crypto/asm/cryptonight_v8_main_loop.S" PROPERTY CPP)
     set_property(SOURCE "xmrstak/backend/cpu/crypto/asm/cnR/CryptonightR_template.S" PROPERTY CPP)
-    set_source_files_properties("xmrstak/backend/cpu/crypto/asm/cryptonight_v8_main_loop.S" PROPERTIES COMPILE_FLAGS "-x assembler-with-cpp")
-    set_source_files_properties("xmrstak/backend/cpu/crypto/asm/cnR/CryptonightR_template.S" PROPERTIES COMPILE_FLAGS "-x assembler-with-cpp")
     add_library(xmr-stak-asm
         STATIC
         "xmrstak/backend/cpu/crypto/asm/cryptonight_v8_main_loop.S"
