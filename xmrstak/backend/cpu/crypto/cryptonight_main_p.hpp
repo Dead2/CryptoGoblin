@@ -664,7 +664,7 @@ void patchAsmVariants(std::string selected_asm, cryptonight_ctx** ctx, const xmr
 template<size_t N>
 struct Cryptonight_R_generator
 {
-    template<xmrstak_algo_id ALGO>
+    template<xmrstak_algo_id ALGO, bool SOFT_AES>
     static void cn_on_new_job(const xmrstak::miner_work& work, cryptonight_ctx** ctx)
     {
         if(ctx[0]->cn_r_ctx.height == work.iBlockHeight && ctx[0]->last_algo == POW(cryptonight_r) && reinterpret_cast<void*>(ctx[0]->hash_fn) == ctx[0]->fun_data)
@@ -676,7 +676,10 @@ struct Cryptonight_R_generator
         int code_size = v4_random_math_init<ALGO>(ctx[0]->cn_r_ctx.code, work.iBlockHeight);
         if(ctx[0]->asm_version != 0)
         {
-            v4_compile_code(N, ctx[0], code_size);
+            if(SOFT_AES)
+                v4_soft_aes_compile_code(N, ctx[0], code_size);
+            else
+                v4_compile_code(N, ctx[0], code_size);
             ctx[0]->hash_fn = Cryptonight_hash_asm<N>::template hash<cryptonight_r, true>;
         }
 

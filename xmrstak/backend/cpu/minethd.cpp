@@ -697,22 +697,26 @@ void minethd::func_multi_selector(cryptonight_ctx** ctx, minethd::cn_on_new_job&
 
         for(size_t h = 0; h < N; ++h)
             ctx[h]->asm_version = 0;
-
     }
 
 
     for(size_t h = 1; h < N; ++h)
         ctx[h]->hash_fn = ctx[0]->hash_fn;
 
-    static const std::unordered_map<uint32_t, minethd::cn_on_new_job> on_new_job_map = {
-        {cryptonight_r, Cryptonight_R_generator<N>::template cn_on_new_job<cryptonight_r>},
+    // Select random code generator
+    static const minethd::cn_on_new_job generator_table[] = {
+        Cryptonight_R_generator<N>::template cn_on_new_job<cryptonight_r,true>,
+        Cryptonight_R_generator<N>::template cn_on_new_job<cryptonight_r,false>,
     };
 
-    auto it = on_new_job_map.find(algo.Id());
-    if (it != on_new_job_map.end())
-        on_new_job = it->second;
-    else
+    if(algo == cryptonight_r){
+        std::bitset<1> gen_digit;
+        gen_digit.set(0, bHaveAes);
+
+        on_new_job = generator_table[gen_digit.to_ulong()];
+    }else{
         on_new_job = nullptr;
+    }
 }
 
 void minethd::func_selector(cryptonight_ctx** ctx, bool bHaveAes, bool bPrefetch, const xmrstak_algo& algo)
