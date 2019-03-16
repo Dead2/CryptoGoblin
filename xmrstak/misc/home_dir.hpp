@@ -3,8 +3,8 @@
 #include <string>
 
 #ifdef _WIN32
-#include <WinSock2.h>
-#include <Shlobj.h>
+//#include <winsock2.h>
+#include <shlobj.h>
 
 namespace
 {

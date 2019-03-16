@@ -23,6 +23,7 @@
 
 #ifndef CONF_NO_HTTPD
 
+#include <microhttpd.h>
 
 #include "httpd.hpp"
 #include "webdesign.hpp"
@@ -36,7 +37,6 @@
 #include <string.h>
 #include <string>
 
-#include <microhttpd.h>
 #ifdef _WIN32
 #define strcasecmp _stricmp
 #endif // _WIN32

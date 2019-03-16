@@ -26,9 +26,9 @@
 #include <algorithm>
 #include <chrono>
 
-#include "jpsock.hpp"
 #include "socks.hpp"
 #include "socket.hpp"
+#include "jpsock.hpp"
 
 #include "xmrstak/misc/executor.hpp"
 #include "xmrstak/jconf.hpp"
