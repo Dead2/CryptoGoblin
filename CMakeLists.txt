@@ -696,7 +696,6 @@ else()
     # activate sse2 and aes-ni
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse2 -maes")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -msse2 -maes")
-
 endif()
 
 # add -Wall for debug builds with gcc
@@ -725,37 +724,49 @@ endif()
 if(CMAKE_C_COMPILER_ID MATCHES "MSVC")
     # asm optimized monero v8 code
     enable_language(ASM_MASM)
-    set_property(SOURCE "xmrstak/backend/cpu/crypto/asm/cryptonight_v8_main_loop.asm" PROPERTY ASM_MASM)
-    set_property(SOURCE "xmrstak/backend/cpu/crypto/asm/cnR/CryptonightR_template.asm" PROPERTY ASM_MASM)
-    add_library(xmr-stak-asm
-        STATIC
+    file(GLOB BACKEND_ASM
         "xmrstak/backend/cpu/crypto/asm/cryptonight_v8_main_loop.asm"
         "xmrstak/backend/cpu/crypto/asm/cnR/CryptonightR_template.asm"
     )
+    set_source_files_properties(${BACKEND_ASM} PROPERTIES LANGUAGE ASM_MASM)
 else()
     # asm optimized monero v8 code
     enable_language(ASM)
-    set_property(SOURCE "xmrstak/backend/cpu/crypto/asm/cryptonight_v8_main_loop.S" PROPERTY CPP)
-    set_property(SOURCE "xmrstak/backend/cpu/crypto/asm/cnR/CryptonightR_template.S" PROPERTY CPP)
-    add_library(xmr-stak-asm
-        STATIC
+    file(GLOB BACKEND_ASM
         "xmrstak/backend/cpu/crypto/asm/cryptonight_v8_main_loop.S"
         "xmrstak/backend/cpu/crypto/asm/cnR/CryptonightR_template.S"
     )
+    set_property(SOURCE "xmrstak/backend/cpu/crypto/asm/cryptonight_v8_main_loop.S" PROPERTY CPP)
+    set_property(SOURCE "xmrstak/backend/cpu/crypto/asm/cnR/CryptonightR_template.S" PROPERTY CPP)
 endif()
 
-set_property(TARGET xmr-stak-asm PROPERTY LINKER_LANGUAGE C)
+if(NOT CG_LTO OR (CUDA_FOUND OR OpenCL_FOUND))
+    add_library(CryptoGoblin-asm
+        STATIC
+        ${BACKEND_ASM}
+    )
+    set_property(TARGET CryptoGoblin-asm PROPERTY LINKER_LANGUAGE C)
+endif()
+
 
 # compile generic backend files
 file(GLOB BACKEND_CPP
     "xmrstak/*.cpp"
+    "xmrstak/http/*.cpp"
+    "xmrstak/misc/*.cpp"
+    "xmrstak/net/*.cpp"
+)
+file(GLOB BACKEND_CPU_CPP
+    "xmrstak/jconf.cpp"
+    "xmrstak/version.cpp"
     "xmrstak/backend/cpu/*.cpp"
     "xmrstak/backend/*.cpp"
     "xmrstak/backend/cpu/crypto/*.cpp"
     "xmrstak/backend/cpu/crypto/*.c"
-    "xmrstak/http/*.cpp"
-    "xmrstak/misc/*.cpp"
-    "xmrstak/net/*.cpp"
+    "xmrstak/misc/console.cpp"
+    "xmrstak/misc/executor.cpp"
+    "xmrstak/misc/uac.cpp"
+    "xmrstak/net/jpsock.cpp"
 )
 #set_source_files_properties(${BACKEND_CPP} PROPERTIES LANGUAGE CXX)
 
@@ -765,6 +776,11 @@ if(NOT CG_LTO OR (CUDA_FOUND OR OpenCL_FOUND))
         ${BACKEND_CPP}
     )
     target_link_libraries(CryptoGoblin-backend ${LIBS})
+    add_library(CryptoGoblin-backend-cpu
+        STATIC
+        ${BACKEND_CPU_CPP}
+    )
+    target_link_libraries(CryptoGoblin-backend-cpu ${LIBS})
 endif()
 
 # compile CUDA backend
@@ -793,7 +809,10 @@ if(CUDA_FOUND)
         )
     endif()
     set(CUDA_LIBRARIES ${CUDA_LIB} ${CUDA_NVRTC_LIB} ${CUDA_LIBRARIES})
-    target_link_libraries(CryptoGoblin_cuda CryptoGoblin-backend xmr-stak-asm ${CUDA_LIBRARIES})
+    target_link_libraries(CryptoGoblin_cuda CryptoGoblin-backend-cpu CryptoGoblin-asm ${CUDA_LIBRARIES})
+    if(NOT CG_LTO)
+        target_link_libraries(CryptoGoblin_cuda CryptoGoblin-backend)
+    endif()
     if(WIN32 AND NOT (CMAKE_CXX_COMPILER_ID MATCHES "MSVC"))
         set_target_properties(CryptoGoblin_cuda PROPERTIES PREFIX "")
     endif()
@@ -811,7 +830,10 @@ if(OpenCL_FOUND)
         SHARED
         ${OPENCLSRCFILES}
     )
-    target_link_libraries(CryptoGoblin_opencl CryptoGoblin-backend xmr-stak-asm ${OpenCL_LIBRARY})
+    target_link_libraries(CryptoGoblin_opencl CryptoGoblin-backend-cpu CryptoGoblin-asm ${OpenCL_LIBRARY})
+    if(NOT CG_LTO)
+        target_link_libraries(CryptoGoblin_opencl CryptoGoblin-backend)
+    endif()
     if(WIN32 AND NOT (CMAKE_CXX_COMPILER_ID MATCHES "MSVC"))
         set_target_properties(CryptoGoblin_opencl PROPERTIES PREFIX "")
     endif()
@@ -824,7 +846,7 @@ file(GLOB SRCFILES_CPP
 set_source_files_properties(${SRCFILES_CPP} PROPERTIES LANGUAGE CXX)
 
 if(CG_LTO)
-    set(SRCFILES_CPP ${SRCFILES_CPP} ${BACKEND_CPP})
+    set(SRCFILES_CPP ${SRCFILES_CPP} ${BACKEND_CPP} ${BACKEND_CPU_CPP} ${BACKEND_ASM})
 endif()
 if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
     set(SRCFILES_CPP ${SRCFILES_CPP} "xmrstak/cli/xmr-stak.manifest")
@@ -836,14 +858,14 @@ add_executable(CryptoGoblin
 
 # LTO compile and linker settings
 if(CG_LTO)
-    target_link_libraries(CryptoGoblin ${LIBS} xmr-stak-asm)
+    target_link_libraries(CryptoGoblin ${LIBS})
     if (CUDA_FOUND OR OpenCL_FOUND)
         target_link_libraries(CryptoGoblin ${CMAKE_DL_LIBS})
     endif()
 else()
-    target_link_libraries(CryptoGoblin CryptoGoblin-backend xmr-stak-asm)
+    target_link_libraries(CryptoGoblin CryptoGoblin-backend CryptoGoblin-backend-cpu CryptoGoblin-asm)
     if (CUDA_FOUND OR OpenCL_FOUND)
-        target_link_libraries(CryptoGoblin-backend ${CMAKE_DL_LIBS})
+        target_link_libraries(CryptoGoblin ${CMAKE_DL_LIBS})
     endif()
 endif()
 
