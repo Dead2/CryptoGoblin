@@ -1,5 +1,5 @@
 # CryptoGoblin - CryptoNight CPU mining tool
-**For coins based on cryptonight-classic, cryptonight-light, cryptonight-heavy and cryptonight-ipbc.**<br>
+**For coins based on the cryptonight algorithm family.**<br>
 **Support for Monero, Electroneum, Aeon, Sumokoin, Edollar and many more.**
 
 CryptoGoblin is a greedy mining goblin that will push the cpu to get as many hashes as possible,
@@ -36,7 +36,7 @@ For more information about compiling and dependencies, please have a look at the
 targeting your OS/distro [here](https://github.com/Dead2/CryptoGoblin/tree/master/doc).
 
 ## Donation
-Dev fee mining is set to 1.5%, and part of it goes to xmr-stak authors.
+Dev fee mining is set to 1.4%, and part of it goes to xmr-stak authors.
 
 If you want to make a little donation directly to me (Dead2), transfers or donation mining (at pool.supportxmr.com:3333), my XMR address is:
 ```
