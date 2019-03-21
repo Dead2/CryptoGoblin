@@ -29,7 +29,11 @@
 #define OS_TYPE "unk"
 #endif
 
-#define COIN_TYPE "aeon-cryptonight-monero"
+#if defined(ONLY_XMR_ALGO)
+#define COIN_TYPE "monero"
+#else
+#define COIN_TYPE "monero-cryptonight-family"
+#endif
 
 #define XMRSTAK_PP_TOSTRING1(str) #str
 #define XMRSTAK_PP_TOSTRING(str) XMRSTAK_PP_TOSTRING1(str)
