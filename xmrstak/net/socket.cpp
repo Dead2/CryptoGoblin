@@ -141,8 +141,8 @@ bool plain_socket::connect()
     sock_closed = false;
     int ret = ::connect(hSocket, pSockAddr->ai_addr, (int)pSockAddr->ai_addrlen);
 
-    getnameinfo((struct sockaddr *)pSockAddr->ai_addr, pSockAddr->ai_addrlen, tmphostname, NI_MAXHOST, NULL, 0, 0);
-    getnameinfo((struct sockaddr *)pSockAddr->ai_addr, pSockAddr->ai_addrlen, tmpip, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
+    getnameinfo((struct sockaddr *)pSockAddr->ai_addr, pSockAddr->ai_addrlen, tmphostname, sizeof(tmphostname), NULL, 0, 0);
+    getnameinfo((struct sockaddr *)pSockAddr->ai_addr, pSockAddr->ai_addrlen, tmpip, sizeof(tmpip), NULL, 0, NI_NUMERICHOST);
     snprintf(hostname, sizeof(hostname), "%s (%s)", tmpip, tmphostname);
 
     freeaddrinfo(pAddrRoot);
@@ -308,7 +308,7 @@ bool tls_socket::connect()
     socklen_t addr_size = sizeof(struct sockaddr_in);
     char tmphostname[MAXHOSTLEN];
     getpeername(BIO_get_fd(bio,NULL), (struct sockaddr *)&addr, &addr_size);
-    getnameinfo((struct sockaddr *)&addr, addr_size, tmphostname, MAXHOSTLEN, NULL, 0, 0);
+    getnameinfo((struct sockaddr *)&addr, addr_size, tmphostname, sizeof(tmphostname), NULL, 0, 0);
     snprintf(hostname, sizeof(hostname), "%s (%s)", inet_ntoa(addr.sin_addr), tmphostname);
 
     if(BIO_do_handshake(bio) != 1)

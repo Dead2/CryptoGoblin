@@ -50,7 +50,7 @@ public:
         return ret;
     }
 
-    char hostname[120];
+    char hostname[128];
 
     inline size_t can_connect() { return get_timestamp() != connect_time; }
     inline bool is_running() { return bRunning; }

@@ -3,7 +3,7 @@
 #include <atomic>
 #include "socks.hpp"
 
-#define MAXHOSTLEN 64
+#define MAXHOSTLEN 60
 
 class jpsock;
 
@@ -16,7 +16,7 @@ public:
     virtual bool send(const char* buf) = 0;
     virtual void close(bool free) = 0;
 
-    char hostname[MAXHOSTLEN];
+    char hostname[(MAXHOSTLEN*2)+8];
 
 protected:
     std::atomic<bool> sock_closed;
