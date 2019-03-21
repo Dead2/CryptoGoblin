@@ -665,7 +665,7 @@ void patchAsmVariants(std::string selected_asm, cryptonight_ctx** ctx, const xmr
         for(size_t i = 1; i < N; ++i)
             ctx[i]->loop_fn = ctx[0]->loop_fn;
 
-        ctx[0]->hash_fn = Cryptonight_hash_asm<N>::template hash<cryptonight_monero_v8, true>;
+        ctx[0]->hash_fn = Cryptonight_hash_asm<N>::template hash<cryptonight_monero_v8, false, true>;
 
         protectExecutableMemory(ctx[0]->fun_data, allocation_size);
         flushInstructionCache(ctx[0]->fun_data, allocation_size);
