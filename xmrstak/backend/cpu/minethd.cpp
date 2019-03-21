@@ -667,22 +667,24 @@ void minethd::func_multi_selector(cryptonight_ctx** ctx, minethd::cn_on_new_job&
 
 #ifndef ONLY_XMR_ALGO
         if(algo == cryptonight_monero_v8){
-            if(selected_asm == "intel_avx" || selected_asm == "amd_avx"){
-                printer::inst()->print_msg(L1, "Enabling cpu cryptonight_v8 asm", selected_asm.c_str());
+            if(bHaveAes && (selected_asm == "intel_avx" || selected_asm == "amd_avx")){
+                printer::inst()->print_msg(L1, "Enabling cpu cryptonight_v8 asm");
                 patchAsmVariants<N>(selected_asm, ctx, algo);
             }else{
-                printer::inst()->print_msg(L1, "Disabling cpu asm", selected_asm.c_str());
+                printer::inst()->print_msg(L1, "Disabling cpu asm");
+                selected_asm = "off";
             }
 
         }else
 #endif
         if(algo == cryptonight_r){
             if(selected_asm == "intel_avx" || selected_asm == "amd_avx"){
-                printer::inst()->print_msg(L1, "Enabling cpu cryptonight_r asm", selected_asm.c_str());
+                printer::inst()->print_msg(L1, "Enabling cpu cryptonight_r asm");
                 for(size_t h = 0; h < N; ++h)
                     ctx[h]->asm_version = selected_asm == "intel_avx" ? 1 : 2; // 1 == Intel; 2 == AMD
             }else{
-                printer::inst()->print_msg(L1, "Disabling cpu asm", selected_asm.c_str());
+                printer::inst()->print_msg(L1, "Disabling cpu asm");
+                selected_asm = "off";
             }
         }
     }
@@ -699,19 +701,22 @@ void minethd::func_multi_selector(cryptonight_ctx** ctx, minethd::cn_on_new_job&
             ctx[h]->asm_version = 0;
     }
 
+    //for(size_t h = 1; h < N; ++h)
+    //    ctx[h]->hash_fn = ctx[0]->hash_fn;
 
-    for(size_t h = 1; h < N; ++h)
-        ctx[h]->hash_fn = ctx[0]->hash_fn;
 
     // Select random code generator
     static const minethd::cn_on_new_job generator_table[] = {
-        Cryptonight_R_generator<N>::template cn_on_new_job<cryptonight_r,true>,
-        Cryptonight_R_generator<N>::template cn_on_new_job<cryptonight_r,false>,
+        Cryptonight_R_generator<N>::template cn_on_new_job<cryptonight_r,true,false>,
+        Cryptonight_R_generator<N>::template cn_on_new_job<cryptonight_r,false,false>,
+        Cryptonight_R_generator<N>::template cn_on_new_job<cryptonight_r,true,true>,
+        Cryptonight_R_generator<N>::template cn_on_new_job<cryptonight_r,false,true>,
     };
 
     if(algo == cryptonight_r){
-        std::bitset<1> gen_digit;
+        std::bitset<2> gen_digit;
         gen_digit.set(0, bHaveAes);
+        gen_digit.set(1, bPrefetch);
 
         on_new_job = generator_table[gen_digit.to_ulong()];
     }else{

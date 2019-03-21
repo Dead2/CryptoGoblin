@@ -33,14 +33,14 @@ CryptonightR_soft_aes_template_part1:
 	xor	r8, QWORD PTR [rcx]
 	mov	r9, QWORD PTR [rcx+40]
 	xor	r9, QWORD PTR [rcx+8]
-	movq	xmm4, rax
+	movd	xmm4, rax
 	mov	rdx, QWORD PTR [rcx+56]
 	xor	rdx, QWORD PTR [rcx+24]
 	mov	r11, QWORD PTR [rcx+224]
 	mov	rcx, QWORD PTR [rcx+88]
 	xor	rcx, QWORD PTR [r10+72]
 	mov	rax, QWORD PTR [r10+80]
-	movq	xmm0, rdx
+	movd	xmm0, rdx
 	xor	rax, QWORD PTR [r10+64]
 
 	movaps	XMMWORD PTR [rsp+16], xmm6
@@ -52,20 +52,20 @@ CryptonightR_soft_aes_template_part1:
 	movaps	XMMWORD PTR [rsp+112], xmm12
 	movaps	XMMWORD PTR [rsp+128], xmm13
 
-	movq	xmm5, rax
+	movd	xmm5, rax
 
 	mov	rax, r8
 	punpcklqdq xmm4, xmm0
 	and	eax, 2097136
-	movq	xmm10, QWORD PTR [r10+96]
-	movq	xmm0, rcx
+	movd	xmm10, QWORD PTR [r10+96]
+	movd	xmm0, rcx
 	mov	rcx, QWORD PTR [r10+104]
 	xorps	xmm9, xmm9
 	mov	QWORD PTR [rsp+328], rax
-	movq	xmm12, r11
+	movd	xmm12, r11
 	mov	QWORD PTR [rsp+320], r9
 	punpcklqdq xmm5, xmm0
-	movq xmm13, rcx
+	movd xmm13, rcx
 	mov r12d, 524288
 
 	ALIGN(64)
@@ -74,9 +74,9 @@ CryptonightR_soft_aes_template_mainloop:
 	mov	r12, QWORD PTR [r10+272]
 	lea	r13, QWORD PTR [rax+r11]
 	mov	esi, DWORD PTR [r13]
-	movq	xmm0, r9
+	movd	xmm0, r9
 	mov	r10d, DWORD PTR [r13+4]
-	movq	xmm7, r8
+	movd	xmm7, r8
 	mov	ebp, DWORD PTR [r13+12]
 	mov	r14d, DWORD PTR [r13+8]
 	mov	rdx, QWORD PTR [rsp+328]
@@ -125,7 +125,7 @@ CryptonightR_soft_aes_template_mainloop:
 	shr	ebp, 8
 	movd	xmm1, r11d
 	add	ebp, 256
-	movq	r11, xmm12
+	movd	r11, xmm12
 	mov	r9d, DWORD PTR [r12+rcx*4]
 	xor	r9d, DWORD PTR [r12+rsi*4]
 	mov	eax, DWORD PTR [r12+rbp*4]
@@ -155,10 +155,10 @@ CryptonightR_soft_aes_template_mainloop:
 	paddq	xmm0, xmm5
 	movdqu	XMMWORD PTR [rcx+r11], xmm0
 	movdqu	XMMWORD PTR [rax+r11], xmm2
-	movq rcx, xmm13
+	movd rcx, xmm13
 	paddq	xmm1, xmm7
 	movdqu	XMMWORD PTR [rdx+r11], xmm1
-	movq	rdi, xmm6
+	movd	rdi, xmm6
 	mov	r10, rdi
 	and	r10d, 2097136
 	movdqa	xmm0, xmm6

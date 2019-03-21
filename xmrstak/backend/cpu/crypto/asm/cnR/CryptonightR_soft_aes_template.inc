@@ -70,6 +70,7 @@ FN_PREFIX(CryptonightR_soft_aes_template_part1):
 
 	ALIGN(64)
 FN_PREFIX(CryptonightR_soft_aes_template_mainloop):
+FN_PREFIX(CryptonightR_soft_aes_template_mainloop2):
 	movd xmm11, r12d
 	mov	r12, QWORD PTR [r10+272]
 	lea	r13, QWORD PTR [rax+r11]
@@ -254,7 +255,7 @@ FN_PREFIX(CryptonightR_soft_aes_template_part2):
 	mov	QWORD PTR [rsp+320], r9
 	mov	QWORD PTR [rsp+328], rax
 	sub	r12d, 1
-	jne	FN_PREFIX(CryptonightR_soft_aes_template_mainloop)
+	jne	FN_PREFIX(CryptonightR_soft_aes_template_mainloop2)
 
 FN_PREFIX(CryptonightR_soft_aes_template_part3):
 	movaps	xmm6, XMMWORD PTR [rsp+16]

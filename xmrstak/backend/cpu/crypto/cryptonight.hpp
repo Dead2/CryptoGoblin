@@ -41,8 +41,9 @@ struct extra_ctx_r
 struct cryptonight_ctx
 {
     uint8_t hash_state[224]; // Need only 200, explicit align
-    uint8_t* long_state;
-    uint8_t ctx_info[24]; //Use some of the extra memory for flags (0=hugepages, 1=mlocked)
+    uint8_t* long_state = nullptr;
+    uint8_t ctx_info[40]; //Use some of the extra memory for flags (0=hugepages, 1=mlocked)
+    const uint32_t* saes_table = nullptr;
     cn_mainloop_fun loop_fn = nullptr;
     cn_hash_fun hash_fn = nullptr;
     uint8_t* fun_data = nullptr;

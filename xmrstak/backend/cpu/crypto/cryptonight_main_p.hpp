@@ -538,13 +538,16 @@ struct Cryptonight_hash<5>{
 
 template<size_t N>
 struct Cryptonight_hash_asm {
-    template<xmrstak_algo_id ALGO, bool PREFETCH>
+    template<xmrstak_algo_id ALGO, bool SOFT_AES, bool PREFETCH>
     static void hash(const void* input, size_t len, void* output, cryptonight_ctx** ctx, const xmrstak_algo& algo){
         for(size_t i = 0; i < N; ++i)
         {
             keccak_200((const uint8_t *)input + len * i, len, ctx[i]->hash_state);
             // Optim - 99% time boundary
-            cn_explode_scratchpad<ALGO, PREFETCH>((__m128i*)ctx[i]->hash_state, (__m128i*)ctx[i]->long_state, algo);
+            if(SOFT_AES)
+                soft_cn_explode_scratchpad<ALGO, PREFETCH>((__m128i*)ctx[i]->hash_state, (__m128i*)ctx[i]->long_state, algo);
+            else
+                cn_explode_scratchpad<ALGO, PREFETCH>((__m128i*)ctx[i]->hash_state, (__m128i*)ctx[i]->long_state, algo);
             // Optim - 90% time boundary
         }
 
@@ -552,17 +555,23 @@ struct Cryptonight_hash_asm {
             if(ALGO == cryptonight_r){
                 // ABI ATTRIBUTE is only required for cryptonight_r
                 typedef void ABI_ATTRIBUTE (*cn_r_mainloop_fun)(cryptonight_ctx *ctx);
-                for(size_t i = 0; i < N; ++i)
-                    reinterpret_cast<cn_r_mainloop_fun>(ctx[0]->loop_fn)(ctx[i]); // use always loop_fn from ctx[0]!!
+                reinterpret_cast<cn_r_mainloop_fun>(ctx[0]->loop_fn)(ctx[0]);
             }else{
-                for(size_t i = 0; i < N; ++i)
-                    ctx[0]->loop_fn(ctx[i]); // use always loop_fn from ctx[0]!!
+                ctx[0]->loop_fn(ctx[0]);
             }
         }else if (N == 2){
             if(ALGO == cryptonight_r){
-                // ABI ATTRIBUTE is only required for cryptonight_r
-                typedef void ABI_ATTRIBUTE (*cn_r_double_mainloop_fun)(cryptonight_ctx*, cryptonight_ctx*);
-                reinterpret_cast<cn_r_double_mainloop_fun>(ctx[0]->loop_fn)(ctx[0], ctx[1]);
+                if(SOFT_AES){
+                    // Double WU is not optimized for cryptonight_r soft-aes, run normal code twice for correctness
+                    // ABI ATTRIBUTE is only required for cryptonight_r
+                    typedef void ABI_ATTRIBUTE (*cn_r_mainloop_fun)(cryptonight_ctx*);
+                    reinterpret_cast<cn_r_mainloop_fun>(ctx[0]->loop_fn)(ctx[0]);
+                    reinterpret_cast<cn_r_mainloop_fun>(ctx[0]->loop_fn)(ctx[1]);
+                }else{
+                    // ABI ATTRIBUTE is only required for cryptonight_r
+                    typedef void ABI_ATTRIBUTE (*cn_r_double_mainloop_fun)(cryptonight_ctx*, cryptonight_ctx*);
+                    reinterpret_cast<cn_r_double_mainloop_fun>(ctx[0]->loop_fn)(ctx[0], ctx[1]);
+                }
             }else{
                 reinterpret_cast<cn_double_mainloop_fun>(ctx[0]->loop_fn)(ctx[0], ctx[1]);
             }
@@ -571,7 +580,10 @@ struct Cryptonight_hash_asm {
         for(size_t i = 0; i < N; ++i)
         {
             // Optim - 90% time boundary
-            cn_implode_scratchpad<ALGO, PREFETCH>((__m128i*)ctx[i]->long_state, (__m128i*)ctx[i]->hash_state, algo);
+            if(SOFT_AES)
+                soft_cn_implode_scratchpad<ALGO, PREFETCH>((__m128i*)ctx[i]->long_state, (__m128i*)ctx[i]->hash_state, algo);
+            else
+                cn_implode_scratchpad<ALGO, PREFETCH>((__m128i*)ctx[i]->long_state, (__m128i*)ctx[i]->hash_state, algo);
             // Optim - 99% time boundary
             keccakf_24((uint64_t*)ctx[i]->hash_state);
             extra_hashes[ctx[i]->hash_state[0] & 3](ctx[i]->hash_state, (char*)output + 32 * i);
@@ -664,7 +676,7 @@ void patchAsmVariants(std::string selected_asm, cryptonight_ctx** ctx, const xmr
 template<size_t N>
 struct Cryptonight_R_generator
 {
-    template<xmrstak_algo_id ALGO, bool SOFT_AES>
+    template<xmrstak_algo_id ALGO, bool SOFT_AES, bool PREFETCH>
     static void cn_on_new_job(const xmrstak::miner_work& work, cryptonight_ctx** ctx)
     {
         if(ctx[0]->cn_r_ctx.height == work.iBlockHeight && ctx[0]->last_algo == POW(cryptonight_r) && reinterpret_cast<void*>(ctx[0]->hash_fn) == ctx[0]->fun_data)
@@ -676,18 +688,21 @@ struct Cryptonight_R_generator
         int code_size = v4_random_math_init<ALGO>(ctx[0]->cn_r_ctx.code, work.iBlockHeight);
         if(ctx[0]->asm_version != 0)
         {
-            if(SOFT_AES)
+            if(SOFT_AES){
+                ctx[0]->saes_table = (const uint32_t*)saes_table;
                 v4_soft_aes_compile_code(N, ctx[0], code_size);
-            else
+            }else{
                 v4_compile_code(N, ctx[0], code_size);
-            ctx[0]->hash_fn = Cryptonight_hash_asm<N>::template hash<cryptonight_r, true>;
+            }
+            ctx[0]->hash_fn = Cryptonight_hash_asm<N>::template hash<cryptonight_r, SOFT_AES, PREFETCH>;
         }
 
         for(size_t i=1; i < N; i++)
         {
             ctx[i]->cn_r_ctx = ctx[0]->cn_r_ctx;
-            ctx[i]->loop_fn = ctx[0]->loop_fn;
-            ctx[i]->hash_fn = ctx[0]->hash_fn;
+            ctx[i]->saes_table = ctx[0]->saes_table;
+            //ctx[i]->loop_fn = ctx[0]->loop_fn;
+            //ctx[i]->hash_fn = ctx[0]->hash_fn;
         }
     }
 };
