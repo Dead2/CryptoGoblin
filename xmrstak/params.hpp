@@ -47,7 +47,7 @@ struct params
 
     // block_version >= 0 enable benchmark
     int benchmark_block_version = -1;
-    int benchmark_wait_sec = 30;
+    int benchmark_wait_sec = 5;
     int benchmark_work_sec = 60;
 
     bool useAMD;
