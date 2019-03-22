@@ -13,6 +13,7 @@
 #include <chrono>
 #include <thread>
 #include <iostream>
+#include <regex>
 
 
 namespace xmrstak
@@ -63,15 +64,15 @@ static std::string get_code(const V4_Instruction* code, int code_size)
 
 struct CacheEntry
 {
-    CacheEntry(xmrstak_algo algo, uint64_t height, size_t deviceIdx, cl_program program) :
+    CacheEntry(xmrstak_algo algo, uint64_t height_offset, size_t deviceIdx, cl_program program) :
         algo(algo),
-        height(height),
+        height_offset(height_offset),
         deviceIdx(deviceIdx),
         program(program)
     {}
 
     xmrstak_algo algo;
-    uint64_t height;
+    uint64_t height_offset;
     size_t deviceIdx;
     cl_program program;
 };
@@ -98,6 +99,34 @@ static std::vector<CacheEntry> CryptonightR_cache;
 static std::mutex background_tasks_mutex;
 static std::vector<BackgroundTaskBase*> background_tasks;
 static std::thread* background_thread = nullptr;
+
+static cl_program search_program(
+    const GpuContext* ctx,
+    xmrstak_algo algo,
+    uint64_t height_offset,
+    bool lock_cache = true
+)
+{
+    if(lock_cache)
+        CryptonightR_cache_mutex.ReadLock();
+
+    // Check if the cache has this program
+    for (const CacheEntry& entry : CryptonightR_cache)
+    {
+        if ((entry.algo == algo) && (entry.height_offset == height_offset) && (entry.deviceIdx == ctx->deviceIdx))
+        {
+            printer::inst()->print_msg(LDEBUG, "CryptonightR: program for height_offset %llu found in cache", height_offset);
+            auto result = entry.program;
+            if(lock_cache)
+                CryptonightR_cache_mutex.UnLock();
+            return result;
+        }
+    }
+    if(lock_cache)
+        CryptonightR_cache_mutex.UnLock();
+
+    return nullptr;
+}
 
 static void background_thread_proc()
 {
@@ -133,7 +162,8 @@ static void background_exec(T&& func)
 static cl_program CryptonightR_build_program(
     const GpuContext* ctx,
     xmrstak_algo algo,
-    uint64_t height,
+    uint64_t height_offset,
+    uint64_t height_chunk_size,
     uint32_t precompile_count,
     std::string source_code,
     std::string options)
@@ -147,9 +177,9 @@ static cl_program CryptonightR_build_program(
         for(size_t i = 0; i < CryptonightR_cache.size();)
         {
             const CacheEntry& entry = CryptonightR_cache[i];
-            if ((entry.algo == algo) && (entry.height + 2 + precompile_count < height))
+            if ((entry.algo == algo) && (entry.height_offset + (2 + precompile_count) * height_chunk_size < height_offset))
             {
-                printer::inst()->print_msg(LDEBUG, "CryptonightR: program for height %llu released (old program)", entry.height);
+                printer::inst()->print_msg(LDEBUG, "CryptonightR: program for height_offset %llu released (old program)", entry.height_offset);
                 old_programs.push_back(entry.program);
                 CryptonightR_cache[i] = std::move(CryptonightR_cache.back());
                 CryptonightR_cache.pop_back();
@@ -162,29 +192,16 @@ static cl_program CryptonightR_build_program(
         CryptonightR_cache_mutex.UnLock();
     }
 
-    for(cl_program p : old_programs) {
+    for(cl_program p : old_programs)
+    {
         clReleaseProgram(p);
     }
 
     std::lock_guard<std::mutex> g1(CryptonightR_build_mutex);
 
-    cl_program program = nullptr;
-    {
-        CryptonightR_cache_mutex.ReadLock();
+    cl_program program = search_program(ctx, algo, height_offset);
 
-        // Check if the cache already has this program (some other thread might have added it first)
-        for (const CacheEntry& entry : CryptonightR_cache)
-        {
-            if ((entry.algo == algo) && (entry.height == height) && (entry.deviceIdx == ctx->deviceIdx))
-            {
-                program = entry.program;
-                break;
-            }
-        }
-        CryptonightR_cache_mutex.UnLock();
-    }
-
-    if (program) {
+    if(program) {
         return program;
     }
 
@@ -239,27 +256,47 @@ static cl_program CryptonightR_build_program(
     }
     while(status == CL_BUILD_IN_PROGRESS);
 
-
-    printer::inst()->print_msg(LDEBUG, "CryptonightR: program for height %llu compiled", height);
-
     CryptonightR_cache_mutex.WriteLock();
-    CryptonightR_cache.emplace_back(algo, height, ctx->deviceIdx, program);
+    auto cached_program = search_program(ctx, algo, height_offset, false);
+
+    if(cached_program)
+    {
+        printer::inst()->print_msg(LDEBUG, "CryptonightR: release already existing program %llu", height_offset);
+        clReleaseProgram(program);
+        program = cached_program;
+    }
+    else
+    {
+        CryptonightR_cache.emplace_back(algo, height_offset, ctx->deviceIdx, program);
+        printer::inst()->print_msg(LDEBUG, "CryptonightR: cache compiled program for height_offset %llu", height_offset);
+    }
+
     CryptonightR_cache_mutex.UnLock();
     return program;
 }
 
-cl_program CryptonightR_get_program(GpuContext* ctx, xmrstak_algo algo, uint64_t height, uint32_t precompile_count, bool background)
+cl_program CryptonightR_get_program(GpuContext* ctx, xmrstak_algo algo, uint64_t height_offset, uint64_t height_chunk_size, uint32_t precompile_count, bool background)
 {
-    printer::inst()->print_msg(LDEBUG, "CryptonightR: start %llu released",height);
-
-    if (background) {
-        background_exec([=](){ CryptonightR_get_program(ctx, algo, height, precompile_count, false); });
+    if (background)
+    {
+        background_exec([=](){ CryptonightR_get_program(ctx, algo, height_offset, height_chunk_size, precompile_count, false); });
         return nullptr;
     }
 
-    const char* source_code_template =
+    auto program = search_program(ctx, algo, height_offset);
+
+    if(program != nullptr)
+        return program;
+
+    printer::inst()->print_msg(LDEBUG, "CryptonightR: create code for block %llu to %llu",height_offset, height_offset + height_chunk_size);
+
+    const char* source_code_definitions=
         #include "amd_gpu/opencl/wolf-aes.cl"
-        #include "amd_gpu/opencl/cryptonight_r.cl"
+        #include "amd_gpu/opencl/cryptonight_r_def.rtcl"
+    ;
+
+    const char* source_code_template =
+        #include "amd_gpu/opencl/cryptonight_r.rtcl"
     ;
     const char include_name[] = "XMRSTAK_INCLUDE_RANDOM_MATH";
     const char* offset = strstr(source_code_template, include_name);
@@ -269,24 +306,33 @@ cl_program CryptonightR_get_program(GpuContext* ctx, xmrstak_algo algo, uint64_t
         return nullptr;
     }
 
-    V4_Instruction code[256];
-    int code_size;
-    switch (algo.Id())
-    {
-    case cryptonight_r_wow:
-        code_size = v4_random_math_init<cryptonight_r_wow>(code, height);
-        break;
-    case cryptonight_r:
-        code_size = v4_random_math_init<cryptonight_r>(code, height);
-        break;
-    default:
-        printer::inst()->print_msg(L0, "CryptonightR_get_program: invalid algo %d", algo);
-        return nullptr;
-    }
+    std::string source_code(source_code_definitions);
 
-    std::string source_code(source_code_template, offset);
-    source_code.append(get_code(code, code_size));
-    source_code.append(offset + sizeof(include_name) - 1);
+    for(uint64_t c = 0; c < height_chunk_size; ++c)
+    {
+        V4_Instruction code[256];
+        int code_size;
+        switch (algo.Id())
+        {
+        case cryptonight_r_wow:
+            code_size = v4_random_math_init<cryptonight_r_wow>(code, height_offset + c);
+            break;
+        case cryptonight_r:
+            code_size = v4_random_math_init<cryptonight_r>(code, height_offset + c);
+            break;
+        default:
+            printer::inst()->print_msg(L0, "CryptonightR_get_program: invalid algo %d", algo);
+            return nullptr;
+        }
+
+        std::string kernel_code(source_code_template, offset);
+        kernel_code.append(get_code(code, code_size));
+        kernel_code.append(offset + sizeof(include_name) - 1);
+
+        std::string kernel_name = "cn1_cryptonight_r_" + std::to_string(height_offset + c);
+
+        source_code += std::regex_replace(kernel_code, std::regex("cn1_cryptonight_r"), kernel_name);
+    }
 
     // scratchpad size for the selected mining algorithm
     size_t hashMemSize = algo.Mem();
@@ -325,27 +371,12 @@ cl_program CryptonightR_get_program(GpuContext* ctx, xmrstak_algo algo, uint64_t
         options += " -cl-fp32-correctly-rounded-divide-sqrt";
 
 
-    const char* source = source_code.c_str();
+    program = search_program(ctx, algo, height_offset);
 
-    {
-        CryptonightR_cache_mutex.ReadLock();
+    if(program != nullptr)
+        return program;
 
-        // Check if the cache has this program
-        for (const CacheEntry& entry : CryptonightR_cache)
-        {
-            if ((entry.algo == algo) && (entry.height == height) && (entry.deviceIdx == ctx->deviceIdx))
-            {
-                printer::inst()->print_msg(LDEBUG, "CryptonightR: program for height %llu found in cache", height);
-                auto result = entry.program;
-                CryptonightR_cache_mutex.UnLock();
-                return result;
-            }
-        }
-        CryptonightR_cache_mutex.UnLock();
-
-    }
-
-    return CryptonightR_build_program(ctx, algo, height, precompile_count, source, options);
+    return CryptonightR_build_program(ctx, algo, height_offset, precompile_count, height_chunk_size, source_code, options);
 }
 
 } // namespace amd
