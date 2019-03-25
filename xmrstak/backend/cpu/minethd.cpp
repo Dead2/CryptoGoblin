@@ -567,10 +567,22 @@ void minethd::func_multi_selector(cryptonight_ctx** ctx, minethd::cn_on_new_job&
             break;
     }
 
-    // These defines add all four variants of each hash function template
+    // These defines generate a single variant of the function templates
     // Example result: Cryptonight_hash<N>::template hash<cryptonight, false, false>,
     #define CNH(t_hashf,t_algo,t_aes,t_prefetch) t_hashf::template hash<t_algo, t_aes, t_prefetch>,
-    #define ADD_HASHF(t_hashf, t_algo) CNH(t_hashf,t_algo,false,false) CNH(t_hashf,t_algo,true,false) CNH(t_hashf,t_algo,false,true) CNH(t_hashf,t_algo,true,true)
+    // Example result: Cryptonight_R_generator<N>::template cn_on_new_job<cryptonight_r,true,false>,
+    #define CNR(t_hashf,t_algo,t_aes,t_prefetch) t_hashf::template cn_on_new_job<t_algo, t_aes, t_prefetch>,
+
+    // These defines add all four variants of each hash function template
+    #ifdef NO_SOFTAES
+        // Always set soft_aes parameter to false in this variant
+        #define ADD_HASHF(t_hashf, t_algo) CNH(t_hashf,t_algo,false,false) CNH(t_hashf,t_algo,false,false) CNH(t_hashf,t_algo,false,true) CNH(t_hashf,t_algo,false,true)
+        #define ADD_RNDF(t_hashf, t_algo)  CNR(t_hashf,t_algo,false,false) CNR(t_hashf,t_algo,false,false) CNR(t_hashf,t_algo,false,true) CNR(t_hashf,t_algo,false,true)
+    #else
+        #define ADD_HASHF(t_hashf, t_algo) CNH(t_hashf,t_algo,true,false) CNH(t_hashf,t_algo,false,false) CNH(t_hashf,t_algo,true,true) CNH(t_hashf,t_algo,false,true)
+        #define ADD_RNDF(t_hashf, t_algo)  CNR(t_hashf,t_algo,true,false) CNR(t_hashf,t_algo,false,false) CNR(t_hashf,t_algo,true,true) CNR(t_hashf,t_algo,false,true)
+    #endif
+
 
     static const cn_hash_fun func_table[] = {
 #ifdef ONLY_XMR_ALGO
@@ -627,32 +639,25 @@ void minethd::func_multi_selector(cryptonight_ctx** ctx, minethd::cn_on_new_job&
         }
     }
 
+    // Prepare function template selection offset (for soft-aes and prefetch)
+    std::bitset<2> digit;
+    digit.set(0, bHaveAes);
+    digit.set(1, bPrefetch);
+
     // Fallback to non-asm version
     if (selected_asm == "off"){
-        std::bitset<2> digit;
-        digit.set(0, !bHaveAes);
-        digit.set(1, bPrefetch);
-
         ctx[0]->hash_fn = func_table[ algv << 2 | digit.to_ulong() ];
-
         for(size_t h = 0; h < N; ++h)
             ctx[h]->asm_version = 0;
     }
 
     // Select random code generator
     static const minethd::cn_on_new_job generator_table[] = {
-        Cryptonight_R_generator<N>::template cn_on_new_job<cryptonight_r,true,false>,
-        Cryptonight_R_generator<N>::template cn_on_new_job<cryptonight_r,false,false>,
-        Cryptonight_R_generator<N>::template cn_on_new_job<cryptonight_r,true,true>,
-        Cryptonight_R_generator<N>::template cn_on_new_job<cryptonight_r,false,true>,
+        ADD_RNDF(Cryptonight_R_generator<N>, cryptonight_r)
     };
 
     if(algo == cryptonight_r){
-        std::bitset<2> gen_digit;
-        gen_digit.set(0, bHaveAes);
-        gen_digit.set(1, bPrefetch);
-
-        on_new_job = generator_table[gen_digit.to_ulong()];
+        on_new_job = generator_table[digit.to_ulong()];
     }else{
         on_new_job = nullptr;
     }
