@@ -291,32 +291,34 @@ bool minethd::self_test()
         printer::inst()->print_msg(L0, RED("Hash self-test failed."));
 
     // Check whether any thread has ASM enabled
-    jconf::inst()->parse_config();
+    if(configEditor::file_exist(params::inst().configFileCPU)){
+        jconf::inst()->parse_config();
 
-    bool test_asm = false;
-    size_t i, n = jconf::inst()->GetThreadCount();
-    jconf::thd_cfg cfg;
-    for (i = 0; i < n; i++){
-        jconf::inst()->GetThreadConfig(i, cfg);
-        if(cfg.asm_version_str != "off"){
-            test_asm = true;
-        }
-    }
-
-    // Test ASM "auto" if ASM was not disabled
-    std::string supported_asm = cpu::getAsmName(1);
-    if(test_asm && supported_asm != "off"){
-        bool asmResult = true;
-        printer::inst()->print_msg(L0, YELLOW("Starting ASM Hash self-tests."));
-        for(const auto algo : neededAlgorithms){
-            asmResult = bResult && testrunner<1>(algo, ctx, supported_asm);
-            asmResult = bResult && testrunner<2>(algo, ctx, supported_asm);
+        bool test_asm = false;
+        size_t i, n = jconf::inst()->GetThreadCount();
+        jconf::thd_cfg cfg;
+        for (i = 0; i < n; i++){
+            jconf::inst()->GetThreadConfig(i, cfg);
+            if(cfg.asm_version_str != "off"){
+                test_asm = true;
+            }
         }
 
-        if (asmResult)
-            printer::inst()->print_msg(L0, GREEN("ASM Hash self-test successful."));
-        else
-            printer::inst()->print_msg(L0, RED("ASM Hash self-test failed, you might need to keep ASM disabled."));
+        // Test ASM "auto" if ASM was not disabled
+        std::string supported_asm = cpu::getAsmName(1);
+        if(test_asm && supported_asm != "off"){
+            bool asmResult = true;
+            printer::inst()->print_msg(L0, YELLOW("Starting ASM Hash self-tests."));
+            for(const auto algo : neededAlgorithms){
+                asmResult = bResult && testrunner<1>(algo, ctx, supported_asm);
+                asmResult = bResult && testrunner<2>(algo, ctx, supported_asm);
+            }
+
+            if (asmResult)
+                printer::inst()->print_msg(L0, GREEN("ASM Hash self-test successful."));
+            else
+                printer::inst()->print_msg(L0, RED("ASM Hash self-test failed, you might need to keep ASM disabled."));
+        }
     }
 
     for (uint32_t i = 0; i < MAX_N; i++)
