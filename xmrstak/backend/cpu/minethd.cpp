@@ -567,93 +567,31 @@ void minethd::func_multi_selector(cryptonight_ctx** ctx, minethd::cn_on_new_job&
             break;
     }
 
+    // These defines add all four variants of each hash function template
+    // Example result: Cryptonight_hash<N>::template hash<cryptonight, false, false>,
+    #define CNH(t_hashf,t_algo,t_aes,t_prefetch) t_hashf::template hash<t_algo, t_aes, t_prefetch>,
+    #define ADD_HASHF(t_hashf, t_algo) CNH(t_hashf,t_algo,false,false) CNH(t_hashf,t_algo,true,false) CNH(t_hashf,t_algo,false,true) CNH(t_hashf,t_algo,true,true)
+
     static const cn_hash_fun func_table[] = {
 #ifdef ONLY_XMR_ALGO
-        Cryptonight_hash<N>::template hash<cryptonight_r, false, false>,
-        Cryptonight_hash<N>::template hash<cryptonight_r, true, false>,
-        Cryptonight_hash<N>::template hash<cryptonight_r, false, true>,
-        Cryptonight_hash<N>::template hash<cryptonight_r, true, true>,
-
+        ADD_HASHF(Cryptonight_hash<N>, cryptonight_r)
 #else
-        Cryptonight_hash<N>::template hash<cryptonight_monero, false, false>,
-        Cryptonight_hash<N>::template hash<cryptonight_monero, true, false>,
-        Cryptonight_hash<N>::template hash<cryptonight_monero, false, true>,
-        Cryptonight_hash<N>::template hash<cryptonight_monero, true, true>,
-
-        Cryptonight_hash<N>::template hash<cryptonight_lite, false, false>,
-        Cryptonight_hash<N>::template hash<cryptonight_lite, true, false>,
-        Cryptonight_hash<N>::template hash<cryptonight_lite, false, true>,
-        Cryptonight_hash<N>::template hash<cryptonight_lite, true, true>,
-
-        Cryptonight_hash<N>::template hash<cryptonight, false, false>,
-        Cryptonight_hash<N>::template hash<cryptonight, true, false>,
-        Cryptonight_hash<N>::template hash<cryptonight, false, true>,
-        Cryptonight_hash<N>::template hash<cryptonight, true, true>,
-
-        Cryptonight_hash<N>::template hash<cryptonight_heavy, false, false>,
-        Cryptonight_hash<N>::template hash<cryptonight_heavy, true, false>,
-        Cryptonight_hash<N>::template hash<cryptonight_heavy, false, true>,
-        Cryptonight_hash<N>::template hash<cryptonight_heavy, true, true>,
-
-        Cryptonight_hash<N>::template hash<cryptonight_aeon, false, false>,
-        Cryptonight_hash<N>::template hash<cryptonight_aeon, true, false>,
-        Cryptonight_hash<N>::template hash<cryptonight_aeon, false, true>,
-        Cryptonight_hash<N>::template hash<cryptonight_aeon, true, true>,
-
-        Cryptonight_hash<N>::template hash<cryptonight_ipbc, false, false>,
-        Cryptonight_hash<N>::template hash<cryptonight_ipbc, true, false>,
-        Cryptonight_hash<N>::template hash<cryptonight_ipbc, false, true>,
-        Cryptonight_hash<N>::template hash<cryptonight_ipbc, true, true>,
-
-        Cryptonight_hash<N>::template hash<cryptonight_stellite, false, false>,
-        Cryptonight_hash<N>::template hash<cryptonight_stellite, true, false>,
-        Cryptonight_hash<N>::template hash<cryptonight_stellite, false, true>,
-        Cryptonight_hash<N>::template hash<cryptonight_stellite, true, true>,
-
-        Cryptonight_hash<N>::template hash<cryptonight_masari, false, false>,
-        Cryptonight_hash<N>::template hash<cryptonight_masari, true, false>,
-        Cryptonight_hash<N>::template hash<cryptonight_masari, false, true>,
-        Cryptonight_hash<N>::template hash<cryptonight_masari, true, true>,
-
-        Cryptonight_hash<N>::template hash<cryptonight_haven, false, false>,
-        Cryptonight_hash<N>::template hash<cryptonight_haven, true, false>,
-        Cryptonight_hash<N>::template hash<cryptonight_haven, false, true>,
-        Cryptonight_hash<N>::template hash<cryptonight_haven, true, true>,
-
-        Cryptonight_hash<N>::template hash<cryptonight_bittube2, false, false>,
-        Cryptonight_hash<N>::template hash<cryptonight_bittube2, true, false>,
-        Cryptonight_hash<N>::template hash<cryptonight_bittube2, false, true>,
-        Cryptonight_hash<N>::template hash<cryptonight_bittube2, true, true>,
-
-        Cryptonight_hash<N>::template hash<cryptonight_monero_v8, false, false>,
-        Cryptonight_hash<N>::template hash<cryptonight_monero_v8, true, false>,
-        Cryptonight_hash<N>::template hash<cryptonight_monero_v8, false, true>,
-        Cryptonight_hash<N>::template hash<cryptonight_monero_v8, true, true>,
-
-        Cryptonight_hash<N>::template hash<cryptonight_superfast, false, false>,
-        Cryptonight_hash<N>::template hash<cryptonight_superfast, true, false>,
-        Cryptonight_hash<N>::template hash<cryptonight_superfast, false, true>,
-        Cryptonight_hash<N>::template hash<cryptonight_superfast, true, true>,
-
-        Cryptonight_hash_gpu::template hash<cryptonight_gpu, false, false>,
-        Cryptonight_hash_gpu::template hash<cryptonight_gpu, true, false>,
-        Cryptonight_hash_gpu::template hash<cryptonight_gpu, false, true>,
-        Cryptonight_hash_gpu::template hash<cryptonight_gpu, true, true>,
-
-        Cryptonight_hash<N>::template hash<cryptonight_conceal, false, false>,
-        Cryptonight_hash<N>::template hash<cryptonight_conceal, true, false>,
-        Cryptonight_hash<N>::template hash<cryptonight_conceal, false, true>,
-        Cryptonight_hash<N>::template hash<cryptonight_conceal, true, true>,
-
-        Cryptonight_hash<N>::template hash<cryptonight_r, false, false>,
-        Cryptonight_hash<N>::template hash<cryptonight_r, true, false>,
-        Cryptonight_hash<N>::template hash<cryptonight_r, false, true>,
-        Cryptonight_hash<N>::template hash<cryptonight_r, true, true>,
-
-        Cryptonight_hash<N>::template hash<cryptonight_v8_reversewaltz, false, false>,
-        Cryptonight_hash<N>::template hash<cryptonight_v8_reversewaltz, true, false>,
-        Cryptonight_hash<N>::template hash<cryptonight_v8_reversewaltz, false, true>,
-        Cryptonight_hash<N>::template hash<cryptonight_v8_reversewaltz, true, true>
+        ADD_HASHF(Cryptonight_hash<N>, cryptonight_monero)
+        ADD_HASHF(Cryptonight_hash<N>, cryptonight_lite)
+        ADD_HASHF(Cryptonight_hash<N>, cryptonight)
+        ADD_HASHF(Cryptonight_hash<N>, cryptonight_heavy)
+        ADD_HASHF(Cryptonight_hash<N>, cryptonight_aeon)
+        ADD_HASHF(Cryptonight_hash<N>, cryptonight_ipbc)
+        ADD_HASHF(Cryptonight_hash<N>, cryptonight_stellite)
+        ADD_HASHF(Cryptonight_hash<N>, cryptonight_masari)
+        ADD_HASHF(Cryptonight_hash<N>, cryptonight_haven)
+        ADD_HASHF(Cryptonight_hash<N>, cryptonight_bittube2)
+        ADD_HASHF(Cryptonight_hash<N>, cryptonight_monero_v8)
+        ADD_HASHF(Cryptonight_hash<N>, cryptonight_superfast)
+        ADD_HASHF(Cryptonight_hash_gpu, cryptonight_gpu)
+        ADD_HASHF(Cryptonight_hash<N>, cryptonight_conceal)
+        ADD_HASHF(Cryptonight_hash<N>, cryptonight_r)
+        ADD_HASHF(Cryptonight_hash<N>, cryptonight_v8_reversewaltz)
 #endif
     };
 
@@ -700,10 +638,6 @@ void minethd::func_multi_selector(cryptonight_ctx** ctx, minethd::cn_on_new_job&
         for(size_t h = 0; h < N; ++h)
             ctx[h]->asm_version = 0;
     }
-
-    //for(size_t h = 1; h < N; ++h)
-    //    ctx[h]->hash_fn = ctx[0]->hash_fn;
-
 
     // Select random code generator
     static const minethd::cn_on_new_job generator_table[] = {
