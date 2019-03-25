@@ -24,9 +24,9 @@
 #include "jconf.hpp"
 #include "params.hpp"
 
+#include "xmrstak/cli/colors.hpp"
 #include "xmrstak/misc/console.hpp"
 #include "xmrstak/misc/jext.hpp"
-#include "xmrstak/misc/console.hpp"
 #include "xmrstak/misc/utility.hpp"
 
 #include <stdio.h>
@@ -502,9 +502,13 @@ bool jconf::parse_config(const char* sFilename, const char* sFilenamePools)
 {
     if(!check_cpu_features())
     {
-        printer::inst()->print_msg(L0, "CPU support of SSE2 is required.");
+        printer::inst()->print_msg(L0, RED("CPU support of SSE2 is required."));
         return false;
     }
+
+    if(!bHaveAes)
+        printer::inst()->print_msg(L0, YELLOW("Your CPU doesn't support hardware AES. Don't expect high hashrates."));
+
 
     if(!parse_file(sFilename, true))
         return false;
@@ -515,7 +519,7 @@ bool jconf::parse_config(const char* sFilename, const char* sFilenamePools)
     size_t pool_cnt = prv->configValues[aPoolList]->Size();
     if(pool_cnt == 0)
     {
-        printer::inst()->print_msg(L0, "Invalid config file. pool_list must not be empty.");
+        printer::inst()->print_msg(L0, RED("Invalid config file. pool_list must not be empty."));
         return false;
     }
 
@@ -532,7 +536,7 @@ bool jconf::parse_config(const char* sFilename, const char* sFilenamePools)
 
         if(!oThdConf.IsObject())
         {
-            printer::inst()->print_msg(L0, "Invalid config file. pool_list must contain objects.");
+            printer::inst()->print_msg(L0, RED("Invalid config file. pool_list must contain objects."));
             return false;
         }
 
@@ -541,13 +545,13 @@ bool jconf::parse_config(const char* sFilename, const char* sFilenamePools)
             const Value* v;
             if((v = GetObjectMember(oThdConf, aPoolValues[j])) == nullptr)
             {
-                printer::inst()->print_msg(L0, "Invalid config file. Pool %u does not have the value %s.", i, aPoolValues[j]);
+                printer::inst()->print_msg(L0, RED("Invalid config file. Pool %u does not have the value %s."), i, aPoolValues[j]);
                 return false;
             }
 
             if(!checkType(v->GetType(), poolValTypes[j]))
             {
-                printer::inst()->print_msg(L0, "Invalid config file. Value %s for pool %u has unexpected type.", aPoolValues[j], i);
+                printer::inst()->print_msg(L0, RED("Invalid config file. Value %s for pool %u has unexpected type."), aPoolValues[j], i);
                 return false;
             }
         }
@@ -556,7 +560,7 @@ bool jconf::parse_config(const char* sFilename, const char* sFilenamePools)
         size_t wt;
         if(!jwt->IsUint64() || (wt = jwt->GetUint64()) == 0)
         {
-            printer::inst()->print_msg(L0, "Invalid pool list for pool %u. Pool weight needs to be an integer larger than zero.", i);
+            printer::inst()->print_msg(L0, RED("Invalid pool list for pool %u. Pool weight needs to be an integer larger than zero."), i);
             return false;
         }
 
@@ -571,50 +575,60 @@ bool jconf::parse_config(const char* sFilename, const char* sFilenamePools)
         !prv->configValues[iGiveUpLimit]->IsUint64())
     {
         printer::inst()->print_msg(L0,
-            "Invalid config file. call_timeout, retry_time and giveup_limit need to be positive integers.");
+            RED("Invalid config file. call_timeout, retry_time and giveup_limit need to be positive integers."));
         return false;
     }
 
     if(prv->configValues[iCallTimeout]->GetUint64() < 2 || prv->configValues[iNetRetry]->GetUint64() < 2)
     {
         printer::inst()->print_msg(L0,
-            "Invalid config file. call_timeout and retry_time need to be larger than 1 second.");
+            RED("Invalid config file. call_timeout and retry_time need to be larger than 1 second."));
         return false;
     }
 
     if(!prv->configValues[iVerboseLevel]->IsUint64() || !prv->configValues[iAutohashTime]->IsUint64())
     {
         printer::inst()->print_msg(L0,
-            "Invalid config file. verbose_level and h_print_time need to be positive integers.");
+            RED("Invalid config file. verbose_level and h_print_time need to be positive integers."));
         return false;
     }
 
     if(!prv->configValues[iHttpdPort]->IsUint() || prv->configValues[iHttpdPort]->GetUint() > 0xFFFF)
     {
         printer::inst()->print_msg(L0,
-            "Invalid config file. httpd_port has to be in the range 0 to 65535.");
+            RED("Invalid config file. httpd_port has to be in the range 0 to 65535."));
         return false;
     }
 
-    if(prv->configValues[bAesOverride]->IsBool())
+    if(prv->configValues[bAesOverride]->IsBool()){
         bHaveAes = prv->configValues[bAesOverride]->GetBool();
 
-    if(!bHaveAes)
-        printer::inst()->print_msg(L0, "Your CPU doesn't support hardware AES. Don't expect high hashrates.");
+        if(bHaveAes)
+            printer::inst()->print_msg(L0, YELLOW("AES support force enabled, this might cause a crash if CPU does not support AES-NI."));
+        else
+            printer::inst()->print_msg(L0, YELLOW("AES support force disabled, using slower soft-aes implementation."));
+    }
+
+#ifdef NO_SOFTAES
+    if(!bHaveAes){
+        printer::inst()->print_msg(L0, RED("Miner was compiled without soft-aes, unable to continue."));
+        return false;
+    }
+#endif
 
     printer::inst()->set_verbose_level(prv->configValues[iVerboseLevel]->GetUint64());
 
     if(GetSlowMemSetting() == unknown_value)
     {
         printer::inst()->print_msg(L0,
-            "Invalid config file. use_slow_memory must be \"always\", \"no_mlck\", \"warn\" or \"never\"");
+            RED("Invalid config file. use_slow_memory must be \"always\", \"no_mlck\", \"warn\" or \"never\""));
         return false;
     }
 
 #ifdef _WIN32
     if(GetSlowMemSetting() == no_mlck)
     {
-        printer::inst()->print_msg(L0, "On Windows large pages need mlock. Please use another option.");
+        printer::inst()->print_msg(L0, RED("On Windows large pages need mlock. Please use another option."));
         return false;
     }
 #endif // _WIN32
@@ -624,7 +638,7 @@ bool jconf::parse_config(const char* sFilename, const char* sFilenamePools)
 
     if(ctmp.length() == 0)
     {
-        printer::inst()->print_msg(L0, "You need to specify the coin that you want to mine.");
+        printer::inst()->print_msg(L0, RED("You need to specify the coin that you want to mine."));
         return false;
     }
 
@@ -641,7 +655,7 @@ bool jconf::parse_config(const char* sFilename, const char* sFilenamePools)
     {
         std::string cl;
         GetAlgoList(cl);
-        printer::inst()->print_msg(L0, "Unrecognised coin '%s', your options are:\n%s", ctmp.c_str(), cl.c_str());
+        printer::inst()->print_msg(L0, RED("Unrecognised coin '%s', your options are:\n%s"), ctmp.c_str(), cl.c_str());
         return false;
     }
 
