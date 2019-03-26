@@ -95,7 +95,7 @@ if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
     # Codegen
     set(CG_CFLAGS "${CG_CFLAGS} -fomit-frame-pointer -momit-leaf-frame-pointer -fvisibility-inlines-hidden -fvisibility=internal -mlong-double-64 -fno-signed-zeros")
     # parameters
-    set(CG_CFLAGS "${CG_CFLAGS} --param max-cse-path-length=20 --param max-cse-insns=2000 --param max-cselib-memory-locations=12000 --param dse-max-object-size=512 --param max-reload-search-insns=200")
+    set(CG_CFLAGS "${CG_CFLAGS} --param max-cse-path-length=20 --param max-cse-insns=2000 --param max-cselib-memory-locations=12000 --param max-reload-search-insns=200")
     set(CG_CFLAGS "${CG_CFLAGS} --param max-sched-ready-insns=200 --param max-sched-region-blocks=12 --param max-sched-region-insns=150 --param max-delay-slot-insn-search=150 --param max-delay-slot-live-search=400")
     set(CG_CFLAGS "${CG_CFLAGS} --param max-gcse-memory=268435456 --param max-partial-antic-length=150 --param max-tail-merge-iterations=3 --param max-tail-merge-comparisons=20")
     set(CG_CFLAGS "${CG_CFLAGS} --param max-tracked-strlens=25000 --param inline-min-speedup=10 --param prefetch-latency=225 --param simultaneous-prefetches=4 --param l2-cache-size=2048")
@@ -117,6 +117,7 @@ if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
 
     if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 8.0)
     #    set(CG_CFLAGS "${CG_CFLAGS} -fira-loop-pressure -floop-interchange -floop-unroll-and-jam")
+        set(CG_CFLAGS "${CG_CFLAGS} --param dse-max-object-size=512")
         set(CG_CFLAGS "${CG_CFLAGS} -fgraphite-identity")
     endif()
 
