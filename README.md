@@ -1,4 +1,4 @@
-# CryptoGoblin - CryptoNight CPU mining tool
+# CryptoGoblin - CryptoNight CPU/GPU mining tool
 **For coins based on the cryptonight algorithm family.**<br>
 **Support for Monero, Electroneum, Aeon, Sumokoin, Edollar and many more.**
 
