@@ -170,7 +170,7 @@ if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
       set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--dynamicbase,--nxcompat,--sort-common,--no-insert-timestamp,--high-entropy-va")
   else()
       set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-O1,-z,now,-z,relro,-z,combreloc,-z,common,-z,common-page-size=2097152,--sort-common,--no-ld-generated-unwind-info,--enable-new-dtags")
-      set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-O1,-z,now,-z,relro,-z,combreloc,-z,common,-z,common-page-size=209715,--sort-common,--no-ld-generated-unwind-info,--enable-new-dtags")
+      set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-O1,-z,now,-z,relro,-z,combreloc,-z,common,-z,common-page-size=2097152,--sort-common,--no-ld-generated-unwind-info,--enable-new-dtags")
   endif()
 
   if(CG_LTO)
